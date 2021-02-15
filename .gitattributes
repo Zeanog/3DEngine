@@ -1,0 +1,16 @@
+*.h !text !filter !merge !diff
+*.cpp !text !filter !merge !diff
+*.hpp !text !filter !merge !diff
+*.inl !text !filter !merge !diff
+*.c !text !filter !merge !diff
+*.sln !text !filter !merge !diff
+*.vcxproj !text !filter !merge !diff
+*.filters !text !filter !merge !diff
+*.user !text !filter !merge !diff
+*.txt !text !filter !merge !diff
+*.md !text !filter !merge !diff
+*.json !text !filter !merge !diff
+*.xml !text !filter !merge !diff
+*.html !text !filter !merge !diff
+*.css !text !filter !merge !diff
+*.config !text !filter !merge !diff
