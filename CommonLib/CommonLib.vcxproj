@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Images\Image.h" />
+    <ClInclude Include="Images\ImageLoader.h" />
+    <ClInclude Include="Images\ImageLoader_PNG.h" />
+    <ClInclude Include="Images\ImageLoader_RAW.h" />
+    <ClInclude Include="Images\ImageLoader_TGA.h" />
+    <ClInclude Include="Images\ImageManager.h" />
+    <ClInclude Include="Images\LodePng\lodepng.h" />
+    <ClInclude Include="Lighting\Light.h" />
+    <ClInclude Include="Lighting\LightPool.h" />
+    <ClInclude Include="Math\Bounds.h" />
+    <ClInclude Include="Math\MathUtils.h" />
+    <ClInclude Include="Math\Matrix.h" />
+    <ClInclude Include="Math\Vector.h" />
+    <ClInclude Include="Rendering\Camera.h" />
+    <ClInclude Include="Rendering\ErrorHandling.h" />
+    <ClInclude Include="Rendering\FrameBufferObject.h" />
+    <ClInclude Include="Rendering\IndexBuffer.h" />
+    <ClInclude Include="Rendering\Joint.h" />
+    <ClInclude Include="Rendering\Mesh.h" />
+    <ClInclude Include="Rendering\Model.h" />
+    <ClInclude Include="Rendering\ModelLoaders\MeshManager.h" />
+    <ClInclude Include="Rendering\ModelLoaders\ModelLoader_FBX.h" />
+    <ClInclude Include="Rendering\ModelLoaders\ModelManager.h" />
+    <ClInclude Include="Rendering\RenderDef.h" />
+    <ClInclude Include="Rendering\VertexBuffer.h" />
+    <ClInclude Include="Shaders\ShaderManager_Fragment.h" />
+    <ClInclude Include="Shaders\ShaderManager_Vertex.h" />
+    <ClInclude Include="Shaders\ShaderProgramManager.h" />
+    <ClInclude Include="Shaders\ShaderProgram_GLSL.h" />
+    <ClInclude Include="Shaders\Shader_GLSL.h" />
+    <ClInclude Include="System\AssetManager.h" />
+    <ClInclude Include="System\Color.h" />
+    <ClInclude Include="System\Configuration.h" />
+    <ClInclude Include="System\DataStructureLibrary.h" />
+    <ClInclude Include="System\DebugConsole.h" />
+    <ClInclude Include="System\File.h" />
+    <ClInclude Include="System\Functors\FunctionHandler.h" />
+    <ClInclude Include="System\Functors\Functor.h" />
+    <ClInclude Include="System\Functors\IFunctorImpl.h" />
+    <ClInclude Include="System\Functors\MemberFunctionHandler.h" />
+    <ClInclude Include="System\Functors\MultiFunctor.h" />
+    <ClInclude Include="System\Functors\ParamType.h" />
+    <ClInclude Include="System\Functors\TypeList.h" />
+    <ClInclude Include="System\IJsonSerializable.h" />
+    <ClInclude Include="System\Input\ADevice.h" />
+    <ClInclude Include="System\Input\InputSystem.h" />
+    <ClInclude Include="System\Input\Keyboard.h" />
+    <ClInclude Include="System\Input\Mouse.h" />
+    <ClInclude Include="System\Input\VirtualKey.h" />
+    <ClInclude Include="System\json.h" />
+    <ClInclude Include="System\JsonSerializer.h" />
+    <ClInclude Include="System\List.h" />
+    <ClInclude Include="System\Map.h" />
+    <ClInclude Include="System\Pool.h" />
+    <ClInclude Include="System\Singleton.h" />
+    <ClInclude Include="System\StackString.h" />
+    <ClInclude Include="System\StaticString.h" />
+    <ClInclude Include="System\String.h" />
+    <ClInclude Include="System\Typedefs.h" />
+    <ClInclude Include="System\TypeSerializer.h" />
+    <ClInclude Include="System\Win32\Error.h" />
+    <ClInclude Include="System\Win32\Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Images\Image.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Images\ImageLoader_PNG.cpp" />
+    <ClCompile Include="Images\ImageLoader_RAW.cpp" />
+    <ClCompile Include="Images\ImageLoader_TGA.cpp" />
+    <ClCompile Include="Images\ImageManager.cpp" />
+    <ClCompile Include="Images\LodePng\lodepng.cpp" />
+    <ClCompile Include="Lighting\Light.cpp" />
+    <ClCompile Include="Lighting\LightPool.cpp" />
+    <ClCompile Include="Math\Bounds.cpp" />
+    <ClCompile Include="Math\MathUtils.cpp" />
+    <ClCompile Include="Rendering\Camera.cpp" />
+    <ClCompile Include="Rendering\ErrorHandling.cpp" />
+    <ClCompile Include="Rendering\FrameBufferObject.cpp" />
+    <ClCompile Include="Rendering\IndexBuffer.cpp" />
+    <ClCompile Include="Rendering\Joint.cpp" />
+    <ClCompile Include="Rendering\Mesh.cpp" />
+    <ClCompile Include="Rendering\Model.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\ModelLoader_FBX.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\ModelManager.cpp" />
+    <ClCompile Include="Rendering\RenderDef.cpp" />
+    <ClCompile Include="Rendering\VertexBuffer.cpp" />
+    <ClCompile Include="Shaders\ShaderManager_Fragment.cpp" />
+    <ClCompile Include="Shaders\ShaderManager_Vertex.cpp" />
+    <ClCompile Include="Shaders\ShaderProgramManager.cpp" />
+    <ClCompile Include="Shaders\ShaderProgram_GLSL.cpp" />
+    <ClCompile Include="Shaders\Shader_GLSL.cpp" />
+    <ClCompile Include="System\Color.cpp" />
+    <ClCompile Include="System\Configuration.cpp" />
+    <ClCompile Include="System\DebugConsole.cpp" />
+    <ClCompile Include="System\json.c" />
+    <ClCompile Include="System\StaticString.cpp" />
+    <ClCompile Include="System\Win32\Error.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CommonLib</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir);C:\Program Files %28x86%29\Microsoft SDKs\Windows\v7.1A\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft SDKs\Windows\v7.1A\Lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX Extensions SDK\2019.0\include;$(ProjectDir)FbxSdk\include;$(ProjectDir)..\..\glm-master;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(ProjectDir)..\..\rapidjson\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWarningAsError>false</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\glm-master;$(ProjectDir)..\..\tinyxml\Debug;$(ProjectDir)freeglut\lib;$(ProjectDir)glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxguid.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,327 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="System">
+      <UniqueIdentifier>{aebb8535-517c-4b75-8cf2-6ca70c668970}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{92388856-5484-4e09-abd0-7807e25f340c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Images">
+      <UniqueIdentifier>{1e27622a-56bd-46b3-96d6-e6f60f55e2c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{e0fff994-ea75-4000-8990-8429d536500f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{b153b0c3-8a70-4060-96ed-cb5ac3befff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lighting">
+      <UniqueIdentifier>{866b828f-89bb-4e0d-89ef-93207b25b5f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\Functors">
+      <UniqueIdentifier>{0fefe481-9f51-4db7-af5a-cf8354d79b80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\Input">
+      <UniqueIdentifier>{c246c1ec-78c2-4dc2-a821-ae36d8e3577a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\Win32">
+      <UniqueIdentifier>{3660b561-4415-4d1c-9297-15c83b90eff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\ModelLoaders">
+      <UniqueIdentifier>{67428e56-17ac-447a-80af-6ebffaba986b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Images\LodePng">
+      <UniqueIdentifier>{8d9b4baf-44d5-423d-928c-867729472d6a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="System\AssetManager.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Color.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\File.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Map.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Singleton.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\StaticString.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\String.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Typedefs.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\Image.h">
+      <Filter>Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\ImageLoader.h">
+      <Filter>Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\ImageLoader_RAW.h">
+      <Filter>Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\ImageLoader_TGA.h">
+      <Filter>Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\ImageManager.h">
+      <Filter>Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\MathUtils.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ErrorHandling.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Lighting\Light.h">
+      <Filter>Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="Lighting\LightPool.h">
+      <Filter>Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\VertexBuffer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\IndexBuffer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="System\List.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderDef.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="System\json.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\TypeSerializer.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\IJsonSerializable.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\DataStructureLibrary.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\JsonSerializer.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Mesh.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Shader_GLSL.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\ShaderProgram_GLSL.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Model.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="System\StackString.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Pool.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\ShaderProgramManager.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\ShaderManager_Fragment.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\ShaderManager_Vertex.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\FunctionHandler.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\Functor.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\IFunctorImpl.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\MemberFunctionHandler.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\MultiFunctor.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\TypeList.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Input\InputSystem.h">
+      <Filter>System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Input\ADevice.h">
+      <Filter>System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Input\Keyboard.h">
+      <Filter>System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Input\Mouse.h">
+      <Filter>System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Input\VirtualKey.h">
+      <Filter>System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Camera.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Functors\ParamType.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
+    <ClInclude Include="System\DebugConsole.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Win32\Error.h">
+      <Filter>System\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Win32\Window.h">
+      <Filter>System\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\FrameBufferObject.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\ModelLoader_FBX.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\ModelManager.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\MeshManager.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\LodePng\lodepng.h">
+      <Filter>Images\LodePng</Filter>
+    </ClInclude>
+    <ClInclude Include="Images\ImageLoader_PNG.h">
+      <Filter>Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Joint.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Configuration.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Bounds.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="System\StaticString.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Images\Image.cpp">
+      <Filter>Images</Filter>
+    </ClCompile>
+    <ClCompile Include="Images\ImageLoader_RAW.cpp">
+      <Filter>Images</Filter>
+    </ClCompile>
+    <ClCompile Include="Images\ImageLoader_TGA.cpp">
+      <Filter>Images</Filter>
+    </ClCompile>
+    <ClCompile Include="Images\ImageManager.cpp">
+      <Filter>Images</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\MathUtils.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ErrorHandling.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Lighting\Light.cpp">
+      <Filter>Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="Lighting\LightPool.cpp">
+      <Filter>Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderDef.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="System\json.c">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Mesh.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\VertexBuffer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\Shader_GLSL.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\ShaderProgram_GLSL.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Model.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\IndexBuffer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\ShaderProgramManager.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\ShaderManager_Fragment.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\ShaderManager_Vertex.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Camera.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="System\DebugConsole.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Win32\Error.cpp">
+      <Filter>System\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\FrameBufferObject.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\ModelManager.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\ModelLoader_FBX.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Images\LodePng\lodepng.cpp">
+      <Filter>Images\LodePng</Filter>
+    </ClCompile>
+    <ClCompile Include="Images\ImageLoader_PNG.cpp">
+      <Filter>Images</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Joint.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Configuration.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Color.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Bounds.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
