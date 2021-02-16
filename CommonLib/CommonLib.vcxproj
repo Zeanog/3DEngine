@@ -152,7 +152,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX Extensions SDK\2019.0\include;$(ProjectDir)FbxSdk\include;$(ProjectDir)..\..\glm-master;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(ProjectDir)..\..\rapidjson\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)FbxSdk\include;$(ProjectDir)..\..\glm-master;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(ProjectDir)..\..\rapidjson\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
