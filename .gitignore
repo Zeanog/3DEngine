@@ -3,3 +3,5 @@ bin
 Release
 Debug
 obj
+*.exe
+*.ilk
