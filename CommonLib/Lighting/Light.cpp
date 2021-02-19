@@ -20,7 +20,7 @@ void Light_Directional::PreShadowRender() {
 	glLoadIdentity();
 
 	//Needs to be the size of all geometry affect by light
-	glOrtho(-7.0, 7.0, -7.0, 7.0, 0.2, 500.0);
+	glOrtho(-10, 10.0, -10.0, 10.0, 0.2, 500.0);
 
 	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_CachedProjectionMatrix));
 
