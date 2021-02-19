@@ -54,7 +54,7 @@ public:
 		return m_Data.size();
 	}
 
-	void	Add(typename Param<TKey>::Type key, typename Param<TValue>::Type value) {
+	virtual void	Add(typename Param<TKey>::Type key, typename Param<TValue>::Type value) {
 		m_Data.insert(TContainer::value_type(key, value));
 	}
 
@@ -124,6 +124,31 @@ protected:
 
 public:
 };
+
+template< typename _TKey, typename _TValue >
+class Map<_TKey, _TValue*> : public AMap<_TKey, _TValue*> {
+	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue*));
+
+protected:
+
+public:
+	virtual void	Add(typename Param<TKey>::Type key, typename Param<_TValue*>::Type value) override {
+		m_Data.insert(TContainer::value_type(key, value));
+	}
+};
+
+template< typename _TKey, typename _TValue >
+class Map<_TKey, const _TValue*> : public AMap<_TKey, const _TValue*> {
+	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, const _TValue*));
+
+protected:
+
+public:
+	virtual void	Add(typename Param<TKey>::Type key, typename Param<const _TValue*>::Type value) override {
+		m_Data.insert(TContainer::value_type(key, value));
+	}
+};
+
 
 template<typename _TKey, typename _TValue>
 class ContainerIterator<Map<_TKey, _TValue>> {

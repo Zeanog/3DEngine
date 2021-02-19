@@ -231,11 +231,11 @@ void GLApplication::update()
 
 
 	if (m_Models.size() >= 1) {
-		m_Models[0]->Rotate(0, m_DeltaTime, 0);
+		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
 	}
 
 	if (m_Models.size() >= 2) {
-		m_Models[1]->Rotate(0, m_DeltaTime, 0);
+		m_Models[1]->Rotation(glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[1]->Rotation());
 	}
 
 	for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
@@ -270,9 +270,11 @@ void GLApplication::render()
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
-
-		glm::mat4x4 lightTransform = (*iter)->ToMat4x4_Local(m_Bounds.GetCenter(), 20.0f);
-		glMultMatrixf(glm::value_ptr(lightTransform));
+		
+		glm::mat4 mat = glm::lookAt(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, m_Bounds.GetCenter(), glm::up<glm::vec3>());
+		//mat = glm::translate(mat, m_Bounds.GetCenter() - (*iter)->Direction() * 20.0f );
+		//mat[3] = glm::vec4(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, 1.0f);
+		glMultMatrixf(glm::value_ptr(mat));
 
 		(*iter)->SetShadowMapAsTarget();
 		for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
@@ -312,13 +314,16 @@ void GLApplication::render()
 		m_PrevModels[i]->render(m_RenderModelProgram);
 	}
 
-	for (DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin(), end = Singleton<DirectionalLightPool>::GetInstance()->End(); iter != end; ++iter) {
-		(*iter)->DebugRender(m_RenderModel_UnlitProgram, (*iter)->ToMat4x4_World(m_Bounds.GetCenter(), 20.0f));
-	}
-
 	for (UInt32 i = 0; i < m_Models.size(); ++i) {
 		m_Models[i]->Render(m_RenderModelProgram);
 		//m_Models[i]->RenderJoints(m_DeltaTime);
+	}
+
+	//AOB: Draw sphere where light origin is
+	for (DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin(), end = Singleton<DirectionalLightPool>::GetInstance()->End(); iter != end; ++iter) {
+		glm::mat4 mat = (*iter)->ToMat4x4();
+		mat[3] = glm::vec4(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, 1.0f);
+		(*iter)->DebugRender(m_RenderModel_UnlitProgram, mat);
 	}
 
 	m_multipleRenderTarget->UnsetAsTarget();
@@ -424,7 +429,7 @@ void GLApplication::loadAssets()
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
 
 	ALight* light = NULL;
-	glm::vec3 dir = glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f));
+	glm::vec3 dir = glm::normalize(glm::vec3(0.707f, -0.707f, 0.0f));
 	light = new Light_Directional(dir);
 #if CAST_SHADOWS
 	light->CastsShadows(true);
@@ -455,10 +460,10 @@ void GLApplication::loadAssets()
 	config.GetValue("Model", "Path", modelPath);
 
 	model = new Model(modelPath.CStr());
-	model->GlobalPosition(-2, 2.5f, 0);
+	model->Position(glm::vec3(-2, 2.5f, 0));
 	m_Models.push_back(model);
 
-	m_Camera.GlobalPosition(0.0f, -4.0f, -10.0f);
+	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));
 }
 

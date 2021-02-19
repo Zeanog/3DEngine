@@ -65,6 +65,9 @@ protected:
 	const Neo::Mesh* m_Mesh;
 
 public:
+	DECLARE_GETSET(Position)
+	DECLARE_GETSET(Rotation)
+
 	Model() : m_Rotation(glm::identity<TRotation>())
 	{
 	}
@@ -72,43 +75,6 @@ public:
 	Model(const StaticString& meshPath);
 
 	virtual ~Model();
-
-	virtual void		LocalPosition(const glm::vec3& pos);
-	virtual void		LocalPosition(Float32 x, Float32 y, Float32 z) {
-		m_Position[0] = x;
-		m_Position[1] = y;
-		m_Position[2] = z;
-	}
-	virtual const glm::vec3& LocalPosition() const {
-		return m_Position;
-	}
-	virtual glm::vec3& LocalPosition() {
-		return m_Position;
-	}
-
-	virtual void		GlobalPosition(const glm::vec3& pos);
-	virtual void		GlobalPosition(Float32 x, Float32 y, Float32 z) {
-		m_Position[0] = x;
-		m_Position[1] = y;
-		m_Position[2] = z;
-	}
-	virtual const glm::vec3& GlobalPosition() const {
-		return m_Position;
-	}
-	virtual glm::vec3& GlobalPosition() {
-		return m_Position;
-	}
-	virtual void		Translate(const glm::vec3& delta);
-
-	virtual void		Rotation(const TRotation& rot);
-	virtual const TRotation& Rotation() const {
-		return m_Rotation;
-	}
-	virtual TRotation& Rotation() {
-		return m_Rotation;
-	}
-	virtual void		Rotate(const TRotation& delta);
-	virtual void		Rotate(Float32 pitch, Float32 yaw, Float32 roll);
 
 	virtual void	Render(const ShaderProgram_GLSL& program) const;
 	virtual void	RenderJoints( Float32 deltaTime );

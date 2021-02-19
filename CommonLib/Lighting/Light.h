@@ -83,7 +83,7 @@ public:
 protected:
 	static glm::mat4	m_CachedProjectionMatrix;
 
-	glm::vec3	m_Direction;
+	glm::vec3			m_Direction;
 
 public:
 	Light_Directional();
@@ -93,9 +93,7 @@ public:
 
 	DECLARE_GETSET(Direction)
 
-	glm::mat4		ToMat4x4_Local(const glm::vec3& focusPt, float offset) const;
-	glm::mat4		ToMat4x4_World(const glm::vec3& focusPt, float offset) const;
-	glm::mat4		ToMat4x4_Camera(const glm::vec3& focusPt, float offset) const;
+	glm::mat4		ToMat4x4() const;
 
 	virtual const RenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
 	virtual const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;

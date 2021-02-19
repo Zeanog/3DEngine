@@ -21,30 +21,6 @@ Model::Model(const StaticString& meshPath) : m_Rotation(glm::identity<TRotation>
 Model::~Model() {
 }
 
-void Model::LocalPosition(const glm::vec3& pos) {
-	m_Position = pos;
-}
-
-void Model::GlobalPosition(const glm::vec3& pos) {
-	m_Position = pos;
-}
-
-void Model::Translate(const glm::vec3& delta) {
-	m_Position += delta;
-}
-
-void Model::Rotation(const TRotation& rot) {
-	m_Rotation = rot;
-}
-
-void Model::Rotate(const TRotation& delta) {
-	m_Rotation = delta * m_Rotation;
-}
-
-void Model::Rotate(Float32 pitch, Float32 yaw, Float32 roll) {
-	Rotate(glm::eulerAngleXYZ(pitch, yaw, roll));
-}
-
 void Model::Render(const ShaderProgram_GLSL& program) const {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
