@@ -429,7 +429,7 @@ void GLApplication::loadAssets()
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
 
 	ALight* light = NULL;
-	glm::vec3 dir = glm::normalize(glm::vec3(0.707f, -0.707f, 0.0f));
+	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
 	light = new Light_Directional(dir);
 #if CAST_SHADOWS
 	light->CastsShadows(true);
