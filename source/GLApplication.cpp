@@ -100,7 +100,7 @@ bool GLApplication::initialize(HWND hwnd, int width, int height)
 
 	loadAssets();
 
-	m_lastTick = GetTickCount();
+	m_PrevTick = GetTickCount();
 
 	CoInitialize(NULL);
 
@@ -206,10 +206,10 @@ void GLApplication::TranslateCamera(Float32 x, Float32 y, Float32 z) {
 
 void GLApplication::update()
 {
-	int delta = GetTickCount() - m_lastTick;
+	m_PrevTick = m_CurrentTime;
+	m_CurrentTime = GetTickCount();
+	int delta = m_CurrentTime - m_PrevTick;
 	float time = delta * 0.001f;
-
-	m_lastTick = GetTickCount();
 
 	m_DeltaTime = MathUtils::Min(time, 1.0f / 30.0f);
 
@@ -225,10 +225,15 @@ void GLApplication::update()
 		m_PrevModels[1]->addRotation(0, time, time);
 	}*/
 
-	//DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
-	//glm::mat4 rot = glm::eulerAngleXYZ(MathUtils::Deg2Radians(-1.0f * m_DeltaTime), 0.0f, 0.0f) * (*iter)->ToMat4x4();
-	//(*iter)->Direction(glm::normalize((*iter)->Direction() + glm::vec3(0.1f, 0.0f, 0.0f) * m_DeltaTime) );
+	DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 
+	//glm::vec3 currAngles = glm::eulerAngles(glm::quatLookAt((*iter)->Direction(), glm::up<glm::vec3>()));
+	glm::vec3 currAngles;
+	currAngles.x = -90.0f;
+	currAngles.y = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
+	currAngles.z = 0.0f;
+	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));
+	(*iter)->Direction(dir);
 
 	if (m_Models.size() >= 1) {
 		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
