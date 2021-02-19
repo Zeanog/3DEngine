@@ -85,6 +85,7 @@ private:
 	HWND				m_hWnd; // Window's handle
 
 	float				m_DeltaTime;
-	unsigned int		m_lastTick;
+	unsigned int		m_CurrentTime;
+	unsigned int		m_PrevTick;
 	unsigned char		m_state; // 0 - Normal render, 1 - Show render targets
 };
