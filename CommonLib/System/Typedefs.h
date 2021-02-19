@@ -137,6 +137,10 @@ void Destroy( _TData& stlContainer ) {
 	stlContainer.clear();
 }
 
+#define ABSTRACT_GETSET( type, name )			\
+virtual typename Param<type>::Type		name() const = 0;	\
+virtual void			name(typename Param<type>::Type val) = 0;
+
 #define DECLARE_GETSET( name )			\
 Param<decltype(m_##name)>::Type		name() const {					\
 	return m_##name;								\

@@ -11,7 +11,7 @@ ALight::ALight() {
 ALight::~ALight() {
 }
 
-glm::mat4	Light_Directional::m_CachedProjectionMatrix;
+glm::mat4	Light_Directional::m_CachedProjectionMatrix(glm::identity<glm::mat4>());
 
 void Light_Directional::PreShadowRender() {
 	//Directional Light Shadow Camera
@@ -57,28 +57,8 @@ Light_Directional::~Light_Directional() {
 	Singleton<DirectionalLightPool>::GetInstance()->Remove( this );
 }
 
-glm::mat4 Light_Directional::ToMat4x4_Local(const glm::vec3& focusPt, float offset) const {// AOB: This is wrong!!
-	glm::mat4 mat(MathUtils::CreateAxisAlong(m_Direction, glm::up<glm::vec3>()));
-	mat[3] = glm::vec4(focusPt, 1.0f) - glm::vec4(m_Direction * offset, 0.0f);
-	return mat;
-}
-
-glm::mat4 Light_Directional::ToMat4x4_World( const glm::vec3& focusPt, float offset ) const {
-	return MathUtils::CreateAxisAlong_World(m_Direction, focusPt - m_Direction * offset, glm::up<glm::vec3>());
-}
-
-void WorldToCamera(glm::mat4x4& matWorld) {
-	matWorld = glm::inverse(matWorld);
-	//matWorld[1] = -matWorld[1];
-	//matWorld[3][0] = -matWorld[3][0];
-	//matWorld[3][1] = -matWorld[3][1];
-	//matWorld[3][2] = -matWorld[3][2];
-}
-
-glm::mat4 Light_Directional::ToMat4x4_Camera(const glm::vec3& focusPt, float offset) const {
-	glm::mat4 mat = MathUtils::CreateAxisAlong_World(m_Direction, focusPt - m_Direction * offset, glm::up<glm::vec3>());
-	WorldToCamera(mat);
-	return mat;
+glm::mat4 Light_Directional::ToMat4x4() const {
+	return MathUtils::CreateAxisAlong(m_Direction, glm::up<glm::vec3>());
 }
 
 const RenderTarget* Light_Directional::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
@@ -90,10 +70,16 @@ const RenderTarget* Light_Directional::LinkTo(const ShaderProgram_GLSL& program,
 	return LinkShadowMapTo(program, bounds, camera);
 }
 
+glm::mat4 biasMatrix(
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 0.5, 0.0,
+	0.5, 0.5, 0.5, 1.0
+);
 const RenderTarget* Light_Directional::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	glm::mat4x4 mv = MathUtils::CreateAxisAlong_Local(m_Direction, bounds.GetCenter(), glm::up<glm::vec3>());
-	//glm::mat4x4 mv = ToMat4x4_Local(bounds.GetCenter(), 20.0f);
-	glm::mat4 mvp = m_CachedProjectionMatrix * mv;
+	glm::mat4 depthViewMatrix = glm::lookAt(bounds.GetCenter() - m_Direction * 10.0f, bounds.GetCenter(), glm::up<glm::vec3>());
+	glm::mat4 mvp = biasMatrix * m_CachedProjectionMatrix * depthViewMatrix;
+	
 	mvp = mvp * glm::inverse(camera.ToMat4x4());
 	
 	verify( program.LinkUniform("mDepthMVP", mvp) );
@@ -111,10 +97,14 @@ void Light_Directional::DebugRender(const ShaderProgram_GLSL& program, const glm
 
 	program.LinkUniform("vColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
-	GLUquadricObj *sphere = gluNewQuadric();
-	gluQuadricTexture(sphere, true);
-	gluSphere(sphere, 0.25f, 64, 64);
-	gluDeleteQuadric(sphere);
+	GLUquadricObj *qObj = gluNewQuadric();
+	gluQuadricTexture(qObj, true);
+	//gluSphere(sphere, 0.25f, 64, 64);
+	float height2WidthRatio = 1.0f / 5.0f;
+	float height = 2;
+	float width = height * height2WidthRatio;
+	gluCylinder(qObj, width, 0, height, 64, 10);
+	gluDeleteQuadric(qObj);
 
 	program.StopUsing();
 
@@ -160,7 +150,7 @@ const RenderTarget* Light_Point::LinkShadowMapTo(const ShaderProgram_GLSL& progr
 	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
 }
 
-glm::mat4	Light_Spot::m_CachedProjectionMatrix;
+glm::mat4	Light_Spot::m_CachedProjectionMatrix(glm::identity<glm::mat4>());
 
 void Light_Spot::PreShadowRender() {
 	//Directional Light Shadow Camera

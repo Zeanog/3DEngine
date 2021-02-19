@@ -9,7 +9,7 @@ Camera::Camera() : m_Rotation(glm::identity<TRotation>()) {
 }
 
 Camera::Camera(const glm::mat3x3& rot, const glm::vec3& pos) : Camera() {
-	GlobalPosition( pos );
+	Position( pos );
 	m_Rotation = rot;
 }
 
@@ -21,20 +21,8 @@ void Camera::LinkTransform() const {
 	glMultMatrixf(glm::value_ptr(ToMat4x4()));
 }
 
-void Camera::LocalPosition(const glm::vec3& pos) {
-	m_Position = pos;
-}
-
-void Camera::GlobalPosition(const glm::vec3& pos) {
-	m_Position = pos;
-}
-
 void Camera::Translate(const glm::vec3& delta) {
 	m_Position += delta;
-}
-
-void Camera::Rotation(const TRotation& rot) {
-	m_Rotation = rot;
 }
 
 void Camera::Rotate(const TRotation& delta) {
@@ -44,4 +32,16 @@ void Camera::Rotate(const TRotation& delta) {
 void Camera::Rotate(Float32 pitch, Float32 yaw, Float32 roll) {
 	Rotate(glm::eulerAngleXYZ(pitch, yaw, roll));
 	//m_Rotation.Rotate(yaw, pitch, roll);
+}
+
+void Camera::RotateAround(const TRotation& delta, const glm::vec3& pt) {
+	Translate(-pt);
+	Rotate(delta);
+	Translate(pt);
+}
+
+void Camera::RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const glm::vec3& pt) {
+	Translate(-pt);
+	Rotate(glm::eulerAngleXYZ(pitch, yaw, roll));
+	Translate(pt);
 }

@@ -12,13 +12,6 @@ float readShadowMap(vec3 viewspace_pos)
 {
 	vec4 lightspace_pos = mDepthMVP * vec4(viewspace_pos, 1.0);
 
-	// perspective divide
-	lightspace_pos /= lightspace_pos.w;
-
-	// move range from [-1.0, 1.0] to [0.0, 1.0]
-	lightspace_pos = lightspace_pos * vec4(0.5) + vec4(0.5);
-
-	// sample shadowmap
 	const float bias = 0.0001;
 	vec4 shadowPixel = texture(tShadowMap, lightspace_pos.xy);
 	float shadowDepth = shadowPixel.z - bias;
