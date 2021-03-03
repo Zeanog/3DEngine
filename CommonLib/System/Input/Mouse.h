@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ADevice.h"
-#include "System/Functors/MultiFunctor.h"
+#include "System\String.h"
 
 struct Button {
 	Byte	State;

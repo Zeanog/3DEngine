@@ -102,6 +102,8 @@ bool GLApplication::initialize(HWND hwnd, int width, int height)
 
 	m_PrevTick = GetTickCount();
 
+	OnRenderShadows.AddListener(this, &TSelf::RenderModelShadows);
+
 	CoInitialize(NULL);
 
 	return true;
@@ -200,10 +202,6 @@ void GLApplication::TranslateCamera(Float32 x, Float32 y, Float32 z) {
 	m_Camera.Translate(glm::vec3(x, y, z) * m_DeltaTime * 5.0f);
 }
 
-/**
-*	Update
-*/
-
 void GLApplication::update()
 {
 	m_PrevTick = m_CurrentTime;
@@ -225,15 +223,23 @@ void GLApplication::update()
 		m_PrevModels[1]->addRotation(0, time, time);
 	}*/
 
-	DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
-
-	//glm::vec3 currAngles = glm::eulerAngles(glm::quatLookAt((*iter)->Direction(), glm::up<glm::vec3>()));
+	//Just for debugging
+	/*DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = -90.0f;
 	currAngles.y = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
 	currAngles.z = 0.0f;
-	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));
-	(*iter)->Direction(dir);
+	glm::vec3 dir = glm::forward<glm::vec4>() * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));
+	(*iter)->Direction(dir);*/
+
+	SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+	/*glm::vec3 currAngles;
+	currAngles.x = 90.0f;
+	currAngles.y = 0.0f;
+	currAngles.z = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
+	glm::vec3 dir = glm::forward<glm::vec4>() * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));*/
+	//(*iter)->Direction(dir);
+	(*iter)->Position(glm::vec3(0.0f, 10.0f, 0.0f) + 3.0f * glm::vec3(std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)), 0.0f, 0.0f));
 
 	if (m_Models.size() >= 1) {
 		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
@@ -254,6 +260,16 @@ void GLApplication::update()
 
 #define CAST_SHADOWS 1
 
+void GLApplication::RenderModels(const ShaderProgram_GLSL& program) {
+	for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
+		m_PrevModels[i]->render(program);
+	}
+
+	for (UInt32 i = 0; i < m_Models.size(); ++i) {
+		m_Models[i]->Render(program);
+	}
+}
+
 void GLApplication::render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -265,37 +281,9 @@ void GLApplication::render()
 
 	glDisable(GL_BLEND);
 
-	Light_Directional::PreShadowRender();
-
-	for (DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin(), end = Singleton<DirectionalLightPool>::GetInstance()->End(); iter != end; ++iter) {
-		if (!(*iter)->CastsShadows()) {
-			continue;
-		}
-		
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		
-		glm::mat4 mat = glm::lookAt(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, m_Bounds.GetCenter(), glm::up<glm::vec3>());
-		//mat = glm::translate(mat, m_Bounds.GetCenter() - (*iter)->Direction() * 20.0f );
-		//mat[3] = glm::vec4(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, 1.0f);
-		glMultMatrixf(glm::value_ptr(mat));
-
-		(*iter)->SetShadowMapAsTarget();
-		for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
-			m_PrevModels[i]->render(m_ShadowMapGenerationProgram);
-		}
-
-		for (UInt32 i = 0; i < m_Models.size(); ++i) {
-			m_Models[i]->Render(m_ShadowMapGenerationProgram);
-		}
-		(*iter)->UnsetShadowMapAsTarget();
-
-		glPopMatrix();
-	}
-
-	Light_Directional::PostShadowRender();
-
+	Light_Directional::RenderShadows(m_Bounds, OnRenderShadows);
+	Light_Spot::RenderShadows(OnRenderShadows);
+	
 	glCullFace(GL_BACK);
 	//glDisable(GL_CULL_FACE);
 
@@ -313,23 +301,20 @@ void GLApplication::render()
 
 	m_Camera.LinkTransform();
 
-	// Render our geometry into the FBO
 	m_multipleRenderTarget->SetAsTarget();
-	for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
-		m_PrevModels[i]->render(m_RenderModelProgram);
-	}
+	RenderModels(m_RenderModelProgram);
 
-	for (UInt32 i = 0; i < m_Models.size(); ++i) {
-		m_Models[i]->Render(m_RenderModelProgram);
-		//m_Models[i]->RenderJoints(m_DeltaTime);
-	}
-
-	//AOB: Draw sphere where light origin is
-	for (DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin(), end = Singleton<DirectionalLightPool>::GetInstance()->End(); iter != end; ++iter) {
+#if _DEBUG
+	FOREACH(iter, *Singleton<DirectionalLightPool>::GetInstance()) {
 		glm::mat4 mat = (*iter)->ToMat4x4();
 		mat[3] = glm::vec4(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, 1.0f);
 		(*iter)->DebugRender(m_RenderModel_UnlitProgram, mat);
 	}
+	FOREACH(iter, *Singleton<SpotLightPool>::GetInstance()) {
+		glm::mat4 mat = (*iter)->ToMat4x4();
+		(*iter)->DebugRender(m_RenderModel_UnlitProgram, mat);
+	}
+#endif
 
 	m_multipleRenderTarget->UnsetAsTarget();
 
@@ -337,20 +322,19 @@ void GLApplication::render()
 	if (m_state == 0)
 	{
 		m_deferredRendering->PreRender();
-		
-		for (DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin(), end = Singleton<DirectionalLightPool>::GetInstance()->End(); iter != end; ++iter) {
+		FOREACH(iter, *Singleton<DirectionalLightPool>::GetInstance()) {
 			m_LightingProgram_Directional.StartUsing();
 			m_deferredRendering->Render(m_LightingProgram_Directional, m_Bounds, m_Camera, *iter);
 			m_LightingProgram_Directional.StopUsing();
 		}
 
-		for (SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin(), end = Singleton<SpotLightPool>::GetInstance()->End(); iter != end; ++iter) {
+		FOREACH(iter, *Singleton<SpotLightPool>::GetInstance()) {
 			m_LightingProgram_Spot.StartUsing();
 			m_deferredRendering->Render(m_LightingProgram_Spot, m_Bounds, m_Camera, *iter);
 			m_LightingProgram_Spot.StopUsing();
 		}
 
-		for (PointLightPool::Iterator iter = Singleton<PointLightPool>::GetInstance()->Begin(), end = Singleton<PointLightPool>::GetInstance()->End(); iter != end; ++iter) {
+		FOREACH(iter, *Singleton<PointLightPool>::GetInstance()) {
 			m_LightingProgram_Point.StartUsing();
 			m_deferredRendering->Render(m_LightingProgram_Point, m_Bounds, m_Camera, *iter);
 			m_LightingProgram_Point.StopUsing();
@@ -363,7 +347,8 @@ void GLApplication::render()
 		m_deferredRendering->showTexture("tPositions", 512, 384, 512, 0);
 		m_deferredRendering->showTexture("tNormals", 512, 384, 0, 384);
 	
-		DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+		//DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+		SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 		(*iter)->DebugRenderMap(512, 384, 512, 384);
 	}
 
@@ -434,12 +419,12 @@ void GLApplication::loadAssets()
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
 
 	ALight* light = NULL;
-	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
-	light = new Light_Directional(dir);
+	//glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
+	//light = new Light_Directional(dir);
 #if CAST_SHADOWS
-	light->CastsShadows(true);
+	//light->CastsShadows(true);
 #endif
-	m_Lights.push_back(light);
+	//m_Lights.push_back(light);
 
 	//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
 #if CAST_SHADOWS
@@ -447,11 +432,15 @@ void GLApplication::loadAssets()
 #endif
 	//m_Lights.push_back(light);
 
-	//light = new Light_Spot(glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), 30.0f);
+	Light_Spot* spotLight = new Light_Spot(glm::vec3(-5.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(0.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), 1.0f);
+	spotLight->ConstantAttenuation(1.0f);
+	spotLight->LinearAttenuation(0.22f);
+	spotLight->QuadraticAttenuation(0.2f);
+	spotLight->Exponent(1);
 #if CAST_SHADOWS
-	//light->CastsShadows(true);
+		spotLight->CastsShadows(true);
 #endif
-	//m_Lights.push_back(light);
+	m_Lights.push_back(spotLight);
 
 	Model* model = NULL;
 	//model = new Model("Data/Cube.mesh");

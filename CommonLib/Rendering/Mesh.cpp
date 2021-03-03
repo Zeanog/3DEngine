@@ -2,7 +2,6 @@
 
 #include <windows.h>
 #include <gl/gl.h>
-
 #include "ModelLoaders/ModelLoader_FBX.h"
 #include "Rendering/Joint.h"
 

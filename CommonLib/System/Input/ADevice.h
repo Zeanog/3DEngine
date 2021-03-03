@@ -10,7 +10,6 @@
 
 #include <utility>
 
-#include "Math/Vector.h"
 #include <list>
 
 class ADevice {

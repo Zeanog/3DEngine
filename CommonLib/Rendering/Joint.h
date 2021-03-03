@@ -26,7 +26,7 @@ class Skeleton;
 namespace Neo {
 	class Skeleton {
 	public:
-		static void				DestroyTree(Joint* root);
+		//static void				DestroyTree(Joint* root);
 
 	protected:
 		List<Joint*>			m_Joints;

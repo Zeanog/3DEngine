@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../System/Typedefs.h"
+#include "System/Typedefs.h"
 #include <System/File.h>
 #include <memory.h>
 #include <math.h>

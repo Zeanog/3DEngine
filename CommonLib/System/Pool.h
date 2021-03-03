@@ -11,6 +11,9 @@ public:
 	typedef typename TContainer::iterator		Iterator;
 	typedef typename TContainer::const_iterator	ConstIterator;
 
+	typedef typename TContainer::iterator		iterator;
+	typedef typename TContainer::iterator	const_iterator;
+
 protected:
 	TContainer	m_Container;
 
@@ -48,6 +51,22 @@ public:
 
 	ConstIterator	End() const {
 		return m_Container.end();
+	}
+
+	Iterator	end() {
+		return m_Container.end();
+	}
+
+	ConstIterator	end() const {
+		return m_Container.cend();
+	}
+
+	Iterator	begin() {
+		return m_Container.begin();
+	}
+
+	ConstIterator	begin() const {
+		return m_Container.cbegin();
 	}
 };
 
