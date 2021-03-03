@@ -27,15 +27,14 @@ void main( void )
 	vec4 image = texture2D( tDiffuse, gl_TexCoord[0].xy );
 	vec4 position = texture2D( tPositions, gl_TexCoord[0].xy );
 	vec4 normal = texture2D( tNormals, gl_TexCoord[0].xy );
-	
-	//normal = normalize(normal);
+	normal = normalize(normal);
 
 	vec4 outColor = image;
 	
-	if( normal.w > 0.0 ) {
+	if( normal.w > 0 ) {
 		float nDotl;
 		nDotl = dot(normal.xyz, -vLightDir);
-		outColor *= mix(0.0, 1.0, nDotl);
+		outColor *= max(0.0, nDotl);
 
 		float shadow = readShadowMap(position.xyz);
 		outColor *= shadow;

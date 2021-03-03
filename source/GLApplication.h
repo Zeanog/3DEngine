@@ -11,6 +11,7 @@
 #include "System/DebugConsole.h"
 #include "Images/ImageManager.h"
 #include "Math/Bounds.h"
+#include "System\Functors\Functor.h"
 
 class IModel;
 class Model;
@@ -55,6 +56,11 @@ private:
 	void	loadAssets();
 	void	releaseAssets();
 
+	void	RenderModels(const ShaderProgram_GLSL& program);
+	void	RenderModelShadows() {
+		RenderModels(m_ShadowMapGenerationProgram);
+	}
+
 	CameraInterpolator				m_Camera;
 
 	// Fields
@@ -62,7 +68,7 @@ private:
 	Neo::Bounds			m_Bounds;
 	std::vector<Model*> m_Models;
 
-
+	Functor<void>		OnRenderShadows;
 
 	DeferredRendering*	m_deferredRendering;
 	FrameBufferObject*	m_multipleRenderTarget;

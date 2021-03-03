@@ -1,13 +1,14 @@
 #pragma once
-#include <windows.h>
-#include <gl/glew.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
 
 #include "System/Typedefs.h"
 #include "System/Map.h"
 #include "System/List.h"
 #include "System/StaticString.h"
+
+#include <windows.h>
+#include <gl/glew.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
 
 class ShaderProgram_GLSL;
 

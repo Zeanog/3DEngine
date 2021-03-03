@@ -1,5 +1,5 @@
 #include "Light.h"
-#include "../Shaders/ShaderProgram_GLSL.h"
+#include "Shaders/ShaderProgram_GLSL.h"
 #include "LightPool.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -35,6 +35,31 @@ void Light_Directional::PostShadowRender() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+}
+
+void Light_Directional::RenderShadows(const Neo::Bounds& worldBounds, const Functor<void>& perLightShadowRenderHandler) {
+	Light_Directional::PreShadowRender();
+
+	FOREACH (iter, *Singleton<DirectionalLightPool>::GetInstance()) {
+		if (!(*iter)->CastsShadows()) {
+			continue;
+		}
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glm::mat4 mat = glm::lookAt(worldBounds.GetCenter() - (*iter)->Direction() * 10.0f, worldBounds.GetCenter(), glm::up<glm::vec3>());
+		glMultMatrixf(glm::value_ptr(mat));
+
+		(*iter)->SetShadowMapAsTarget();
+		perLightShadowRenderHandler();
+		(*iter)->UnsetShadowMapAsTarget();
+
+		glPopMatrix();
+	}
+
+	Light_Directional::PostShadowRender();
 }
 
 Light_Directional::Light_Directional() {
@@ -95,7 +120,7 @@ void Light_Directional::DebugRender(const ShaderProgram_GLSL& program, const glm
 
 	program.StartUsing();
 
-	program.LinkUniform("vColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	program.LinkUniform("vColor", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	GLUquadricObj *qObj = gluNewQuadric();
 	gluQuadricTexture(qObj, true);
@@ -115,18 +140,16 @@ Light_Point::Light_Point() {
 	Singleton<PointLightPool>::GetInstance()->Add( this );
 }
 
-Light_Point::Light_Point( const glm::vec3& org, Float32 radius ) {
+Light_Point::Light_Point( const glm::vec3& org ) {
 	m_Origin = org;
-	m_Radius = radius;
 
 	Singleton<PointLightPool>::GetInstance()->Add( this );
 }
 
-Light_Point::Light_Point( Float32 x, Float32 y, Float32 z, Float32 radius ) {
+Light_Point::Light_Point( Float32 x, Float32 y, Float32 z ) {
 	m_Origin[ 0 ] = x;
 	m_Origin[ 1 ] = y;
 	m_Origin[ 2 ] = z;
-	m_Radius = radius;
 
 	Singleton<PointLightPool>::GetInstance()->Add( this );
 }
@@ -136,8 +159,7 @@ Light_Point::~Light_Point() {
 }
 
 const RenderTarget* Light_Point::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	verify(program.LinkUniform(StaticString("vLightPos"), m_Origin));
-	verify(program.LinkUniform(StaticString("fLightRadius"), m_Radius));
+	verify(program.LinkUniform(StaticString("vLightPos"), m_Origin * glm::inverse(camera.Rotation())));
 	if (!CastsShadows()) {
 		return NULL;
 	}
@@ -150,8 +172,6 @@ const RenderTarget* Light_Point::LinkShadowMapTo(const ShaderProgram_GLSL& progr
 	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
 }
 
-glm::mat4	Light_Spot::m_CachedProjectionMatrix(glm::identity<glm::mat4>());
-
 void Light_Spot::PreShadowRender() {
 	//Directional Light Shadow Camera
 	glMatrixMode(GL_PROJECTION);
@@ -159,9 +179,10 @@ void Light_Spot::PreShadowRender() {
 	glLoadIdentity();
 
 	//Needs to be the size of all geometry affect by light
-	glOrtho(-10.0, 10.0, -10.0, 10.0, 0.2, 100.0);
+	//glOrtho(-10.0, 10.0, -10.0, 10.0, 0.2, 100.0);
+	gluPerspective(m_FOV, m_AspectRatio, 0.1f, 100.0f);
 
-	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_CachedProjectionMatrix));
+	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_ProjectionMatrix));
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -177,14 +198,34 @@ void Light_Spot::PostShadowRender() {
 }
 
 Light_Spot::Light_Spot() {
-	m_Radius = 0.0f;
 	Singleton<SpotLightPool>::GetInstance()->Add( this );
 }
 
-Light_Spot::Light_Spot( const glm::vec3& org, const glm::vec3& dir, Float32 radius ) {
-	m_Origin = org;
-	m_Direction = dir;
-	m_Radius = radius;
+void Light_Spot::RenderShadows(const Functor<void>& perLightShadowRenderHandler) {
+	//glm::mat4 projectionMatrix;
+	FOREACH (iter, *Singleton<SpotLightPool>::GetInstance()) {
+		if (!(*iter)->CastsShadows()) {
+			continue;
+		}
+
+		(*iter)->PreShadowRender();
+
+		glm::mat4 mat = glm::lookAt((*iter)->Position(), (*iter)->Position() + (*iter)->Direction() * 10.0f, -glm::forward<glm::vec3>());
+		glMultMatrixf(glm::value_ptr(mat));
+
+		(*iter)->SetShadowMapAsTarget();
+		perLightShadowRenderHandler();
+		(*iter)->UnsetShadowMapAsTarget();
+
+		(*iter)->PostShadowRender();
+	}
+}
+
+Light_Spot::Light_Spot( const glm::vec3& org, const glm::mat4& rot, Float32 fovInRadians, Float32 aspectRatio ) {
+	m_Transform = rot;
+	m_Transform[3] = glm::vec4(org, 1.0f);
+	FOV(fovInRadians);
+	m_AspectRatio = aspectRatio;
 	Singleton<SpotLightPool>::GetInstance()->Add( this );
 }
 
@@ -193,12 +234,59 @@ Light_Spot::~Light_Spot() {
 }
 
 const RenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	verify(program.LinkUniform(StaticString("vLightDir"), m_Direction * glm::inverse(camera.Rotation())));
-	verify(program.LinkUniform(StaticString("vEyeDir"), camera.Forward()));
-	return TSuper::LinkTo(program, bounds, camera);
+	verify(program.LinkUniform(StaticString("fConstantAttenuation"), m_ConstantAttenuation));
+	verify(program.LinkUniform(StaticString("fLinearAttenuation"), m_LinearAttenuation));
+	verify(program.LinkUniform(StaticString("fQuadraticAttenuation"), m_QuadraticAttenuation));
+	verify(program.LinkUniform(StaticString("fExponent"), m_Exponent));
+	verify(program.LinkUniform(StaticString("fLightCosCutoff"), m_CosCutoff));
+
+	glm::vec3 camWorldPos = camera.Position();
+	camWorldPos.z *= -1.0f;
+	glm::vec3 offset(Position() - camWorldPos);
+	offset = offset * glm::inverse(camera.Rotation());
+	verify(program.LinkUniform(StaticString("vLightPos"), offset));
+	verify(program.LinkUniform(StaticString("vLightDirection"), Direction() * glm::inverse(camera.Rotation())));
+	verify(program.LinkUniform(StaticString("vEyePos"), camera.Position()));
+	
+	if (!CastsShadows()) {
+		return NULL;
+	}
+
+	return LinkShadowMapTo(program, bounds, camera);
 }
 
 const RenderTarget* Light_Spot::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	//program.LinkUniform("mDepthMVP", MathUtils::CreateAxisAlong());
+	glm::mat4 mvp = biasMatrix * m_ProjectionMatrix * ToMat4x4();
+
+	mvp = mvp * glm::inverse(camera.ToMat4x4());
+
+	verify(program.LinkUniform("mDepthMVP", mvp));
 	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
+}
+
+glm::mat4 Light_Spot::ToMat4x4() const {
+	return m_Transform;
+}
+
+void Light_Spot::DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
+	glMultMatrixf(glm::value_ptr(transform));
+
+	program.StartUsing();
+
+	program.LinkUniform("vColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+	GLUquadricObj* qObj = gluNewQuadric();
+	gluQuadricTexture(qObj, true);
+	float height = 5.0f;
+	float width = std::tanf(FOV() * 0.5f) * height * 2.0f;
+	gluCylinder(qObj, 0, width, height, 64, 10);
+	gluDeleteQuadric(qObj);
+
+	program.StopUsing();
+
+	glPopMatrix();
 }

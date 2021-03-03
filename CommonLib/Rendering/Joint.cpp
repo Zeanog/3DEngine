@@ -53,16 +53,15 @@ const Joint* Neo::Skeleton::FindJoint(const StaticString& name) const {
 
 Bool Neo::Skeleton::UploadData(const AMeshLoader& loader) {
 	const List<AMeshLoader::JointInfo>& joints = loader.Joints();
-	AMeshLoader::JointInfo	jointInfo;
-	AMeshLoader::JointInfo	parentJointInfo;
+	const AMeshLoader::JointInfo*	jointInfo;
 	Joint* joint = NULL;
 	Joint* parentJoint = NULL;
 
 	for (UInt32 ix = 0; ix < joints.Length(); ++ix) {
-		jointInfo = joints[ix];
+		jointInfo = &(joints[ix]);
 		joint = new Joint();
-		joint->Name( jointInfo.Name );
-		joint->Parent( jointInfo.ParentIndex );
+		joint->Name( jointInfo->Name );
+		joint->Parent( jointInfo->ParentIndex );
 		m_Joints.Add(joint);
 	}
 	return true;
@@ -84,5 +83,4 @@ glm::mat4 AnimKeyFrame::GetGlobalTransform(int index, const Neo::Skeleton& skele
 	};
 
 	return mat;
-	//return m_FrameData[index];
 }

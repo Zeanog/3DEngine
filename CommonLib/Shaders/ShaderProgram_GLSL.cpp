@@ -89,19 +89,6 @@ Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const glm::mat4&
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const Vector<3>& vec ) const {
-	assert( m_Handle );
-
-	Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
-	glUniform3f( loc, vec[0], vec[1], vec[2] );
-	Int32 errorCode = glGetError();
-	if( errorCode ) {
-		const Char* errorMsg = glErrorString( errorCode );
-		return false;
-	}
-	return true;
-}
-
 Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, const glm::vec3& vec) const {
 	assert(m_Handle);
 

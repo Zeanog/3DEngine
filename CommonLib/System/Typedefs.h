@@ -84,10 +84,10 @@ public:
 };
 
 #define FOREACH( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::Iterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer); iterName != ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName++ )
+	for( typename ContainerIterator<decltype(stlContainer)>::Iterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterNameEnd = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterNameEnd; iterName++ )
 
 #define FOREACH_CONST( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer); iterName != ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName++ )
+	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterNameEnd = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterNameEnd; iterName++ )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
 

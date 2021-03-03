@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../System/StaticString.h"
-#include "../Math/Vector.h"
-#include "../Math/Matrix.h"
+#include "System/StaticString.h"
 #include "Math/Bounds.h"
+#include "System/Functors/Functor.h"
 
 #include "Rendering/Camera.h"
 #include "Rendering/FrameBufferObject.h"
@@ -12,7 +11,6 @@
 
 class ShaderProgram_GLSL;
 class Camera;
-
 
 class ALight {
 	CLASS_TYPEDEFS( ALight );
@@ -79,6 +77,7 @@ class Light_Directional : public ALight {
 public:
 	static void	PreShadowRender();
 	static void	PostShadowRender();
+	static void RenderShadows(const Neo::Bounds& worldBounds, const Functor<void>& perLightRenderHandler);
 
 protected:
 	static glm::mat4	m_CachedProjectionMatrix;
@@ -95,8 +94,8 @@ public:
 
 	glm::mat4		ToMat4x4() const;
 
-	virtual const RenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
-	virtual const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
+	virtual const RenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 
 	virtual void DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform) override;
 };
@@ -108,7 +107,6 @@ public:
 
 protected:
 	glm::vec3	m_Origin;
-	Float32		m_Radius;
 
 protected:
 	virtual void		InitShadowMap() override {
@@ -126,55 +124,87 @@ public:
 	Light_Point();
 	virtual ~Light_Point();
 
-	Light_Point( const glm::vec3& org, Float32 radius );
+	Light_Point( const glm::vec3& org );
 
-	Light_Point( Float32 x, Float32 y, Float32 z, Float32 radius );
+	Light_Point( Float32 x, Float32 y, Float32 z );
 
-	void	SetOrigin( const glm::vec3& org ) {
-		m_Origin = org;
-	}
+	DECLARE_GETSET(Origin)
 
-	const glm::vec3&	GetOrigin() const {
-		return m_Origin;
-	}
-
-	void	SetRadius( Float32 radius ) {
-		m_Radius = radius;
-	}
-
-	const Float32	GetRadius() const {
-		return m_Radius;
-	}
-
-	virtual const RenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
-	virtual 	const RenderTarget*				LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
+	virtual const RenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual 	const RenderTarget*				LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 };
 
-class Light_Spot : public Light_Point {
-	INHERITEDCLASS_TYPEDEFS( Light_Spot, Light_Point);
+class Light_Spot : public ALight {
+	INHERITEDCLASS_TYPEDEFS( Light_Spot, ALight);
 
 public:
-	static void	PreShadowRender();
-	static void	PostShadowRender();
+	static void RenderShadows(const Functor<void>& perLightRenderHandler);
 
 protected:
-	static glm::mat4	m_CachedProjectionMatrix;
+	glm::mat4	m_ProjectionMatrix;
 
-	glm::vec3	m_Direction;
+	glm::mat4	m_Transform;
+
+	float		m_ConstantAttenuation;
+	float		m_LinearAttenuation;
+	float		m_QuadraticAttenuation;
+	float		m_Exponent;
+	float		m_CosCutoff;
+
+	Float32		m_FOV;
+	Float32		m_AspectRatio;
+
+protected:
+	void	PreShadowRender();
+	void	PostShadowRender();
+
+	virtual void		InitShadowMap() override {
+		m_ShadowFBO->Bind();
+		m_ShadowFBO->AddTarget("tShadowMap", GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+		m_ShadowFBO->Unbind();
+	}
 
 public:
 	Light_Spot();
-	Light_Spot( const glm::vec3& org, const glm::vec3& dir, Float32 radius );
+	Light_Spot( const glm::vec3& org, const glm::mat4& rot, Float32 fov, Float32 aspectRatio );
 	virtual ~Light_Spot();
 
-	void	Direction( const glm::vec3& dir ) {
-		m_Direction = dir;
+	DECLARE_GETSET(Transform)
+	DECLARE_GETSET(ConstantAttenuation)
+	DECLARE_GETSET(LinearAttenuation)
+	DECLARE_GETSET(QuadraticAttenuation)
+	DECLARE_GETSET(Exponent)
+	DECLARE_GETSET(AspectRatio)
+	DECLARE_GETSET(ProjectionMatrix)
+
+	void FOV(Float32 fov) {
+		m_FOV = fov;
+		m_CosCutoff = std::cos(FOV() * 0.5f);
 	}
 
-	const glm::vec3&	Direction() const {
-		return m_Direction;
+	Float32 FOV() const {
+		return m_FOV;
 	}
 
-	virtual const RenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
-	virtual 	const RenderTarget*				LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const;
+	glm::vec3	Position() const {
+		return m_Transform[3];
+	}
+
+	void		Position(const glm::vec3& pt) {
+		m_Transform[3] = glm::vec4(pt, 1.0f);
+	}
+
+	glm::vec3	Direction() const {
+		return m_Transform[2];
+	}
+
+	void	Direction(const glm::vec3& dir) {
+		m_Transform[2] = glm::vec4(dir, 1.0f);
+	}
+
+	virtual const RenderTarget*			LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual 	const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	void								DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform);
+
+	glm::mat4		ToMat4x4() const;
 };

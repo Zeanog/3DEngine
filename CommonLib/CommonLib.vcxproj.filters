@@ -78,9 +78,6 @@
     <ClInclude Include="Math\MathUtils.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Math\Matrix.h">
-      <Filter>Math</Filter>
-    </ClInclude>
     <ClInclude Include="Math\Vector.h">
       <Filter>Math</Filter>
     </ClInclude>

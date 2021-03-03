@@ -62,13 +62,13 @@ public:
 	const int TRIANGLE_VERTEX_COUNT = 3;
 
 protected:
-	static FbxManager* g_SdkManager;
-	FbxScene* m_Scene;
-	FbxImporter* m_Importer;
-	FbxAnimLayer * m_CurrentAnimLayer;
-	FbxArray<FbxString*> m_AnimStackNameArray;
+	static FbxManager*		g_SdkManager;
+	FbxScene*				m_Scene;
+	FbxImporter*			m_Importer;
+	FbxAnimLayer *			m_CurrentAnimLayer;
+	FbxArray<FbxString*>	m_AnimStackNameArray;
 
-	List<FbxNode*>		m_JointNodes;
+	List<FbxNode*>			m_JointNodes;
 
 protected:
 	void	LoadComponents(const fbxsdk::FbxScene * pScene, FbxAnimLayer * pAnimLayer, const char * pFbxFileName, bool pSupportVBO);

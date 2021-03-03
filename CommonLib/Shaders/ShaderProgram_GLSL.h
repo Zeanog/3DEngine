@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../System/StaticString.h"
-#include "../Math/Vector.h"
-#include "../Math/Matrix.h"
 #include "Shader_GLSL.h"
 
 #include "../Rendering/ErrorHandling.h"
@@ -32,7 +30,6 @@ public:
 	Bool	LinkUniform( const StaticString& name, const Float32* mat ) const;
 	Bool	LinkUniform( const StaticString& name, const glm::mat3& mat ) const;
 	Bool	LinkUniform( const StaticString& name, const glm::mat4& mat ) const;
-	Bool	LinkUniform( const StaticString& name, const Vector<3>& vec ) const;
 	Bool	LinkUniform(const StaticString& name, const glm::vec3& vec) const;
 	Bool	LinkUniform(const StaticString& name, const glm::vec4& vec) const;
 	Bool	LinkUniform( const StaticString& name, Int32 val ) const;
@@ -46,36 +43,6 @@ public:
 
 		Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
 		glUniform1fv( loc, count, list );
-		Int32 errorCode = glGetError();
-		if( errorCode ) {
-			const Char* errorMsg = glErrorString( errorCode );
-			return false;
-		}
-		return true;
-	}
-
-	template<>
-	Bool	LinkUniform<Vector<3>>( const StaticString& name, const Float32* vecList, UInt32 vecCount ) const {
-		assert( m_Handle );
-		//assert( !(size % 3) );
-
-		Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
-		glUniform3fv( loc, vecCount, vecList );
-		Int32 errorCode = glGetError();
-		if( errorCode ) {
-			const Char* errorMsg = glErrorString( errorCode );
-			return false;
-		}
-		return true;
-	}
-
-	template<>
-	Bool	LinkUniform<Vector<2>>( const StaticString& name, const Float32* vecList, UInt32 vecCount ) const {
-		assert( m_Handle );
-		//assert( !(size % 2) );
-
-		Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
-		glUniform2fv( loc, vecCount, vecList );
 		Int32 errorCode = glGetError();
 		if( errorCode ) {
 			const Char* errorMsg = glErrorString( errorCode );

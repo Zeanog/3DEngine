@@ -8,8 +8,7 @@
 
 namespace glm {
 	template<typename T>
-	inline T	up() {
-	}
+	inline T	up();
 
 	template<>
 	inline vec3	up() {
@@ -17,17 +16,20 @@ namespace glm {
 	}
 
 	template<typename T>
-	inline T	forward() {
-	}
+	inline T	forward();
 
 	template<>
 	inline vec3	forward() {
 		return vec3(0.0f, 0.0f, 1.0f);
 	}
 
-	template<typename T>
-	inline T	right() {
+	template<>
+	inline vec4	forward() {
+		return vec4(0.0f, 0.0f, 1.0f, 0.0f);
 	}
+
+	template<typename T>
+	inline T	right();
 
 	template<>
 	inline vec3	right() {
