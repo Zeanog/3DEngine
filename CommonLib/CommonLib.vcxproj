@@ -46,6 +46,8 @@
     <ClInclude Include="System\DataStructureLibrary.h" />
     <ClInclude Include="System\DebugConsole.h" />
     <ClInclude Include="System\File.h" />
+    <ClInclude Include="System\Flash\Dispatcher.h" />
+    <ClInclude Include="System\Flash\SWF.h" />
     <ClInclude Include="System\Functors\FunctionHandler.h" />
     <ClInclude Include="System\Functors\Functor.h" />
     <ClInclude Include="System\Functors\IFunctorImpl.h" />
@@ -72,6 +74,7 @@
     <ClInclude Include="System\TypeSerializer.h" />
     <ClInclude Include="System\Win32\Error.h" />
     <ClInclude Include="System\Win32\Window.h" />
+    <ClInclude Include="TinyXML\tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Images\Image.cpp">
@@ -106,9 +109,11 @@
     <ClCompile Include="System\Color.cpp" />
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
+    <ClCompile Include="System\Flash\SWF.cpp" />
     <ClCompile Include="System\json.c" />
     <ClCompile Include="System\StaticString.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />
+    <ClCompile Include="TinyXML\tinyxml2.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}</ProjectGuid>

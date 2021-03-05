@@ -3,8 +3,9 @@
 #include "System/Typedefs.h"
 #include "System/Functors/TypeList.h"
 #include "System/Singleton.h"
-#include <tinyxml.h>
+#include "TinyXML/tinyxml2.h"
 
+using namespace tinyxml2;
 class FlashEngine;
 
 template<typename _TReturn, typename _TList>
@@ -43,7 +44,7 @@ public:
 		m_Handler.Set(obj, func);
 	}
 
-	void	Dispatch(FlashEngine* engine, TiXmlHandle* element) {
+	void	Dispatch(FlashEngine* engine, XMLHandle* element) {
 		Helper<_TReturn>::Dispatch(engine, m_Handler);
 	}
 };
@@ -73,18 +74,20 @@ protected:
 public:
 	template< typename TFunction >
 	void	Register( TFunction func ) {
-		m_Handler.Set( func );
+		m_Handler.Clear();
+		m_Handler.AddListener(func);
 	}
 
 	template< class TObject, typename TMemberFunction >
 	void Register(TObject* obj, TMemberFunction func) {
-		m_Handler.Set(obj, func);
+		m_Handler.Clear();
+		m_Handler.AddListener(obj, func);
 	}
 
-	void	Dispatch(FlashEngine* engine, TiXmlHandle* element) {
-		TiXmlHandle hArguments = element->FirstChildElement("arguments");
+	void	Dispatch(FlashEngine* engine, XMLHandle* element) {
+		XMLHandle hArguments = element->FirstChildElement("arguments");
 
-		const Char* param1 = hArguments.FirstChild().FirstChild().Node()->Value();
+		const Char* param1 = hArguments.FirstChild().FirstChild().ToNode()->Value();
 		Helper<_TReturn>::Dispatch(engine, m_Handler, param1);
 	}
 };
@@ -122,8 +125,8 @@ public:
 		m_Handler.Set(obj, func);
 	}
 
-	void	Dispatch(FlashEngine* engine, TiXmlHandle* element) {
-		TiXmlHandle hArguments = element->FirstChildElement("arguments");
+	void	Dispatch(FlashEngine* engine, XMLHandle* element) {
+		XMLHandle hArguments = element->FirstChildElement("arguments");
 
 		const Char* param1 = hArguments.FirstChild().FirstChild().Node()->Value();
 		const Char* param2 = hArguments.FirstChild().ToNode()->NextSibling().FirstChild().Node()->Value();
