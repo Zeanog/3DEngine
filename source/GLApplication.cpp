@@ -233,13 +233,15 @@ void GLApplication::update()
 	(*iter)->Direction(dir);*/
 
 	SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
-	/*glm::vec3 currAngles;
-	currAngles.x = 90.0f;
-	currAngles.y = 0.0f;
-	currAngles.z = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
-	glm::vec3 dir = glm::forward<glm::vec4>() * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));*/
-	//(*iter)->Direction(dir);
-	(*iter)->Position(glm::vec3(0.0f, 10.0f, 0.0f) + 3.0f * glm::vec3(std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)), 0.0f, 0.0f));
+	glm::vec3 currAngles;
+	currAngles.x = MathUtils::Deg2Radians(90.0f);
+	currAngles.y = MathUtils::Deg2Radians(30.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)));
+	currAngles.z = MathUtils::Deg2Radians(0.0f);
+	glm::mat4 t = glm::eulerAngleXYZ(currAngles.x, currAngles.y, currAngles.z);
+	t[3] = glm::vec4((*iter)->Position(), 1.0f);
+	(*iter)->Transform(t);
+
+	//(*iter)->Position(glm::vec3(0.0f, 10.0f, 0.0f) + 3.0f * glm::vec3(std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)), 0.0f, 0.0f));
 
 	if (m_Models.size() >= 1) {
 		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
@@ -293,7 +295,7 @@ void GLApplication::render()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(45.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 0.1f, 100.0f);
+	gluPerspective(60.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 0.1f, 100.0f);
 #endif
 
 	glMatrixMode(GL_MODELVIEW);
@@ -432,7 +434,7 @@ void GLApplication::loadAssets()
 #endif
 	//m_Lights.push_back(light);
 
-	Light_Spot* spotLight = new Light_Spot(glm::vec3(-5.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(0.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), 1.0f);
+	Light_Spot* spotLight = new Light_Spot(glm::vec3(0.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(45.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), 1.0f);
 	spotLight->ConstantAttenuation(1.0f);
 	spotLight->LinearAttenuation(0.22f);
 	spotLight->QuadraticAttenuation(0.2f);

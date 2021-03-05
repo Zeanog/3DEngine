@@ -173,14 +173,12 @@ const RenderTarget* Light_Point::LinkShadowMapTo(const ShaderProgram_GLSL& progr
 }
 
 void Light_Spot::PreShadowRender() {
-	//Directional Light Shadow Camera
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
 
-	//Needs to be the size of all geometry affect by light
 	//glOrtho(-10.0, 10.0, -10.0, 10.0, 0.2, 100.0);
-	gluPerspective(m_FOV, m_AspectRatio, 0.1f, 100.0f);
+	gluPerspective(MathUtils::Radians2Deg(m_FOV), m_AspectRatio, 1, 100.0);
 
 	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_ProjectionMatrix));
 
@@ -210,7 +208,8 @@ void Light_Spot::RenderShadows(const Functor<void>& perLightShadowRenderHandler)
 
 		(*iter)->PreShadowRender();
 
-		glm::mat4 mat = glm::lookAt((*iter)->Position(), (*iter)->Position() + (*iter)->Direction() * 10.0f, -glm::forward<glm::vec3>());
+		glm::mat4 mat = glm::lookAt((*iter)->Position(), (*iter)->Position() + (*iter)->Direction() * 30.0f, glm::forward<glm::vec3>());  //MathUtils::CreateAxisAlong((*iter)->Direction(), glm::right<glm::vec3>());
+		//mat[3] = glm::vec4(-(*iter)->Position(), 1.0f);
 		glMultMatrixf(glm::value_ptr(mat));
 
 		(*iter)->SetShadowMapAsTarget();
@@ -240,13 +239,11 @@ const RenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const 
 	verify(program.LinkUniform(StaticString("fExponent"), m_Exponent));
 	verify(program.LinkUniform(StaticString("fLightCosCutoff"), m_CosCutoff));
 
-	glm::vec3 camWorldPos = camera.Position();
-	camWorldPos.z *= -1.0f;
-	glm::vec3 offset(Position() - camWorldPos);
+	glm::vec3 offset(Position() + camera.Position());
 	offset = offset * glm::inverse(camera.Rotation());
 	verify(program.LinkUniform(StaticString("vLightPos"), offset));
 	verify(program.LinkUniform(StaticString("vLightDirection"), Direction() * glm::inverse(camera.Rotation())));
-	verify(program.LinkUniform(StaticString("vEyePos"), camera.Position()));
+	verify(program.LinkUniform(StaticString("vEyePos"), -camera.Position()));
 	
 	if (!CastsShadows()) {
 		return NULL;

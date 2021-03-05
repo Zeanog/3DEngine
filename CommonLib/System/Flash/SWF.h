@@ -6,7 +6,6 @@
 #include "System/StaticString.h"
 #include "System/StackString.h"
 #include "System/Map.h"
-#include <tinyxml.h>
 
 #include "System/Flash/Dispatcher.h"
 
@@ -14,6 +13,8 @@
 #include <atlwin.h>
 #include <comdef.h>
 #include <stdio.h>
+
+using namespace tinyxml2;
 
 #define HANDLERNAME( fc ) _##fc##Handler
 
@@ -362,28 +363,33 @@ public:
 		return TypeConvert<TReturn>::Parse(ret);
 	}
 
-	typedef Map<StaticString, const IFunctorImpl<void, TYPELIST_2(FlashEngine*, TiXmlHandle*)>*>	THandlerContainer;
+	typedef Map<StaticString, const IFunctorImpl<void, TYPELIST_2(FlashEngine*, XMLHandle*)>*>	THandlerContainer;
 	THandlerContainer		m_HandlerMap;
 
 	void	AddHandler(const Char* handlerName, THandlerContainer::TValue handler) {
 		m_HandlerMap.Add(StaticString(handlerName), handler);
 	}
 
-	HRESULT	InvokeCall(TiXmlHandle* hInvoke) {
-		std::string functionName;
-		int result = hInvoke->Element()->QueryStringAttribute("name", &functionName);
-		if (result != 0)
-		{
-			return S_FALSE;
-		}
+	HRESULT	InvokeCall(XMLHandle* hInvoke) {
+		try {
+			const char* functionName = STACK_ALLOC(char, 512);
+			int result = hInvoke->ToElement()->QueryStringAttribute("name", &functionName);
+			if (result != 0)
+			{
+				return S_FALSE;
+			}
 
-		THandlerContainer::TValue handler = m_HandlerMap[functionName.c_str()];
-		if (!handler) {
-			return S_FALSE;
-		}
+			THandlerContainer::TValue handler = m_HandlerMap[functionName];
+			if (!handler) {
+				return S_FALSE;
+			}
 
-		(*handler)(this, hInvoke);
-		return S_OK;
+			(*handler)(this, hInvoke);
+			return S_OK;
+		}
+		catch (...) {
+			assert(0);
+		}
 	}
 
 	HRESULT STDMETHODCALLTYPE Invoke(
@@ -494,12 +500,12 @@ public:
 			return hr;
 		}
 
-		TiXmlDocument doc;
+		tinyxml2::XMLDocument doc;
 		const char *c_str = request;
 		doc.Parse(c_str);
 
-		TiXmlHandle hDoc(&doc);
-		TiXmlHandle hInvoke = hDoc.FirstChildElement("invoke");
+		XMLHandle hDoc(&doc);
+		XMLHandle hInvoke = hDoc.FirstChildElement("invoke");
 		hr = InvokeCall(&hInvoke);
 		return hr;
 	}

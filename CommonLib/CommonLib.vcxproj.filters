@@ -34,6 +34,12 @@
     <Filter Include="Images\LodePng">
       <UniqueIdentifier>{8d9b4baf-44d5-423d-928c-867729472d6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TinyXML">
+      <UniqueIdentifier>{b97e33e9-6649-493b-a258-0df9c5f70cf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\Flash">
+      <UniqueIdentifier>{f15da20f-6887-4e06-a6f8-f935fbb4be41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\AssetManager.h">
@@ -219,6 +225,15 @@
     <ClInclude Include="Math\Bounds.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="TinyXML\tinyxml2.h">
+      <Filter>TinyXML</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Flash\Dispatcher.h">
+      <Filter>System\Flash</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Flash\SWF.h">
+      <Filter>System\Flash</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
@@ -319,6 +334,12 @@
     </ClCompile>
     <ClCompile Include="Math\Bounds.cpp">
       <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyXML\tinyxml2.cpp">
+      <Filter>TinyXML</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Flash\SWF.cpp">
+      <Filter>System\Flash</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -198,9 +198,9 @@ public:
 		return m_Transform[2];
 	}
 
-	void	Direction(const glm::vec3& dir) {
+	/*void	Direction(const glm::vec3& dir) {
 		m_Transform[2] = glm::vec4(dir, 1.0f);
-	}
+	}*/
 
 	virtual const RenderTarget*			LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 	virtual 	const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
