@@ -106,7 +106,7 @@ public:
 		notifyListeners |= m_DeviceState.DeltaZ != 0;
 
 		for (int ix = 0; ix < STATIC_ARRAY_LENGTH(m_DeviceState.Btns); ++ix) {
-			m_DeviceState.Btns[ix].Set(state.rgbButtons[ix] & 0x80, state.rgbButtons[ix] ^ m_DeviceState.Btns[ix].IsSet());
+			m_DeviceState.Btns[ix].Set(state.rgbButtons[ix] & 0x80, state.rgbButtons[ix] ^ (Byte)m_DeviceState.Btns[ix].IsSet());
 			notifyListeners |= m_DeviceState.Btns[ix].Changed();
 		}
 

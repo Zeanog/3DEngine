@@ -69,7 +69,6 @@ void FrameBufferObject::SetAsTarget() {
 *	Stop rendering to this texture.
 */
 void FrameBufferObject::UnsetAsTarget(){
-	// Stop acquiring and unbind the FBO
 	Unbind();
 	glPopAttrib();
 }

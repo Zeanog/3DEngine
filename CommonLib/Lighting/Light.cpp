@@ -82,7 +82,7 @@ Light_Directional::~Light_Directional() {
 	Singleton<DirectionalLightPool>::GetInstance()->Remove( this );
 }
 
-glm::mat4 Light_Directional::ToMat4x4() const {
+glm::mat4 Light_Directional::Transform() const {
 	return MathUtils::CreateAxisAlong(m_Direction, glm::up<glm::vec3>());
 }
 
@@ -160,6 +160,10 @@ Light_Point::~Light_Point() {
 
 const RenderTarget* Light_Point::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
 	verify(program.LinkUniform(StaticString("vLightPos"), m_Origin * glm::inverse(camera.Rotation())));
+	verify(program.LinkUniform(StaticString("fConstantAttenuation"), m_ConstantAttenuation));
+	verify(program.LinkUniform(StaticString("fLinearAttenuation"), m_LinearAttenuation));
+	verify(program.LinkUniform(StaticString("fQuadraticAttenuation"), m_QuadraticAttenuation));
+
 	if (!CastsShadows()) {
 		return NULL;
 	}
@@ -173,12 +177,19 @@ const RenderTarget* Light_Point::LinkShadowMapTo(const ShaderProgram_GLSL& progr
 }
 
 void Light_Spot::PreShadowRender() {
+	float height = 768.0f;
+
+	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0, 0, (int)(m_AspectRatio * height), (int)height);
+
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
 
-	//glOrtho(-10.0, 10.0, -10.0, 10.0, 0.2, 100.0);
-	gluPerspective(MathUtils::Radians2Deg(m_FOV), m_AspectRatio, 1, 100.0);
+	//glOrtho(-10.0, 10.0, -10.0, 10.0, 1.0f, 25.0);
+	//gluPerspective(MathUtils::Radians2Deg(m_FOV), m_AspectRatio, 1, 25.0);
+	gluPerspective(60.0f, m_AspectRatio, 1, 25.0);
+	//glFrustum(-10, 10, -10, 10, 0.1f, 25.0f);
 
 	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_ProjectionMatrix));
 
@@ -193,24 +204,24 @@ void Light_Spot::PostShadowRender() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+
+	glPopAttrib();
 }
 
 Light_Spot::Light_Spot() {
 	Singleton<SpotLightPool>::GetInstance()->Add( this );
 }
 
-void Light_Spot::RenderShadows(const Functor<void>& perLightShadowRenderHandler) {
-	//glm::mat4 projectionMatrix;
-	FOREACH (iter, *Singleton<SpotLightPool>::GetInstance()) {
+void Light_Spot::RenderShadows(const Functor<void>& perLightShadowRenderHandler, const ICamera& camera) {
+	FOREACH(iter, *Singleton<SpotLightPool>::GetInstance()) {
 		if (!(*iter)->CastsShadows()) {
 			continue;
 		}
 
 		(*iter)->PreShadowRender();
 
-		glm::mat4 mat = glm::lookAt((*iter)->Position(), (*iter)->Position() + (*iter)->Direction() * 30.0f, glm::forward<glm::vec3>());  //MathUtils::CreateAxisAlong((*iter)->Direction(), glm::right<glm::vec3>());
-		//mat[3] = glm::vec4(-(*iter)->Position(), 1.0f);
-		glMultMatrixf(glm::value_ptr(mat));
+		glm::mat4 m = (*iter)->AsCameraTransform();
+		glMultMatrixf(glm::value_ptr(m));
 
 		(*iter)->SetShadowMapAsTarget();
 		perLightShadowRenderHandler();
@@ -253,16 +264,16 @@ const RenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const 
 }
 
 const RenderTarget* Light_Spot::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	glm::mat4 mvp = biasMatrix * m_ProjectionMatrix * ToMat4x4();
+	glm::mat4 depthViewMatrix = glm::inverse(camera.ToMat4x4()) * AsCameraTransform();
 
-	mvp = mvp * glm::inverse(camera.ToMat4x4());
+	glm::mat4 mvp = biasMatrix * m_ProjectionMatrix * depthViewMatrix;
 
 	verify(program.LinkUniform("mDepthMVP", mvp));
 	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
 }
 
-glm::mat4 Light_Spot::ToMat4x4() const {
-	return m_Transform;
+glm::mat4 Light_Spot::AsCameraTransform() const {
+	return MathUtils::CreateAxisAlong(Position(), Position() + Direction() * 30.0f, glm::up<glm::vec3>());
 }
 
 void Light_Spot::DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform)
@@ -278,7 +289,7 @@ void Light_Spot::DebugRender(const ShaderProgram_GLSL& program, const glm::mat4&
 
 	GLUquadricObj* qObj = gluNewQuadric();
 	gluQuadricTexture(qObj, true);
-	float height = 5.0f;
+	float height = 2.0f;
 	float width = std::tanf(FOV() * 0.5f) * height * 2.0f;
 	gluCylinder(qObj, 0, width, height, 64, 10);
 	gluDeleteQuadric(qObj);

@@ -5,6 +5,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 Float32 MathUtils::PI = 3.145926f;
+Float32 MathUtils::Epsilon = 0.001f;
 
 glm::mat4x4 MathUtils::CreateAxisAlong_Local( const glm::vec3& worldForward, const glm::vec3& localPos, const glm::vec3& up ) {
 	glm::mat4x4 mat( CreateAxisAlong(worldForward, up) );
@@ -33,6 +34,16 @@ glm::mat4x4 MathUtils::CreateAxisAlong( const glm::vec3& forward, const glm::vec
 
 	return glm::mat3x3( xDir, yDir, zDir );
 	//return glm::lookAt(glm::zero<glm::vec3>(), forward * 10.0f, up);
+}
+
+glm::mat4x4 MathUtils::CreateAxisAlong(const glm::vec3& eye, const glm::vec3& focalPt, const glm::vec3& up) {
+	glm::vec3 dir = glm::normalize(focalPt - eye);
+	glm::vec3 dirXup = glm::cross(dir, up);
+	if (glm::length(dirXup) > MathUtils::Epsilon) {
+		return glm::lookAt(eye, focalPt, up);
+	}
+
+	return glm::lookAt(eye, focalPt, -glm::forward<glm::vec3>());
 }
 
 Float32	MathUtils::Sqrt( Float32 val ) {
