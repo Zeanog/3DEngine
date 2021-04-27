@@ -5,3 +5,9 @@ Debug
 obj
 *.exe
 *.ilk
+
+!/CommonLib/FbxSdk/lib/vs2015/x86/debug
+!/CommonLib/FbxSdk/lib/vs2015/x86/release
+!/CommonLib/FbxSdk/lib/vs2015/x64/debug
+!/CommonLib/FbxSdk/lib/vs2015/x64/release
+!/CommonLib/glew-2.1.0/lib/Release

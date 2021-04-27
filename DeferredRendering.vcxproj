@@ -63,7 +63,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libfbxsdk.lib;libfbxsdk-md.lib;glu32.lib;opengl32.lib;glew32.lib;CommonLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)\CommonLib\FbxSdk\lib\vs2015\x86\debug;$(ProjectDir)\CommonLib\glew-2.1.0\lib\Debug\Win32;$(ProjectDir)\CommonLib\glew-2.1.0\lib\Release\Win32;$(ProjectDir)\CommonLib\freeglut\lib;C:\Users\zeano\Dropbox\tinyxml\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\CommonLib\FbxSdk\lib\vs2015\x86\release;$(ProjectDir)\CommonLib\glew-2.1.0\lib\release\Win32;$(ProjectDir)\CommonLib\glew-2.1.0\lib\Release\Win32;$(ProjectDir)\CommonLib\freeglut\lib;C:\Users\zeano\Dropbox\tinyxml\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
