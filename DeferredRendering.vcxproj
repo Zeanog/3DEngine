@@ -55,7 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>VL_FLOAT;WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\rapidjson\include;$(ProjectDir)\CommonLib\FbxSdk\include;$(ProjectDir)\..\glm-master;$(ProjectDir)\..\tinyxml;$(ProjectDir)\CommonLib\glew-2.1.0\include;$(ProjectDir)\CommonLib;$(ProjectDir)\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\rapidjson\include;$(ProjectDir)\CommonLib\FbxSdk\include;$(ProjectDir)\CommonLib\Math;$(ProjectDir)\..\tinyxml;$(ProjectDir)\CommonLib\glew-2.1.0\include;$(ProjectDir)\CommonLib;$(ProjectDir)\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>

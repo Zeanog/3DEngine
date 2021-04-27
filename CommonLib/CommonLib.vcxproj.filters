@@ -338,8 +338,5 @@
     <ClCompile Include="TinyXML\tinyxml2.cpp">
       <Filter>TinyXML</Filter>
     </ClCompile>
-    <ClCompile Include="System\Flash\SWF.cpp">
-      <Filter>System\Flash</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
