@@ -40,12 +40,14 @@ namespace glm {
 class MathUtils {
 public:
 	static Float32		PI;
+	static Float32		Epsilon;
 
 public:
 	static glm::mat4x4	CreateAxisAlong_Local( const glm::vec3& forward, const glm::vec3& localPos, const glm::vec3& up );
 	static glm::mat4x4	CreateAxisAlong_World(const glm::vec3& forward, const glm::vec3& wordlPos, const glm::vec3& up);
+	static glm::mat4x4	CreateAxisAlong( const glm::vec3& eye, const glm::vec3& focalPt, const glm::vec3& up );
 	static glm::mat4x4	CreateAxisAlong( const glm::vec3& forward, const glm::vec3& up );
-
+	
 	static Float32	Sqrt( Float32 val );
 
 	static Float32	MilliSec2Sec(Int32 millsec) {

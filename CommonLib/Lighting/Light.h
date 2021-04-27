@@ -92,7 +92,7 @@ public:
 
 	DECLARE_GETSET(Direction)
 
-	glm::mat4		ToMat4x4() const;
+	glm::mat4				Transform() const;
 
 	virtual const RenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 	virtual const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
@@ -107,6 +107,9 @@ public:
 
 protected:
 	glm::vec3	m_Origin;
+	float		m_ConstantAttenuation;
+	float		m_LinearAttenuation;
+	float		m_QuadraticAttenuation;
 
 protected:
 	virtual void		InitShadowMap() override {
@@ -129,6 +132,9 @@ public:
 	Light_Point( Float32 x, Float32 y, Float32 z );
 
 	DECLARE_GETSET(Origin)
+	DECLARE_GETSET(ConstantAttenuation)
+	DECLARE_GETSET(LinearAttenuation)
+	DECLARE_GETSET(QuadraticAttenuation)
 
 	virtual const RenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 	virtual 	const RenderTarget*				LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
@@ -138,7 +144,7 @@ class Light_Spot : public ALight {
 	INHERITEDCLASS_TYPEDEFS( Light_Spot, ALight);
 
 public:
-	static void RenderShadows(const Functor<void>& perLightRenderHandler);
+	static void RenderShadows(const Functor<void>& perLightRenderHandler, const ICamera& camera);
 
 protected:
 	glm::mat4	m_ProjectionMatrix;
@@ -206,5 +212,6 @@ public:
 	virtual 	const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 	void								DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform);
 
-	glm::mat4		ToMat4x4() const;
+	//AOB: Then remove ToMat4x4 and just use Transform getter
+	virtual glm::mat4		AsCameraTransform() const;
 };

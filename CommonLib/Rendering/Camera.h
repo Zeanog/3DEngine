@@ -141,26 +141,9 @@ public:
 	virtual void		RotateAround(const TRotation& delta, const TPosition& pt) override;
 	virtual void		RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) override;
 
-	virtual glm::vec3					Forward() const override {
-		const float x2 = 2.0f * m_Rotation.x;
-		const float y2 = 2.0f * m_Rotation.y;
-		const float z2 = 2.0f * m_Rotation.z;
-		const float x2w = x2 * m_Rotation.w;
-		const float y2w = y2 * m_Rotation.w;
-		const float x2x = x2 * m_Rotation.x;
-		const float z2x = z2 * m_Rotation.x;
-		const float y2y = y2 * m_Rotation.y;
-		const float z2y = z2 * m_Rotation.y;
-		return glm::normalize(glm::vec3(z2x + y2w, z2y - x2w, 1.0f - (x2x + y2y)));
-	}
+	virtual glm::vec3					Forward() const override;
 
-	virtual glm::mat4x4		ToMat4x4() const override {
-		glm::mat4x4 localTransform = glm::mat4x4(m_Rotation);
-		
-		localTransform = glm::translate(localTransform, m_Position);
-
-		return localTransform;
-	}
+	virtual glm::mat4x4		ToMat4x4() const override;
 };
 
 class CameraInterpolator : public ACameraDecorator {

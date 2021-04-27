@@ -176,7 +176,7 @@ void GLApplication::setSize(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(45.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 0.1f, 100.0f);
+	gluPerspective(60.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 0.1f, 100.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -224,22 +224,22 @@ void GLApplication::update()
 	}*/
 
 	//Just for debugging
-	/*DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+	DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = -90.0f;
 	currAngles.y = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
 	currAngles.z = 0.0f;
 	glm::vec3 dir = glm::forward<glm::vec4>() * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));
-	(*iter)->Direction(dir);*/
+	(*iter)->Direction(dir);
 
-	SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+	/*SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = MathUtils::Deg2Radians(90.0f);
 	currAngles.y = MathUtils::Deg2Radians(30.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)));
 	currAngles.z = MathUtils::Deg2Radians(0.0f);
 	glm::mat4 t = glm::eulerAngleXYZ(currAngles.x, currAngles.y, currAngles.z);
 	t[3] = glm::vec4((*iter)->Position(), 1.0f);
-	(*iter)->Transform(t);
+	(*iter)->Transform(t);*/
 
 	//(*iter)->Position(glm::vec3(0.0f, 10.0f, 0.0f) + 3.0f * glm::vec3(std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)), 0.0f, 0.0f));
 
@@ -284,7 +284,7 @@ void GLApplication::render()
 	glDisable(GL_BLEND);
 
 	Light_Directional::RenderShadows(m_Bounds, OnRenderShadows);
-	Light_Spot::RenderShadows(OnRenderShadows);
+	Light_Spot::RenderShadows(OnRenderShadows, m_Camera);
 	
 	glCullFace(GL_BACK);
 	//glDisable(GL_CULL_FACE);
@@ -295,7 +295,7 @@ void GLApplication::render()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(60.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 0.1f, 100.0f);
+	gluPerspective(60.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 1.0f, 25.0f);
 #endif
 
 	glMatrixMode(GL_MODELVIEW);
@@ -308,13 +308,12 @@ void GLApplication::render()
 
 #if _DEBUG
 	FOREACH(iter, *Singleton<DirectionalLightPool>::GetInstance()) {
-		glm::mat4 mat = (*iter)->ToMat4x4();
+		glm::mat4 mat = (*iter)->Transform();
 		mat[3] = glm::vec4(m_Bounds.GetCenter() - (*iter)->Direction() * 10.0f, 1.0f);
 		(*iter)->DebugRender(m_RenderModel_UnlitProgram, mat);
 	}
 	FOREACH(iter, *Singleton<SpotLightPool>::GetInstance()) {
-		glm::mat4 mat = (*iter)->ToMat4x4();
-		(*iter)->DebugRender(m_RenderModel_UnlitProgram, mat);
+		(*iter)->DebugRender(m_RenderModel_UnlitProgram, (*iter)->Transform());
 	}
 #endif
 
@@ -421,12 +420,12 @@ void GLApplication::loadAssets()
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
 
 	ALight* light = NULL;
-	//glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
-	//light = new Light_Directional(dir);
+	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
+	light = new Light_Directional(dir);
 #if CAST_SHADOWS
-	//light->CastsShadows(true);
+	light->CastsShadows(true);
 #endif
-	//m_Lights.push_back(light);
+	m_Lights.push_back(light);
 
 	//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
 #if CAST_SHADOWS
@@ -434,15 +433,15 @@ void GLApplication::loadAssets()
 #endif
 	//m_Lights.push_back(light);
 
-	Light_Spot* spotLight = new Light_Spot(glm::vec3(0.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(45.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), 1.0f);
+	/*Light_Spot* spotLight = new Light_Spot(glm::vec3(0.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(45.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
 	spotLight->ConstantAttenuation(1.0f);
-	spotLight->LinearAttenuation(0.22f);
-	spotLight->QuadraticAttenuation(0.2f);
+	spotLight->LinearAttenuation(0.05f);
+	spotLight->QuadraticAttenuation(0.01f);
 	spotLight->Exponent(1);
 #if CAST_SHADOWS
 		spotLight->CastsShadows(true);
 #endif
-	m_Lights.push_back(spotLight);
+	m_Lights.push_back(spotLight);*/
 
 	Model* model = NULL;
 	//model = new Model("Data/Cube.mesh");
