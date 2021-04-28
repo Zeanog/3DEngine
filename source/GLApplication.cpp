@@ -348,8 +348,8 @@ void GLApplication::render()
 		m_deferredRendering->showTexture("tPositions", 512, 384, 512, 0);
 		m_deferredRendering->showTexture("tNormals", 512, 384, 0, 384);
 	
-		//DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
-		SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+		DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+		//SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 		(*iter)->DebugRenderMap(512, 384, 512, 384);
 	}
 
