@@ -394,6 +394,7 @@ void GLApplication::loadAssets()
 	
 	verify(m_RenderModel_UnlitProgram.Create("data/deferredShading.vert", "data/deferredShading_Unlit.frag", NULL));
 	verify(m_RenderModelProgram.Create("data/deferredShading.vert", "data/deferredShading.frag", NULL));
+	verify(m_ShadowMapGenerationProgram.Create("data/shadowMap.vert", "data/shadowMap.frag", NULL));
 
 	IModel* m = NULL;
 
