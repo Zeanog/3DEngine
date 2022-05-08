@@ -224,22 +224,22 @@ void GLApplication::update()
 	}*/
 
 	//Just for debugging
-	DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+	/*DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = -90.0f;
 	currAngles.y = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
 	currAngles.z = 0.0f;
 	glm::vec3 dir = glm::forward<glm::vec4>() * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));
-	(*iter)->Direction(dir);
+	(*iter)->Direction(dir);*/
 
-	/*SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+	SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = MathUtils::Deg2Radians(90.0f);
 	currAngles.y = MathUtils::Deg2Radians(30.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)));
 	currAngles.z = MathUtils::Deg2Radians(0.0f);
 	glm::mat4 t = glm::eulerAngleXYZ(currAngles.x, currAngles.y, currAngles.z);
 	t[3] = glm::vec4((*iter)->Position(), 1.0f);
-	(*iter)->Transform(t);*/
+	(*iter)->Transform(t);
 
 	//(*iter)->Position(glm::vec3(0.0f, 10.0f, 0.0f) + 3.0f * glm::vec3(std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)), 0.0f, 0.0f));
 
@@ -348,8 +348,8 @@ void GLApplication::render()
 		m_deferredRendering->showTexture("tPositions", 512, 384, 512, 0);
 		m_deferredRendering->showTexture("tNormals", 512, 384, 0, 384);
 	
-		DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
-		//SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+		//DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+		SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 		(*iter)->DebugRenderMap(512, 384, 512, 384);
 	}
 
@@ -418,14 +418,14 @@ void GLApplication::loadAssets()
 	m->loadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(7, 2.5, 0);
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
-
-	ALight* light = NULL;
-	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
-	light = new Light_Directional(dir);
-#if CAST_SHADOWS
-	light->CastsShadows(true);
-#endif
-	m_Lights.push_back(light);
+//
+//	ALight* light = NULL;
+//	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
+//	light = new Light_Directional(dir);
+//#if CAST_SHADOWS
+//	light->CastsShadows(true);
+//#endif
+//	m_Lights.push_back(light);
 
 	//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
 #if CAST_SHADOWS
@@ -433,15 +433,15 @@ void GLApplication::loadAssets()
 #endif
 	//m_Lights.push_back(light);
 
-	/*Light_Spot* spotLight = new Light_Spot(glm::vec3(0.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(45.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
-	spotLight->ConstantAttenuation(1.0f);
-	spotLight->LinearAttenuation(0.05f);
+	Light_Spot* spotLight = new Light_Spot(glm::vec3(2.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(45.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
+	spotLight->ConstantAttenuation(2.0f);
+	spotLight->LinearAttenuation(0.01f);
 	spotLight->QuadraticAttenuation(0.01f);
-	spotLight->Exponent(1);
+	spotLight->Exponent(2);
 #if CAST_SHADOWS
 		spotLight->CastsShadows(true);
 #endif
-	m_Lights.push_back(spotLight);*/
+	m_Lights.push_back(spotLight);
 
 	Model* model = NULL;
 	//model = new Model("Data/Cube.mesh");

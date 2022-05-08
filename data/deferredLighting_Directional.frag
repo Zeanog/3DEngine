@@ -11,15 +11,16 @@ uniform mat4 mDepthMVP;
 float readShadowMap(vec3 viewspace_pos)
 {
 	vec4 lightspace_pos = mDepthMVP * vec4(viewspace_pos, 1.0);
+	vec2 texCoords = lightspace_pos.xy;
 
 	const float bias = 0.0001;
-	vec4 shadowPixel = texture(tShadowMap, lightspace_pos.xy);
+	vec4 shadowPixel = texture(tShadowMap, texCoords);
 	float shadowDepth = shadowPixel.z - bias;
 	if( lightspace_pos.z < shadowDepth ) {
 		return 1.0;
 	}
 
-	return 0.0f;
+	return 0.0;
 }
 
 void main( void )

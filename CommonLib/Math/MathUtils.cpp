@@ -43,7 +43,7 @@ glm::mat4x4 MathUtils::CreateAxisAlong(const glm::vec3& eye, const glm::vec3& fo
 		return glm::lookAt(eye, focalPt, up);
 	}
 
-	return glm::lookAt(eye, focalPt, -glm::forward<glm::vec3>());
+	return glm::lookAt(eye, focalPt, up);
 }
 
 Float32	MathUtils::Sqrt( Float32 val ) {

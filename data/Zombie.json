@@ -1,0 +1,12 @@
+{
+	"mesh": "data/Zombie.fbx",
+	"invertNormals": true,
+	"shaderProgram": {
+		"vert": "data/deferredShading.vert",
+		"frag": "data/deferredShading.frag"
+	},
+	"shadowProgram": {
+		"vert": "data/shadowMap.vert",
+		"frag": "data/shadowMap.frag"
+	}
+}
