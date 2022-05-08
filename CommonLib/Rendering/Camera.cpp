@@ -55,10 +55,5 @@ glm::mat4x4 Camera::ToMat4x4() const {
 	glm::mat4x4 t = glm::mat4x4(m_Rotation);
 	t = glm::translate(t, m_Position);
 
-	/*glm::vec3 pos = -(m_Position * Rotation());
-	glm::vec3 focal = pos - Forward() * 10.0f;
-	glm::vec3 up = glm::up<glm::vec3>();
-	glm::mat4x4 t = MathUtils::CreateAxisAlong(pos, focal, up);*/
-
 	return t;
 }

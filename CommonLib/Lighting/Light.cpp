@@ -264,16 +264,18 @@ const RenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const 
 }
 
 const RenderTarget* Light_Spot::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	glm::mat4 depthViewMatrix = glm::inverse(camera.ToMat4x4()) * AsCameraTransform();
+	glm::mat4 depthViewMatrix =  m_Transform * glm::mat4(glm::inverse(camera.ToMat4x4()));
+	//glm::mat4 depthViewMatrix = glm::lookAt(Position(), Direction() * 30.0f, glm::up<glm::vec3>());
 
 	glm::mat4 mvp = biasMatrix * m_ProjectionMatrix * depthViewMatrix;
+	//mvp = mvp * glm::inverse(camera.ToMat4x4());
 
 	verify(program.LinkUniform("mDepthMVP", mvp));
 	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
 }
 
 glm::mat4 Light_Spot::AsCameraTransform() const {
-	return MathUtils::CreateAxisAlong(Position(), Position() + Direction() * 30.0f, glm::up<glm::vec3>());
+	return m_Transform;
 }
 
 void Light_Spot::DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform)

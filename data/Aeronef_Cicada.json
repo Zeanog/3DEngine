@@ -1,0 +1,8 @@
+{
+	"mesh": "data/Cicada.fbx",
+	"invertNormals": false,
+	"shaderProgram": {
+		"vert": "data/deferredShading.vert",
+		"frag": "data/deferredShading.frag"
+	}
+}
