@@ -89,10 +89,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			}
 		}
 
-		if (running) {
-			application.update();
-			application.render();
+		if (!running) {
+			continue;
 		}
+
+		application.update();
+		application.render();
 	}
 
 	application.release();
