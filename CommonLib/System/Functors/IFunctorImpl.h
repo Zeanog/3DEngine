@@ -1,8 +1,9 @@
 #pragma once
 
 #include "System/Typedefs.h"
+#include "System\Functors\ParamType.h"
 #include "TypeList.h"
-#include "System/Functors/ParamType.h"
+#include "System/Typedefs.h"
 
 class IBaseFunctorImpl {
 public:
@@ -40,7 +41,7 @@ template< typename _TReturn, typename _TParam1 >
 class IFunctorImpl<_TReturn, TYPELIST_1(_TParam1) > : public IBaseFunctorImpl {
 public:
 	typedef _TReturn	TReturn;
-	typedef typename ParamType<_TParam1>::Type	TParam1;
+	typedef typename Param<_TParam1>::Type	TParam1;
 
 protected:
 
@@ -54,8 +55,8 @@ template< typename _TReturn, typename _TParam1, typename _TParam2 >
 class IFunctorImpl<_TReturn, TYPELIST_2(_TParam1, _TParam2) > : public IBaseFunctorImpl {
 public:
 	typedef _TReturn	TReturn;
-	typedef typename ParamType<_TParam1>::Type	TParam1;
-	typedef typename ParamType<_TParam2>::Type	TParam2;
+	typedef typename Param<_TParam1>::Type	TParam1;
+	typedef typename Param<_TParam2>::Type	TParam2;
 
 protected:
 
@@ -69,9 +70,9 @@ template< typename _TReturn, typename _TParam1, typename _TParam2, typename _TPa
 class IFunctorImpl<_TReturn, TYPELIST_3(_TParam1, _TParam2, _TParam3) > : public IBaseFunctorImpl {
 public:
 	typedef _TReturn	TReturn;
-	typedef typename ParamType<_TParam1>::Type	TParam1;
-	typedef typename ParamType<_TParam2>::Type	TParam2;
-	typedef typename ParamType<_TParam3>::Type	TParam3;
+	typedef typename Param<_TParam1>::Type	TParam1;
+	typedef typename Param<_TParam2>::Type	TParam2;
+	typedef typename Param<_TParam3>::Type	TParam3;
 
 protected:
 
@@ -85,10 +86,10 @@ template< typename _TReturn, typename _TParam1, typename _TParam2, typename _TPa
 class IFunctorImpl<_TReturn, TYPELIST_4(_TParam1, _TParam2, _TParam3, _TParam4) > : public IBaseFunctorImpl {
 public:
 	typedef _TReturn	TReturn;
-	typedef typename ParamType<_TParam1>::Type	TParam1;
-	typedef typename ParamType<_TParam2>::Type	TParam2;
-	typedef typename ParamType<_TParam3>::Type	TParam3;
-	typedef typename ParamType<_TParam4>::Type	TParam4;
+	typedef typename Param<_TParam1>::Type	TParam1;
+	typedef typename Param<_TParam2>::Type	TParam2;
+	typedef typename Param<_TParam3>::Type	TParam3;
+	typedef typename Param<_TParam4>::Type	TParam4;
 
 protected:
 
@@ -102,11 +103,11 @@ template< typename _TReturn, typename _TParam1, typename _TParam2, typename _TPa
 class IFunctorImpl<_TReturn, TYPELIST_5(_TParam1, _TParam2, _TParam3, _TParam4, _TParam5) > : public IBaseFunctorImpl {
 public:
 	typedef _TReturn	TReturn;
-	typedef typename ParamType<_TParam1>::Type	TParam1;
-	typedef typename ParamType<_TParam2>::Type	TParam2;
-	typedef typename ParamType<_TParam3>::Type	TParam3;
-	typedef typename ParamType<_TParam4>::Type	TParam4;
-	typedef typename ParamType<_TParam5>::Type	TParam5;
+	typedef typename Param<_TParam1>::Type	TParam1;
+	typedef typename Param<_TParam2>::Type	TParam2;
+	typedef typename Param<_TParam3>::Type	TParam3;
+	typedef typename Param<_TParam4>::Type	TParam4;
+	typedef typename Param<_TParam5>::Type	TParam5;
 
 protected:
 

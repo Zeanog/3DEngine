@@ -6,7 +6,7 @@
 
 template< class _TList >
 class AMultiFunctor : public IFunctorImpl<void, _TList> {
-	INHERITEDCLASS_TYPEDEFS(AMultiFunctor, TEMPLATE_2(IFunctorImpl, void, _TList));
+	INHERITEDCLASS_TYPEDEFS(AMultiFunctor, TEMPLATE_2(IFunctorImpl, void, _TList))
 
 public:
 	typedef _TList		TParamList;
@@ -44,6 +44,14 @@ public:
 		return *this;
 	}*/
 
+	void AddListener(Functor<void, TParamList> func) {
+		m_Listeners.Add(func);
+	}
+
+	void RemoveListener(Functor<void, TParamList> func) {
+		m_Listeners.Remove(func);
+	}
+
 	template< typename TFunction >
 	void AddListener(TFunction func) {
 		m_Listeners.Add(Functor<void, TParamList>(func));
@@ -80,7 +88,7 @@ class MultiFunctor;
 
 template<>
 class MultiFunctor<TNull> : public AMultiFunctor<TNull> {
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor, AMultiFunctor<TNull>);
+	INHERITEDCLASS_TYPEDEFS(MultiFunctor, AMultiFunctor<TNull>)
 
 protected:
 	typedef typename TSuper::TListenerContainer	TListenerContainer;
@@ -112,7 +120,7 @@ public:
 
 template<typename _TParam1>
 class MultiFunctor<TYPELIST_1(_TParam1)> : public AMultiFunctor<TYPELIST_1(_TParam1)> {
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TYPELIST_1(_TParam1)>, AMultiFunctor<TYPELIST_1(_TParam1)>);
+	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TYPELIST_1(_TParam1)>, AMultiFunctor<TYPELIST_1(_TParam1)>)
 
 public:
 	typedef typename TSuper::TParam1	TParam1;
@@ -146,7 +154,7 @@ public:
 template<typename _TParam1, typename _TParam2>
 class MultiFunctor<TYPELIST_2(_TParam1, _TParam2)> : public AMultiFunctor<TYPELIST_2(_TParam1, _TParam2)> {
 	typedef TYPELIST_2(_TParam1, _TParam2) TTypeList;
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>);
+	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>)
 
 public:
 	typedef typename TSuper::TParam1	TParam1;
@@ -180,7 +188,7 @@ public:
 template<typename _TParam1, typename _TParam2, typename _TParam3>
 class MultiFunctor<TYPELIST_3(_TParam1, _TParam2, _TParam3)> : public AMultiFunctor<TYPELIST_3(_TParam1, _TParam2, _TParam3)> {
 	typedef TYPELIST_3(_TParam1, _TParam2, _TParam3) TTypeList;
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>);
+	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>)
 
 public:
 	typedef typename TSuper::TParam1	TParam1;

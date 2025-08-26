@@ -11,7 +11,7 @@
 #include "System/json.h"
 
 class VertexBuffer : public IJsonSerializable {
-	CLASS_TYPEDEFS( VertexBuffer );
+	CLASS_TYPEDEFS( VertexBuffer )
 
 public:
 	typedef Vector<3>	TPosition;
@@ -25,7 +25,7 @@ public:
 	};
 
 protected:
-	UInt32						m_Handle;
+	UInt32						m_Handle = 0;
 
 	List<TPosition>				m_Positions;
 	List<TNormal>				m_Normals;

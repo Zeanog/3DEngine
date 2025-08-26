@@ -18,7 +18,7 @@ public:
 protected:
 	VertexBuffer	m_VertexBuffer;
 	IndexBuffer		m_IndexBuffer;
-	List<Neo::Mesh::AMaterialSlot*>	m_MaterialSlots;
+	List<Neo::Mesh::AMaterial*>	m_Materials;
 
 	List<JointInfo>			m_Joints;
 	List<AnimationClip*>	m_AnimationClips;
@@ -39,8 +39,8 @@ public:
 		return m_AnimationClips;
 	}
 
-	const List<Neo::Mesh::AMaterialSlot*>&	MaterialSlots() const {
-		return m_MaterialSlots;
+	const List<Neo::Mesh::AMaterial*>&	Materials() const {
+		return m_Materials;
 	}
 
 	const List<JointInfo>&	Joints() const {
@@ -73,11 +73,11 @@ protected:
 protected:
 	void	LoadComponents(const fbxsdk::FbxScene * pScene, FbxAnimLayer * pAnimLayer, const char * pFbxFileName, bool pSupportVBO);
 	Bool	LoadComponents(FbxNode * pNode, FbxAnimLayer * pAnimLayer, bool pSupportVBO);
-	void	LoadComponents(FbxNode * pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, List<Neo::Mesh::AMaterialSlot*>& slots);
+	void	LoadComponents(FbxNode * pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, List<Neo::Mesh::AMaterial*>& slots);
 	void	LoadAnimations(fbxsdk::FbxScene* pScene);
 	void	LoadSkeletonHierarchy(FbxNode * rootnode);
 	void	LoadSkeletonHierarchyre(FbxNode * node, int depth, int index, int parentindex);
-	void	LoadTextures(FbxMesh* pMesh, List<Neo::Mesh::AMaterialSlot*>& slots);
+	void	LoadTextures(FbxMesh* pMesh, List<Neo::Mesh::AMaterial*>& slots);
 
 public:
 	static void	CreateGlobals();

@@ -11,7 +11,7 @@
 
 #include <windows.h>
 
-Model::Model(const StaticString& meshPath) : m_Rotation(glm::identity<TRotation>())
+Model::Model(const StaticString& meshPath) : m_Rotation(glm::identity<TRotation>()), m_Position(glm::zero<glm::vec3>())
 {
 	m_Mesh = Singleton<MeshManager>::GetInstance()->Get(meshPath);
 
@@ -35,19 +35,8 @@ void Model::Render(const ShaderProgram_GLSL& program) const {
 
 	m_Mesh->PreRender((VertexBuffer::VertexAttributes)(VertexBuffer::VertexAttributes::PositionAttrib | VertexBuffer::VertexAttributes::NormalAttrib | VertexBuffer::VertexAttributes::TexCoordsAttrib));
 
-	const Neo::Image* img = NULL;
 	for (int ix = 0; ix < m_Mesh->NumMaterials(); ++ix) {
-
-		/*img = m_Images.Length() > 0 ? m_Images[ix] : NULL;
-		if (img) {
-			img->Bind();
-		}*/
-
 		m_Mesh->RenderMaterial(ix);
-
-		/*if (img) {
-			img->Unbind();
-		}*/
 	}
 
 	m_Mesh->PostRender();

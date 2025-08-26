@@ -49,3 +49,13 @@ glm::mat4x4 MathUtils::CreateAxisAlong(const glm::vec3& eye, const glm::vec3& fo
 Float32	MathUtils::Sqrt( Float32 val ) {
 	return sqrtf( val );
 }
+
+UInt32 MathUtils::NearestPowerOfTwo(UInt32 val) {
+	Float32 pos = ceilf((Float32)log2(val));//  (ceiling of log n with base 2)
+	return (UInt32)powf(2, pos);
+}
+
+Int32 MathUtils::NearestPowerOfTwo(Int32 val) {
+	Float32 pos = ceilf((Float32)log2(val));//  (ceiling of log n with base 2)
+	return (Int32)powf(2, pos);
+}

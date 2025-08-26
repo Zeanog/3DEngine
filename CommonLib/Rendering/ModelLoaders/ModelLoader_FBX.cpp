@@ -96,12 +96,12 @@ Bool MeshLoader_FBX::LoadComponents(FbxNode * pNode, FbxAnimLayer * pAnimLayer, 
 		{
 			VertexBuffer vb;
 			IndexBuffer ib;
-			List<Neo::Mesh::AMaterialSlot*>	slots;
+			List<Neo::Mesh::AMaterial*>	slots;
 			LoadComponents(pNode, vb, m_VertexBuffer.NumVerts(), ib, slots);
 
 			m_VertexBuffer += vb;
 			m_IndexBuffer += ib;
-			m_MaterialSlots += slots;
+			m_Materials += slots;
 		}
 		else if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
 			/*FbxSkeleton* lSkeleton = (FbxSkeleton*)lNodeAttribute;
@@ -280,8 +280,7 @@ glm::mat4 MeshLoader_FBX::GetJointLocalTransform(const StaticString& jointName, 
 	return glm::identity<glm::mat4>();
 }
 
-Bool GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPropertyName, const char * pFactorPropertyName, Neo::Mesh::AMaterialSlot*& outMaterial) {
-	Neo::Mesh::MaterialSlot_ColorChannel* matSlot = NULL;
+Bool GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPropertyName, const char * pFactorPropertyName, const char* channelName, Neo::Mesh::AMaterial* matSlot) {
 	const FbxProperty lProperty = pMaterial->FindProperty(pPropertyName);
 	const FbxProperty lFactorProperty = pMaterial->FindProperty(pFactorPropertyName);
 	if (!lProperty.IsValid())
@@ -293,7 +292,6 @@ Bool GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPro
 	dataDirPath += "\\data\\";
 
 	const int lTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
-	matSlot = new Neo::Mesh::MaterialSlot_ColorChannel();
 	for (int j = 0; j < lTextureCount; j++)
 	{
 		FbxFileTexture* texture = FbxCast<FbxFileTexture>(lProperty.GetSrcObject<FbxFileTexture>(j));
@@ -316,38 +314,28 @@ Bool GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPro
 					}
 				}
 			}
-			matSlot->Texture = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
+			matSlot->UpdateChannel(channelName, Singleton<ImageManager>::GetInstance()->Get(fileName.CStr()) );
 		}
 		else if (texture && texture->GetUserDataPtr())
 		{
-			matSlot->Texture = new Neo::Image(*(static_cast<UInt32*>(texture->GetUserDataPtr())), GL_RGBA);
+			matSlot->UpdateChannel(channelName, new Neo::Image(*(static_cast<UInt32*>(texture->GetUserDataPtr())), GL_RGBA) );
 		}
 	}
-
-	outMaterial = matSlot;
 
 	if (lFactorProperty.IsValid())
 	{
 		FbxDouble3 lResult = lProperty.Get<FbxDouble3>();
 		double lFactor = lFactorProperty.Get<FbxDouble>();
-		if (lFactor != 1)
+		//if (lFactor != 1)
 		{
-			if (!outMaterial) {
-				matSlot = new Neo::Mesh::MaterialSlot_ColorChannel();
-				outMaterial = matSlot;
-			}
-
-			matSlot->Diffuse[0] = (float)lFactor;
-			matSlot->Diffuse[1] = (float)lFactor;
-			matSlot->Diffuse[2] = (float)lFactor;
-			matSlot->Diffuse[3] = 1.0f;
+			matSlot->UpdateChannel(channelName, Color<Float32>((float)lResult[0], (float)lResult[1], (float)lResult[2], 1.0f));
 			return true;
 		}
 	}
-	return outMaterial != NULL;
+	return true;
 }
 
-void MeshLoader_FBX::LoadTextures(FbxMesh* pMesh, List<Neo::Mesh::AMaterialSlot*>& slots) {
+void MeshLoader_FBX::LoadTextures(FbxMesh* pMesh, List<Neo::Mesh::AMaterial*>& slots) {
 	FbxProperty lProperty;
 	const Char* d = NULL;
 	int lNbMat = pMesh->GetNode()->GetSrcObjectCount();
@@ -355,21 +343,28 @@ void MeshLoader_FBX::LoadTextures(FbxMesh* pMesh, List<Neo::Mesh::AMaterialSlot*
 	for (int lMaterialIndex = 0; lMaterialIndex < lNbMat; lMaterialIndex++)
 	{
 		FbxSurfaceMaterial *lMaterial = (FbxSurfaceMaterial *)pMesh->GetNode()->GetSrcObject(lMaterialIndex);
-		Neo::Mesh::AMaterialSlot* matSlot = NULL;
 		if (!lMaterial)
 		{
 			continue;
 		}
 
-		if (GetMaterialProperty(lMaterial, FbxSurfaceMaterial::sDiffuse, FbxSurfaceMaterial::sDiffuseFactor, matSlot)) {
-			matSlot->Index = 0;
-			matSlot->PolyCount = pMesh->GetPolygonCount();
-			slots.Add(matSlot);
+		Neo::Mesh::AMaterial* matSlot = new Neo::Mesh::Material();
+		matSlot->Index = 0;
+		matSlot->PolyCount = pMesh->GetPolygonCount();
+		slots.Add(matSlot);
+
+		if (GetMaterialProperty(lMaterial, FbxSurfaceMaterial::sDiffuse, FbxSurfaceMaterial::sDiffuseFactor, "Diffuse", matSlot)) {
+			//assert(0);
 		}
+
+		/*if (GetMaterialProperty(lMaterial, FbxSurfaceMaterial::sSpecular, FbxSurfaceMaterial::sSpecularFactor, "Specular", matSlot)) {
+
+
+		}*/
 	}
 }
 
-void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, List<Neo::Mesh::AMaterialSlot*>& slots) {
+void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, List<Neo::Mesh::AMaterial*>& slots) {
 	FbxMesh* pMesh = pNode->GetMesh();
 	if (!pMesh->GetNode()) {
 		return;
@@ -500,7 +495,7 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 
 	int lFileFormat = -1;
 	m_Importer = FbxImporter::Create(g_SdkManager, "");
-	if (!g_SdkManager->GetIOPluginRegistry()->DetectReaderFileFormat(fileName.CStr(), lFileFormat))
+	if (g_SdkManager && !g_SdkManager->GetIOPluginRegistry()->DetectReaderFileFormat(fileName.CStr(), lFileFormat))
 	{
 		// Unrecognizable file format. Try to fall back to FbxImporter::eFBX_BINARY
 		lFileFormat = g_SdkManager->GetIOPluginRegistry()->FindReaderIDByDescription("FBX binary (*.fbx)");
@@ -515,10 +510,7 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 		return false;
 	}
 
-	// Set the scene status flag to refresh 
-		// the scene in the first timer callback.
-
-		// Convert Axis System to what is used in this example, if needed
+	// Convert Axis System to what is used in this example, if needed
 	FbxAxisSystem SceneAxisSystem = m_Scene->GetGlobalSettings().GetAxisSystem();
 	FbxAxisSystem OurAxisSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd, FbxAxisSystem::eRightHanded);
 	if (SceneAxisSystem != OurAxisSystem)
@@ -558,14 +550,13 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 
 	LoadAnimations(m_Scene);
 
-	assert(m_MaterialSlots[0] != NULL);
-	for (UInt32 ix = 1; ix < m_MaterialSlots.Length(); ++ix) {
-		if (!m_MaterialSlots[ix]->Texture) {
-			m_MaterialSlots[ix]->Texture = m_MaterialSlots[0]->Texture;
+	assert(m_Materials[0] != NULL);
+	for (UInt32 ix = 1; ix < m_Materials.Length(); ++ix) {
+		auto channel = m_Materials[ix]->Channels["Diffuse"];
+		if (channel && !channel->Texture) {
+			channel->Texture = m_Materials[0]->Channels["Diffuse"]->Texture;
 		}
 	}
-
-	//lResult = true;
 
 	return true;
 }

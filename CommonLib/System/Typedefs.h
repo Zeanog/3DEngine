@@ -42,23 +42,6 @@ public:
 
 #define STATIC_ARRAY_LENGTH( array )	(sizeof(array) / (sizeof(array[0])))
 
-#define CPU_BUS_SIZE 32
-
-template< typename _TValue, Bool underBusSize >
-struct _ParamHelper {
-	typedef _TValue		Type;
-};
-
-template< typename _TValue >
-struct _ParamHelper<_TValue, false> {
-	typedef const _TValue&		Type;
-};
-
-template< typename _TValue >
-struct Param {
-	typedef typename _ParamHelper<_TValue, sizeof(_TValue) <= CPU_BUS_SIZE>::Type Type;
-};
-
 template< class TContainer >
 class ContainerIterator {
 public:
@@ -66,40 +49,40 @@ public:
 	typedef typename TUndecorated::iterator	Iterator;
 	typedef typename TUndecorated::const_iterator	ConstIterator;
 
-	static Iterator	Begin(TUndecorated& container) {
+	static Iterator	Begin(typename TUndecorated& container) {
 		return container.begin();
 	}
 
-	static ConstIterator	Begin(const TUndecorated& container) {
+	static ConstIterator	Begin(const typename TUndecorated& container) {
 		return container.cbegin();
 	}
 
-	static Iterator	End(TUndecorated& container) {
+	static Iterator	End(typename TUndecorated& container) {
 		return container.end();
 	}
 
-	static ConstIterator	End(const TUndecorated& container) {
+	static ConstIterator	End(const typename TUndecorated& container) {
 		return container.cend();
 	}
 };
 
 #define FOREACH( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::Iterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterNameEnd = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterNameEnd; iterName++ )
+	for( typename ContainerIterator<decltype(stlContainer)>::Iterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
 #define FOREACH_CONST( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterNameEnd = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterNameEnd; iterName++ )
+	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
 
-#define CLASS_TYPEDEFS( classType )		\
+#define CLASS_TYPEDEFS( classType )	\
 public:								\
 	typedef classType	TSelf;		\
 private:
 
 #define INHERITEDCLASS_TYPEDEFS( classType, superClass )		\
-CLASS_TYPEDEFS( classType );								\
-public:													\
-typedef superClass		TSuper;							\
+CLASS_TYPEDEFS( classType )										\
+public:															\
+typedef superClass		TSuper;									\
 private:
 
 #define TEMPLATE_2( classType, T1, T2 )	classType<T1, T2>
@@ -126,9 +109,9 @@ void DeleteArray( _TData*& ptr ) {
 
 template< class _TData >
 void DeleteContents( _TData& stlContainer ) {
-	FOREACH( iter, stlContainer ) {     
+	/*FOREACH( iter, stlContainer ) {     
 		DeletePtr( *iter );             
-	}
+	}*/
 }
 
 template< typename _TData >
@@ -136,6 +119,8 @@ void Destroy( _TData& stlContainer ) {
 	DeleteContents( stlContainer );
 	stlContainer.clear();
 }
+
+#include "System\Functors\ParamType.h"
 
 #define ABSTRACT_GETSET( type, name )			\
 virtual typename Param<type>::Type		name() const = 0;	\

@@ -21,14 +21,14 @@ class GLApplication {
 
 protected:
 	Functor<void, TYPELIST_1(Mouse::State)>		OnMouseChangedFunctor;
-	void	OnMouseChanged(ParamType<Mouse::State>::Type mouseState) {
+	void	OnMouseChanged(Param<Mouse::State>::Type mouseState) {
 		if (mouseState.Btns[0].IsSet() && (mouseState.DeltaX != 0 || mouseState.DeltaY != 0)) {
 			RotateCamera(mouseState.DeltaX, mouseState.DeltaY);
 		}
 	}
 
 	Functor<void, TYPELIST_1(KeyboardState)>		OnKeyboardChangedFunctor;
-	void	OnKeyboardChanged(ParamType<KeyboardState>::Type keyboardState);
+	void	OnKeyboardChanged(Param<KeyboardState>::Type keyboardState);
 
 public:
 	GLApplication() {

@@ -11,7 +11,7 @@ Bool VertexBuffer::Bind(VertexAttributes attribs) const {
 		assert(!glGetError());
 
 		assert(m_TextureCoordinates.Length() > 0);
-		glTexCoordPointer(2, GL_FLOAT, 0, &m_TextureCoordinates[0]);
+		glTexCoordPointer(decltype(m_TextureCoordinates)::TData::NumDimensions, GL_FLOAT, 0, &m_TextureCoordinates[0]);
 		assert(!glGetError());
 	}
 
@@ -29,7 +29,7 @@ Bool VertexBuffer::Bind(VertexAttributes attribs) const {
 		assert(!glGetError());
 
 		assert(m_Positions.Length() > 0);
-		glVertexPointer(3, GL_FLOAT, 0, &m_Positions[0]);
+		glVertexPointer(decltype(m_Positions)::TData::NumDimensions, GL_FLOAT, 0, &m_Positions[0]);
 		assert(!glGetError());
 	}
 	
