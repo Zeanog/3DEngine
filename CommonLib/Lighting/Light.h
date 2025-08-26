@@ -13,7 +13,7 @@ class ShaderProgram_GLSL;
 class Camera;
 
 class ALight {
-	CLASS_TYPEDEFS( ALight );
+	CLASS_TYPEDEFS( ALight )
 
 protected:
 	virtual void		InitShadowMap() {
@@ -151,14 +151,14 @@ protected:
 
 	glm::mat4	m_Transform;
 
-	float		m_ConstantAttenuation;
-	float		m_LinearAttenuation;
-	float		m_QuadraticAttenuation;
-	float		m_Exponent;
-	float		m_CosCutoff;
+	Float32		m_ConstantAttenuation = 0.0f;
+	Float32		m_LinearAttenuation = 0.0f;
+	Float32		m_QuadraticAttenuation = 0.0f;
+	Float32		m_Exponent = 0.0f;
+	Float32		m_CosCutoff = 0.0f;
 
-	Float32		m_FOV;
-	Float32		m_AspectRatio;
+	Float32		m_FOV = 0.0f;
+	Float32		m_AspectRatio = 0.0f;
 
 protected:
 	void	PreShadowRender();

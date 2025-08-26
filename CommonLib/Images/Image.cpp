@@ -1,8 +1,6 @@
 #include "Image.h"
-
+#include "cmath"
 #include <gl/glew.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
 
 Neo::Image::~Image() {
 	if( m_Id != 0 ) {
@@ -26,18 +24,6 @@ void Neo::Image::Unbind() const {
 	GLenum error = glGetError();
 
 	assert(!error);
-}
-
-#include <math.h>
-
-UInt32 Neo::Image::NearestPowerOfTwo(UInt32 val) {
-	Float32 pos = ceilf((Float32)log2(val));//  (ceiling of log n with base 2)
-	return (UInt32)powf(2, pos);
-}
-
-Int32 Neo::Image::NearestPowerOfTwo(Int32 val) {
-	Float32 pos = ceilf((Float32)log2(val));//  (ceiling of log n with base 2)
-	return (Int32)powf(2, pos);
 }
 
 Bool Neo::Image::UploadData( const ImageLoader& loader ) {

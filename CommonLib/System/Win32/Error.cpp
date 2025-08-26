@@ -4,13 +4,16 @@
 
 #if _WIN32
 const Char*	GetErrorMessage(int errorCode) {
-	static Char	buffers[5][256];
+	static const int numBuffers = 5;
+	static const int bufferSize = 256;
+	static Char	buffers[numBuffers][bufferSize];
 	static int	currentBufferIndex = 0;
 
-	Char* buffer = buffers[currentBufferIndex++];
+	currentBufferIndex = (currentBufferIndex + 1) % numBuffers;
+	Char* buffer = buffers[currentBufferIndex];
 
 	size_t size = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)buffer, 256, NULL);
+		NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)buffer, bufferSize, NULL);
 
 	return buffer;
 }

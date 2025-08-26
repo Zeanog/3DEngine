@@ -1,6 +1,7 @@
 #pragma once
 
 #include "System/Typedefs.h"
+#include "System\Functors\ParamType.h"
 
 #include <glm/mat4x4.hpp>
 #include <glm/mat3x3.hpp>
@@ -37,7 +38,7 @@ public:
 };
 
 class ACameraDecorator : public ICamera {
-	INHERITEDCLASS_TYPEDEFS(ACameraDecorator, ICamera);
+	INHERITEDCLASS_TYPEDEFS(ACameraDecorator, ICamera)
 
 protected:
 	ICamera*	m_Decoratee;
@@ -117,7 +118,7 @@ protected:
 };
 
 class Camera : public ICamera {
-	INHERITEDCLASS_TYPEDEFS(Camera, ICamera);
+	INHERITEDCLASS_TYPEDEFS(Camera, ICamera)
 
 protected:
 	TRotation		m_Rotation;
@@ -141,13 +142,13 @@ public:
 	virtual void		RotateAround(const TRotation& delta, const TPosition& pt) override;
 	virtual void		RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) override;
 
-	virtual glm::vec3					Forward() const override;
+	virtual glm::vec3		Forward() const override;
 
 	virtual glm::mat4x4		ToMat4x4() const override;
 };
 
 class CameraInterpolator : public ACameraDecorator {
-	INHERITEDCLASS_TYPEDEFS(CameraInterpolator, ACameraDecorator);
+	INHERITEDCLASS_TYPEDEFS(CameraInterpolator, ACameraDecorator)
 
 protected:
 	TRotation		m_TargetRotation;

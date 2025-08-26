@@ -4,8 +4,7 @@
 #include "Rendering/VertexBuffer.h"
 #include "Rendering/IndexBuffer.h"
 #include "System/List.h"
-
-#include "System/File.h"
+#include "System/Map.h"
 #include "System/Json.h"
 #include "Images/Image.h"
 #include "Rendering/Joint.h"
@@ -17,75 +16,148 @@ class Joint;
 
 namespace Neo {
 	class Mesh {
-		CLASS_TYPEDEFS(Mesh);
+		CLASS_TYPEDEFS(Mesh)
 
 	public:
-		struct AMaterialSlot {
-			CLASS_TYPEDEFS(AMaterialSlot);
+		struct AMaterial {
+			CLASS_TYPEDEFS(AMaterial)
 
 		public:
+			struct Channel {
+				Color<Float32>	Color = decltype(Color)::White;
+				const Neo::Image* Texture = NULL;
 
-			Int32	Index;
-			Int32	PolyCount;
-			const Neo::Image*	Texture;
+				Channel(decltype(Color) c, decltype(Texture) t) {
+					Color = c;
+					Texture = t;
+				}
 
-			AMaterialSlot() {
-				Index = -1;
-				PolyCount = 0;
-				Texture = NULL;
+				virtual void		Bind() const {
+					if (Texture) {
+						Texture->Bind();
+					}
+				}
+				virtual void		Unbind() const {
+					if (Texture) {
+						Texture->Unbind();
+					}
+				}
+			};
+
+			Int32	Index = -1;
+			Int32	PolyCount = 0;
+
+			Map<StaticString, Channel*>	Channels;
+
+			AMaterial() {
+				AddChannel("Diffuse");
 			}
 
-			AMaterialSlot(Int32 i, Int32 polyCount) {
+			AMaterial(Int32 i, Int32 polyCount) : AMaterial() {
 				Index = i;
 				PolyCount = polyCount;
-				Texture = NULL;
 			}
 
+			void AddChannel(const StaticString& channelName) {
+				Channels.Add(channelName, new AMaterial::Channel(Color<Float32>(), NULL));
+			}
+
+			void AddChannel(const char* channelName) {
+				AddChannel(StaticString(channelName));
+			}
+
+			void UpdateChannel(const StaticString& channelName, const Neo::Image* texture) {
+				try {
+					auto channel = Channels[channelName];
+					if (channel) {
+						channel->Texture = texture;
+					}
+				}
+				catch (...) {
+				}
+			}
+
+			void UpdateChannel(const char* channelName, const Neo::Image* texture) {
+				UpdateChannel(StaticString(channelName), texture);
+			}
+
+			void UpdateChannel(const StaticString& channelName, const Color<Float32>& color) {
+				try {
+					auto channel = Channels[channelName];
+					if (channel) {
+						channel->Color = color;
+					}
+				}
+				catch (...) {
+				}
+			}
+
+			void UpdateChannel(const char* channelName, const Color<Float32>& color) {
+				UpdateChannel(StaticString(channelName), color);
+			}
+
+			virtual void		Bind(List<StaticString> channelNames) const {
+				/*if (DiffuseTexture) {
+					DiffuseTexture->Bind();
+				}*/
+				FOREACH(iter, channelNames) {
+					auto channel = Channels[*iter];
+					if (channel) {
+						channel->Bind();
+					}
+				}
+			}
 			virtual void		Bind() const {
-				if (Texture) {
-					Texture->Bind();
+				/*if (DiffuseTexture) {
+					DiffuseTexture->Bind();
+				}*/
+				FOREACH_CONST(iter, Channels) {
+					if (iter->second) {
+						iter->second->Bind();
+					}
 				}
 			}
 			virtual void		Unbind() const {
-				if (Texture) {
-					Texture->Unbind();
+				/*if (DiffuseTexture) {
+					DiffuseTexture->Unbind();
+				}*/
+				FOREACH_CONST(iter, Channels) {
+					if (iter->second) {
+						iter->second->Unbind();
+					}
 				}
 			}
 		};
 
-		struct MaterialSlot_ColorChannel : public AMaterialSlot {
-			INHERITEDCLASS_TYPEDEFS(MaterialSlot_ColorChannel, AMaterialSlot);
+		struct Material : public AMaterial {
+			INHERITEDCLASS_TYPEDEFS(Material, AMaterial)
 
 		public:
-			Color<Float32>	Emissive;
-			Color<Float32>	Diffuse;
-			Color<Float32>	Ambient;
-			Color<Float32>	Specular;
 			Float32			Shininess;
 
-			MaterialSlot_ColorChannel() {
-				Emissive = decltype(Emissive)::Black;
-				Diffuse = decltype(Diffuse)::White;
+			Material() {
+				/*Emissive = decltype(Emissive)::Black;
 				Ambient = decltype(Ambient)::White;
-				Specular = decltype(Specular)::Black;
+				Specular = decltype(Specular)::Black;*/
+				AddChannel("Emissive");
+				AddChannel("Ambient");
+				AddChannel("Specular");
 				Shininess = 0.0f;
 			}
 
-			MaterialSlot_ColorChannel(Int32 i, Int32 polyCount) : TSuper(i, polyCount) {
-				Emissive = decltype(Emissive)::Black;
-				Diffuse = decltype(Diffuse)::White;
-				Ambient = decltype(Ambient)::White;
-				Specular = decltype(Specular)::Black;
+			Material(Int32 i, Int32 polyCount) : TSuper(i, polyCount) {
+				AddChannel("Emissive");
+				AddChannel("Ambient");
+				AddChannel("Specular");
 				Shininess = 0.0f;
 			}
 
-			MaterialSlot_ColorChannel&	operator=(const MaterialSlot_ColorChannel& rhs) {
+			Material&	operator=(const Material& rhs) {
 				Index = rhs.Index;
 				PolyCount = rhs.PolyCount;
-				Texture = rhs.Texture;
 
-				Emissive = rhs.Emissive;
-				Diffuse = rhs.Diffuse;
+				Channels = rhs.Channels;
+				
 				return *this;
 			}
 
@@ -98,7 +170,7 @@ namespace Neo {
 		VertexBuffer	m_VertexBuffer;
 		IndexBuffer		m_IndexBuffer;
 
-		List<AMaterialSlot*>	m_MaterialSlots;
+		List<AMaterial*>	m_Materials;
 
 		Skeleton		m_Skeleton;
 
@@ -112,10 +184,10 @@ namespace Neo {
 		Mesh(const VertexBuffer& vb, const IndexBuffer& ib);
 
 		virtual ~Mesh() {
-			for (UInt32 ix = 0; ix < m_MaterialSlots.Length(); ++ix) {
-				DeletePtr(m_MaterialSlots[ix]);
+			for (UInt32 ix = 0; ix < m_Materials.Length(); ++ix) {
+				DeletePtr(m_Materials[ix]);
 			}
-			m_MaterialSlots.Clear();
+			m_Materials.Clear();
 		}
 
 		const Bounds&	GetBounds() const {
@@ -129,8 +201,8 @@ namespace Neo {
 		void	PreRender(VertexBuffer::VertexAttributes attribs) const;
 		void	PostRender() const;
 		Int32	NumMaterials() const;
-		const AMaterialSlot*	GetMaterialSlot(int index) const {
-			return m_MaterialSlots[index];
+		const AMaterial*	GetMaterial(int index) const {
+			return m_Materials[index];
 		}
 		Bool	RenderMaterial(int index) const;
 		Bool	Render() const;
@@ -230,7 +302,7 @@ namespace Neo {
 };
 
 template<>
-class JsonSerializer<Neo::Mesh::MaterialSlot_ColorChannel> {
+class JsonSerializer<Neo::Mesh::Material> {
 public:
 	/*static Vector<_NumDimensions>	ReadFrom(json_value* root) {
 		Vector<_NumDimensions>	val;
@@ -238,8 +310,8 @@ public:
 		return val;
 	}*/
 
-	static Neo::Mesh::MaterialSlot_ColorChannel	ReadFrom(json_value* root) {
-		Neo::Mesh::MaterialSlot_ColorChannel outVal;
+	static Neo::Mesh::Material	ReadFrom(json_value* root) {
+		Neo::Mesh::Material outVal;
 		for (UInt32 ix = 0; ix < root->u.object.length; ++ix) {
 			if (!String::StrICmp(root->u.object.values[ix].name, "Index")) {
 				outVal.Index = (Int32)root->u.object.values[ix].value->u.integer;

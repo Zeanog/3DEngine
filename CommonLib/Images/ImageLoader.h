@@ -1,11 +1,12 @@
 #pragma once
 
 #include "System/Typedefs.h"
+#include "System\Functors\ParamType.h"
 #include "System/StaticString.h"
 #include "System/File.h"
 
 class ImageLoader {
-	CLASS_TYPEDEFS( ImageLoader );
+	CLASS_TYPEDEFS( ImageLoader )
 
 protected:
 	UInt32			m_Width;

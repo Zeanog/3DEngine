@@ -5,13 +5,11 @@
 #include "ModelLoaders/ModelLoader_FBX.h"
 #include "Rendering/Joint.h"
 
-#include <glm/gtx/transform.hpp>
-
-void Neo::Mesh::MaterialSlot_ColorChannel::Bind() const {
+void Neo::Mesh::Material::Bind() const {
 	TSuper::Bind();
 }
 
-void Neo::Mesh::MaterialSlot_ColorChannel::Unbind() const {
+void Neo::Mesh::Material::Unbind() const {
 	TSuper::Unbind();
 }
 
@@ -24,15 +22,15 @@ Neo::Mesh::Mesh(const VertexBuffer& vb, const IndexBuffer& ib) {
 }
 
 Int32 Neo::Mesh::NumMaterials() const {
-	return (Int32)m_MaterialSlots.Length();
+	return (Int32)m_Materials.Length();
 }
 
 Bool Neo::Mesh::RenderMaterial(int index) const {
-	if (index < 0 || index >= (int)m_MaterialSlots.Length()) {
+	if (index < 0 || index >= (int)m_Materials.Length()) {
 		return false;
 	}
 
-	const AMaterialSlot* matSlot = m_MaterialSlots[index];
+	const AMaterial* matSlot = m_Materials[index];
 
 	matSlot->Bind();
 
@@ -84,7 +82,7 @@ void Neo::Mesh::PostRender() const {
 Bool Neo::Mesh::UploadData(const AMeshLoader& loader) {
 	m_VertexBuffer = loader.VB();
 	m_IndexBuffer = loader.IB();
-	m_MaterialSlots = loader.MaterialSlots();
+	m_Materials = loader.Materials();
 
 	m_Bounds += m_VertexBuffer.Positions();
 	

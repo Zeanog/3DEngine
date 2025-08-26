@@ -18,9 +18,9 @@ class AnimationPlayer {
 public:
 
 protected:
-	const AnimationClip* m_Clip;
+	const AnimationClip* m_Clip = NULL;
 
-	Float32			m_Time;
+	Float32			m_Time = -1.0f;
 
 public:
 	AnimationPlayer() {

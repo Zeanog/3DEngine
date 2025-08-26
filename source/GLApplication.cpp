@@ -114,7 +114,7 @@ GLApplication::~GLApplication() {
 }
 
 
-void	GLApplication::OnKeyboardChanged(ParamType<KeyboardState>::Type keyboardState) {
+void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) {
 	if (keyboardState.KeyIsDown(DIK_W)) {
 		TranslateCamera(0.0f, 0.0f, 1.0f);
 	}
@@ -205,7 +205,7 @@ void GLApplication::TranslateCamera(Float32 x, Float32 y, Float32 z) {
 void GLApplication::update()
 {
 	m_PrevTick = m_CurrentTime;
-	m_CurrentTime = GetTickCount();
+	m_CurrentTime = GetTickCount64();
 	int delta = m_CurrentTime - m_PrevTick;
 	float time = delta * 0.001f;
 

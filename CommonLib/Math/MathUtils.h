@@ -80,4 +80,16 @@ public:
 	static _TValue	Abs(_TValue val ) {
 		return val < 0 ? -val : val;
 	}
+
+	__inline static Bool		IsPowerOfTwo(UInt32 val) {
+		return val && (val & (val - 1)) == 0;
+	}
+
+	__inline static Bool		IsPowerOfTwo(Int32 val) {
+		return val && (val & (val - 1)) == 0;
+	}
+
+	static UInt32		NearestPowerOfTwo(UInt32 val);
+
+	static Int32		NearestPowerOfTwo(Int32 val);
 };
