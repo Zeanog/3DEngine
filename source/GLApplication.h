@@ -35,12 +35,12 @@ public:
 	}
 
 	// Methods
-	bool	initialize(HWND hwnd, int w, int h);
+	bool	Initialize(HWND hwnd, int w, int h);
 	virtual ~GLApplication();
-	void	setSize(int w, int h);
-	void	update();
-	void	render();
-	void	release();
+	void	SetSize(int w, int h);
+	void	Update();
+	void	Render();
+	void	Release();
 
 	void    StartRotateCamera(Int64 x, Int64 y);
 	void    StopRotateCamera(Int64 x, Int64 y);
@@ -53,8 +53,8 @@ public:
 
 private:
 	// Methods
-	void	loadAssets();
-	void	releaseAssets();
+	void	LoadAssets();
+	void	ReleaseAssets();
 
 	void	RenderModels(const ShaderProgram_GLSL& program);
 	void	RenderModelShadows() {
@@ -91,7 +91,7 @@ private:
 	HWND				m_hWnd; // Window's handle
 
 	float				m_DeltaTime;
-	unsigned int		m_CurrentTime;
-	unsigned int		m_PrevTick;
+	UInt64				m_CurrentTime;
+	UInt64				m_PrevTick;
 	unsigned char		m_state; // 0 - Normal render, 1 - Show render targets
 };

@@ -3,7 +3,7 @@
 #include "Images/ImageManager.h"
 #include "Shaders/ShaderProgram_GLSL.h"
 
-bool IModel::loadImage( const StaticString& textureName ) {
+bool IModel::LoadImage( const StaticString& textureName ) {
 	m_Image = Singleton<ImageManager>::GetInstance()->Get( textureName );
 	return m_Image != NULL;
 }

@@ -8,7 +8,7 @@
 
 template< typename _TData >
 class AList {
-	CLASS_TYPEDEFS( AList );
+	CLASS_TYPEDEFS( AList )
 
 public:
 	typedef _TData	TData;
@@ -188,7 +188,7 @@ public:
 	}
 
 	void	DestroyContents() {
-		//DeleteContents(*this);
+		DeleteContents(*this);
 		Clear();
 	}
 };

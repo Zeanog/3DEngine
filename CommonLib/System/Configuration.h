@@ -77,7 +77,7 @@ protected:
 public:
 	Bool	LoadFrom(const Char* relativeFilePath);
 
-	Bool	GetValue(const StaticString& section, const StaticString& key, String& outValue) const;
+	Bool	GetValue(const StaticString& sectionName, const StaticString& key, String& outValue) const;
 
-	Bool	GetSection(const StaticString& section, const ConfigurationSection*& outConfig) const;
+	Bool	GetSection(const StaticString& sectionName, const ConfigurationSection*& outConfig) const;
 };

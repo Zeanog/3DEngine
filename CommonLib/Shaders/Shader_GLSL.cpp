@@ -120,6 +120,7 @@ Bool Shader_Fragment_GLSL::ReadFrom(const StaticString& path, const Char* header
 		GetShaderInfoLog(log);
 
 		OutputDebugString(log.CStr());
+		printf(log.CStr());
 	}
 
 	return !!compiled;

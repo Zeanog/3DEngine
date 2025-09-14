@@ -17,19 +17,6 @@ Bool SubmixVoice::Init(IXAudio2* audio, UInt32 numChannels, UInt32 sampleRate) {
 		return false;
 	}
 
-	/*IUnknown* pReverbFx{};
-	verify(SUCCEEDED(XAudio2CreateReverb(&pReverbFx, 0)));
-
-	XAUDIO2_EFFECT_DESCRIPTOR descriptor;
-	descriptor.InitialState = true;
-	descriptor.OutputChannels = m_NumChannels;
-	descriptor.pEffect = pReverbFx;
-
-	XAUDIO2_EFFECT_CHAIN chain;
-	chain.EffectCount = 1;
-	chain.pEffectDescriptors = &descriptor;
-
-	m_Voice->SetEffectChain(&chain);*/
 	return true;
 }
 

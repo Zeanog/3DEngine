@@ -1,13 +1,13 @@
 #pragma once
 
-#include "String.h"
+//#include "String.h"
 
 class StackString : public AString {
 public:
 
 protected:
-	Char * m_pData;
-	Int32	m_Size;
+	Char * m_pData = NULL;
+	Int32	m_Size = -1;
 
 protected:
 	StackString() {}

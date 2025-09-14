@@ -58,24 +58,24 @@ public:
 
 	SourceVoice* CreateSourceVoice(const WAVEFORMATEX& format, SubmixVoice* destVoice);
 	SourceVoice* CreateSourceVoice(const WAVEFORMATEX& format);
-	SourceVoice* CreateSourceVoice(Sound* sound);
+	SourceVoice* CreateSourceVoice(Sound* sound, SubmixVoice* destVoice);
 	SubmixVoice* CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
-
-	template< typename TArg, typename... TArgs>
-	void	BuildDescriptions(List<XAUDIO2_SEND_DESCRIPTOR>& outDescriptions, TArg arg, TArgs... args) {
-		outDescriptions.Add({ 0, arg->Voice() });
-		BuildDescriptions(outDescriptions, args);
-	}
-
-	template< typename TArg, typename... TArgs>
-	XAUDIO2_VOICE_SENDS&&	BuildDescriptions(TArg arg, TArgs... args) {
-		List<XAUDIO2_SEND_DESCRIPTOR> descriptions;
-		XAUDIO2_VOICE_SENDS	sends{};
-		BuildDescriptions(descriptions, arg, args...);
-
-	}
 
 	Bool	CommitChanges(UInt32 operationSet) {
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
 	}
+
+	/*template <typename... Voices>
+	constexpr XAUDIO2_VOICE_SENDS Build(Voices... voices) {
+		static constexpr UINT32 NumDescriptors = sizeof...(Voices);
+		XAUDIO2_SEND_DESCRIPTOR* descriptors = new XAUDIO2_SEND_DESCRIPTOR[NumDescriptors];
+		XAUDIO2_VOICE_SENDS sends{ NumDescriptors, descriptors };
+
+		std::size_t i = 0;
+		(void)std::initializer_list<int>{
+			(descriptors[i++] = { 0, voices }, 0)...
+		};
+
+		return sends;
+	}*/
 };

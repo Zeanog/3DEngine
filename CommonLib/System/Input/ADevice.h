@@ -28,6 +28,12 @@ public:
 	}
 
 	virtual Bool	Init(HWND hWnd, LPDIRECTINPUT8 system) = 0;
+	virtual void	Release() {
+		if (m_pDevice) {
+			m_pDevice->Release();
+			m_pDevice = nullptr;
+		}
+	}
 	virtual Bool	Acquire() const = 0;
 	virtual Bool	Unacquire() const = 0;
 

@@ -41,11 +41,23 @@
     <ClInclude Include="Shaders\ShaderProgram_GLSL.h" />
     <ClInclude Include="Shaders\Shader_GLSL.h" />
     <ClInclude Include="System\AssetManager.h" />
+    <ClInclude Include="System\Audio\AVoice.h" />
+    <ClInclude Include="System\Audio\Loaders\AudioLoader.h" />
+    <ClInclude Include="System\Audio\Loaders\AudioLoader_OggVorbis.h" />
+    <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h" />
+    <ClInclude Include="System\Audio\Loaders\SoundManager.h" />
+    <ClInclude Include="System\Audio\MasteringVoice.h" />
+    <ClInclude Include="System\Audio\AudioSystem.h" />
+    <ClInclude Include="System\Audio\Sound.h" />
+    <ClInclude Include="System\Audio\SourceVoice.h" />
+    <ClInclude Include="System\Audio\SourceVoiceCallbacks.h" />
+    <ClInclude Include="System\Audio\SubmixVoice.h" />
     <ClInclude Include="System\Color.h" />
     <ClInclude Include="System\Configuration.h" />
     <ClInclude Include="System\DataStructureLibrary.h" />
     <ClInclude Include="System\DebugConsole.h" />
     <ClInclude Include="System\File.h" />
+    <ClInclude Include="System\File_RIFF.h" />
     <ClInclude Include="System\Flash\Dispatcher.h" />
     <ClInclude Include="System\Flash\SWF.h" />
     <ClInclude Include="System\Functors\FunctionHandler.h" />
@@ -106,13 +118,26 @@
     <ClCompile Include="Shaders\ShaderProgramManager.cpp" />
     <ClCompile Include="Shaders\ShaderProgram_GLSL.cpp" />
     <ClCompile Include="Shaders\Shader_GLSL.cpp" />
+    <ClCompile Include="System\Audio\Loaders\AudioLoader_OggVorbis.cpp" />
+    <ClCompile Include="System\Audio\Loaders\AudioLoader_RIFF.cpp" />
+    <ClCompile Include="System\Audio\Loaders\SoundManager.cpp" />
+    <ClCompile Include="System\Audio\MasteringVoice.cpp" />
+    <ClCompile Include="System\Audio\AudioSystem.cpp" />
+    <ClCompile Include="System\Audio\Sound.cpp" />
+    <ClCompile Include="System\Audio\SourceVoice.cpp" />
+    <ClCompile Include="System\Audio\SourceVoiceCallbacks.cpp" />
+    <ClCompile Include="System\Audio\SubmixVoice.cpp" />
     <ClCompile Include="System\Color.cpp" />
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
+    <ClCompile Include="System\File_RIFF.cpp" />
     <ClCompile Include="System\json.c" />
     <ClCompile Include="System\StaticString.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />
     <ClCompile Include="TinyXML\tinyxml2.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}</ProjectGuid>
@@ -130,7 +155,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -164,8 +189,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\tinyxml\Debug;$(ProjectDir)freeglut\lib;$(ProjectDir)glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxguid.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)freeglut\lib;$(ProjectDir)glew-2.1.0\lib\Release\Win32;$(SolutionDir)packages\ImeSense.Packages.LibOgg.1.3.5.5\native\lib\Win32\Debug;$(SolutionDir)packages\ImeSense.Packages.LibVorbis.1.3.7.5\native\lib\Win32\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxguid.lib;dinput8.lib;xaudio2.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -177,6 +202,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)packages\ImeSense.Packages.LibOgg.1.3.5.5\native\include;$(SolutionDir)packages\ImeSense.Packages.LibVorbis.1.3.7.5\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -184,8 +210,27 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets" Condition="Exists('..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets')" />
+    <Import Project="..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets" Condition="Exists('..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets'))" />
+    <Error Condition="!Exists('..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets'))" />
+  </Target>
 </Project>

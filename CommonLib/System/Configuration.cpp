@@ -4,7 +4,7 @@
 #include <cstring>
 
 Bool ConfigurationSection::LoadFrom(const Char* sectionName, const Char* fileName) {
-	STACK_STRING(sectionKeys, 512);
+	STACK_STRING(sectionKeys, 1024);
 	STACK_STRING(sectionVal, 64);
 	GetPrivateProfileString(sectionName, NULL, "", sectionKeys.CStr(), sectionKeys.Allocated(), fileName);
 
@@ -42,14 +42,16 @@ Bool Configuration::LoadFrom(const Char* relativeFilePath) {
 	return true;
 }
 
-Bool Configuration::GetValue(const StaticString& section, const StaticString& key, String& outValue) const {
-	STACK_STRING(tempValue, 256);
-	GetPrivateProfileString(section.CStr(), key.CStr(), "", tempValue.CStr(), tempValue.Allocated(), m_FilePath.CStr());
-	outValue = tempValue.CStr();
-	return true;
+Bool Configuration::GetValue(const StaticString& sectionName, const StaticString& key, String& outValue) const {
+	const ConfigurationSection* section{};
+	if (!GetSection(sectionName, section)) {
+		return false;
+	}
+	return section->GetValue(key, outValue);
 }
 
-Bool Configuration::GetSection(const StaticString& section, const ConfigurationSection*& outConfig) const {
-	outConfig = &m_Sections[section.CStr()];
+Bool Configuration::GetSection(const StaticString& sectionName, const ConfigurationSection*& outConfig) const {
+	assert(m_Sections.Contains(sectionName));
+	outConfig = &m_Sections[sectionName];
 	return true;
 }

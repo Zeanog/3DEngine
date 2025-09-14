@@ -11,7 +11,7 @@
 #include "Rendering/Model.h"
 
 #include "System/Input/InputSystem.h"
-
+#include "System/Audio/AudioSystem.h"
 #include "System/Configuration.h"
 
 #include "System/Win32/Window.h"
@@ -29,8 +29,11 @@ CComModule	_module;
 /**
 *	Initialize our GL application
 */
-bool GLApplication::initialize(HWND hwnd, int width, int height)
+bool GLApplication::Initialize(HWND hwnd, int width, int height)
 {
+	HRESULT hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hr)) return false;
+
 	GLuint pixelFormat;
 	m_windowHeight = height;
 	m_windowWidth = width;
@@ -77,7 +80,7 @@ bool GLApplication::initialize(HWND hwnd, int width, int height)
 	ShowWindow(m_hWnd, SW_SHOW);
 	SetForegroundWindow(m_hWnd);
 	SetFocus(m_hWnd);
-	setSize(width, height);
+	SetSize(width, height);
 
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
@@ -98,13 +101,13 @@ bool GLApplication::initialize(HWND hwnd, int width, int height)
 	OnKeyboardChangedFunctor.AddListener(this, &TSelf::OnKeyboardChanged);
 	Singleton<InputSystem>::GetInstance()->GetKeyboard()->OnKeydown.AddListener( OnKeyboardChangedFunctor );
 
-	loadAssets();
+	verify( Singleton<AudioSystem>::GetInstance()->Init() );
 
-	m_PrevTick = GetTickCount();
+	LoadAssets();
+
+	m_PrevTick = (decltype(m_PrevTick))GetTickCount64();
 
 	OnRenderShadows.AddListener(this, &TSelf::RenderModelShadows);
-
-	CoInitialize(NULL);
 
 	return true;
 }
@@ -166,7 +169,7 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 /**
 *	Set window's size
 */
-void GLApplication::setSize(int w, int h)
+void GLApplication::SetSize(int w, int h)
 {
 	m_windowWidth = w;
 	m_windowHeight = h;
@@ -202,12 +205,12 @@ void GLApplication::TranslateCamera(Float32 x, Float32 y, Float32 z) {
 	m_Camera.Translate(glm::vec3(x, y, z) * m_DeltaTime * 5.0f);
 }
 
-void GLApplication::update()
+void GLApplication::Update()
 {
 	m_PrevTick = m_CurrentTime;
-	m_CurrentTime = GetTickCount64();
-	int delta = m_CurrentTime - m_PrevTick;
-	float time = delta * 0.001f;
+	m_CurrentTime = (decltype(m_CurrentTime))GetTickCount64();
+	UInt64 delta = m_CurrentTime - m_PrevTick;
+	Float32 time = MathUtils::MilliSec2Sec(delta);
 
 	m_DeltaTime = MathUtils::Min(time, 1.0f / 30.0f);
 
@@ -272,7 +275,7 @@ void GLApplication::RenderModels(const ShaderProgram_GLSL& program) {
 	}
 }
 
-void GLApplication::render()
+void GLApplication::Render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -359,22 +362,30 @@ void GLApplication::render()
 /**
 *	Release all the GL resources we have allocated
 */
-void GLApplication::release()
+void GLApplication::Release()
 {
-	releaseAssets();
+	ReleaseAssets();
+
+	Singleton<AudioSystem>::GetInstance()->Release();
 
 	wglMakeCurrent(m_hDC, 0);
 	wglDeleteContext(m_hRC);
 
 	ReleaseDC(m_hWnd, m_hDC);
+
+	verify(SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED)));
 }
 
 #include "Rendering/ModelLoaders/MeshManager.h"
+#include <System/Audio/Loaders/SoundManager.h>
+#include <System/Audio/Loaders/AudioLoader_RIFF.h>
+#include <System/Audio/SourceVoice.h>
+#include <System/Audio/Sound.h>
 
 /**
 *	Load all the required assets
 */
-void GLApplication::loadAssets()
+void GLApplication::LoadAssets()
 {
 	m_state = 0;
 
@@ -400,7 +411,7 @@ void GLApplication::loadAssets()
 
 	m = new SphereModel(1, 64);
 	m_PrevModels.push_back(m);
-	m->loadImage(StaticString("data/125881.tga"));
+	m->LoadImage(StaticString("data/125881.tga"));
 	m->Position(2, 2.5f, 0);
 
 	/*m = new CubeModel(1);
@@ -411,12 +422,12 @@ void GLApplication::loadAssets()
 
 	m = new PlaneModel(5);
 	m_PrevModels.push_back(m);
-	m->loadImage(StaticString("data/DragonsDogma.tga"));
+	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(0, 0, 0);
 
 	m = new PlaneModel(5);
 	m_PrevModels.push_back(m);
-	m->loadImage(StaticString("data/DragonsDogma.tga"));
+	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(7, 2.5, 0);
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
 //
@@ -459,6 +470,18 @@ void GLApplication::loadAssets()
 	model->Position(glm::vec3(-2, 2.5f, 0));
 	m_Models.push_back(model);
 
+	//Audio
+	String musicPath;
+	config.GetValue("Music", "Path", musicPath);
+
+	Sound* sound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
+	Sound* sound2 = Singleton<SoundManager>::GetInstance()->Get("Data/Applause3.wav");
+	SubmixVoice* mixVoice = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
+	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound, mixVoice);
+	//SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2, mixVoice);
+	v->Start();
+	//v2->Start();
+
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));
 }
@@ -467,7 +490,7 @@ void GLApplication::loadAssets()
 #include "Shaders/ShaderManager_Vertex.h"
 #include "Shaders/ShaderManager_Fragment.h"
 
-void GLApplication::releaseAssets()
+void GLApplication::ReleaseAssets()
 {
 	DeletePtr(m_multipleRenderTarget);
 	DeletePtr(m_deferredRendering);

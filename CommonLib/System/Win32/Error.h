@@ -1,5 +1,5 @@
 #pragma once
 
-#include "System/Typedefs.h"
+#include "../../System/Typedefs.h"
 
 const Char*	GetErrorMessage(int errorCode);

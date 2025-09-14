@@ -7,7 +7,7 @@
 #include <GL/glew.h>
 
 class Shader_GLSL {
-	CLASS_TYPEDEFS(Shader_GLSL);
+	CLASS_TYPEDEFS(Shader_GLSL)
 
 public:
 
@@ -39,7 +39,7 @@ protected:
 };
 
 class Shader_Vertex_GLSL : public Shader_GLSL {
-	INHERITEDCLASS_TYPEDEFS(Shader_Vertex_GLSL, Shader_GLSL);
+	INHERITEDCLASS_TYPEDEFS(Shader_Vertex_GLSL, Shader_GLSL)
 
 public:
 
@@ -54,7 +54,7 @@ public:
 };
 
 class Shader_Fragment_GLSL : public Shader_GLSL {
-	INHERITEDCLASS_TYPEDEFS(Shader_Fragment_GLSL, Shader_GLSL);
+	INHERITEDCLASS_TYPEDEFS(Shader_Fragment_GLSL, Shader_GLSL)
 
 public:
 
