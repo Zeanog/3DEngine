@@ -50,6 +50,14 @@ public:
 	
 	static Float32	Sqrt( Float32 val );
 
+	static Float32	MilliSec2Sec(UInt64 millsec) {
+		return millsec / 1000.0f;
+	}
+
+	static Float32	MilliSec2Sec(UInt32 millsec) {
+		return millsec / 1000.0f;
+	}
+
 	static Float32	MilliSec2Sec(Int32 millsec) {
 		return millsec / 1000.0f;
 	}

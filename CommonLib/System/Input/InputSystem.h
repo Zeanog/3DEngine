@@ -5,12 +5,12 @@
 #include "System/Singleton.h"
 
 class InputSystem {
-	CLASS_TYPEDEFS( InputSystem );
+	CLASS_TYPEDEFS( InputSystem )
 	SINGLETON_DECLARATIONS(InputSystem) {
 	}
 
 protected:
-	LPDIRECTINPUT8	m_pSystem;
+	LPDIRECTINPUT8	m_pSystem{};
 
 	Keyboard		m_Keyboard;
 	Mouse			m_Mouse;
@@ -22,19 +22,21 @@ public:
 			return false;
 		}
 
-		hr = m_Keyboard.Init(hWnd, m_pSystem);
-		if (FAILED(hr)) {
+		if (!m_Keyboard.Init(hWnd, m_pSystem)) {
 			return false;
 		}
-		verify(SUCCEEDED(m_Keyboard.Acquire()));
+		verify(m_Keyboard.Acquire());
 
-		hr = m_Mouse.Init(hWnd, m_pSystem);
-		if (FAILED(hr)) {
+		if (!m_Mouse.Init(hWnd, m_pSystem)) {
 			return false;
 		}
-		verify(SUCCEEDED(m_Mouse.Acquire()));
+		verify(m_Mouse.Acquire());
 
 		return true;
+	}
+
+	void	Release() {
+		
 	}
 
 	Keyboard*	GetKeyboard() {

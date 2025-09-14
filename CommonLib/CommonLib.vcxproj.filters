@@ -40,6 +40,12 @@
     <Filter Include="System\Flash">
       <UniqueIdentifier>{f15da20f-6887-4e06-a6f8-f935fbb4be41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\Audio">
+      <UniqueIdentifier>{dc8ad037-2fa7-41cf-ad30-b24e290ddf15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\Audio\Loaders">
+      <UniqueIdentifier>{386288d9-8b71-435f-a0de-280beccf65c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\AssetManager.h">
@@ -234,6 +240,42 @@
     <ClInclude Include="System\Flash\SWF.h">
       <Filter>System\Flash</Filter>
     </ClInclude>
+    <ClInclude Include="System\Audio\MasteringVoice.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\AudioSystem.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\AVoice.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\SourceVoice.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\AudioLoader.h">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\File_RIFF.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Sound.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\SoundManager.h">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\AudioLoader_OggVorbis.h">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\SourceVoiceCallbacks.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\SubmixVoice.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
@@ -338,5 +380,38 @@
     <ClCompile Include="TinyXML\tinyxml2.cpp">
       <Filter>TinyXML</Filter>
     </ClCompile>
+    <ClCompile Include="System\Audio\MasteringVoice.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\AudioSystem.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\SourceVoice.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\File_RIFF.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\Sound.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\Loaders\AudioLoader_RIFF.cpp">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\Loaders\SoundManager.cpp">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\Loaders\AudioLoader_OggVorbis.cpp">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\SourceVoiceCallbacks.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\SubmixVoice.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

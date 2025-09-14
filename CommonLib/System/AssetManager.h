@@ -5,7 +5,7 @@
 
 template< class _TAsset >
 class AssetManager {
-	CLASS_TYPEDEFS( AssetManager );
+	CLASS_TYPEDEFS( AssetManager )
 
 public:
 	typedef _TAsset						TAsset;

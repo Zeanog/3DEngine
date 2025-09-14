@@ -9,7 +9,7 @@
 #include "System\json.h"
 
 class IndexBuffer : public IJsonSerializable {
-	CLASS_TYPEDEFS( IndexBuffer );
+	CLASS_TYPEDEFS( IndexBuffer )
 
 public:
 	typedef List<UInt32>	TContainer;

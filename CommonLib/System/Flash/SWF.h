@@ -149,7 +149,7 @@ public:
 		STACK_STRING(encodedData, Type().Length() * 2 + 16 + numExtraChars);
 
 		sprintf_s(encodedData.CStr(), encodedData.Allocated(), "<%s>%d</%s>", Type().CStr(), data, Type().CStr());
-		return encodedData.CStr();
+		return encodedData.CStr();//TODO: Double check that this is safe.  Returning addr of local var
 	}
 };
 

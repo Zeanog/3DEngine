@@ -6,7 +6,7 @@
 
 template< typename _TData >
 class ALinkedList {
-	CLASS_TYPEDEFS(ALinkedList);
+	CLASS_TYPEDEFS(ALinkedList)
 
 public:
 	typedef _TData	TData;

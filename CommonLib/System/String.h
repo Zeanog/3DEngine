@@ -99,7 +99,7 @@ public:
 
 	static const Char*	Format( const char* format, ... ) {
 		static const int NumBuffers = 5;
-		static const int MaxBufferSize = 128;
+		static const int MaxBufferSize = 256;
 		static int currentIndex = 0;
 		static Char buffers[NumBuffers][MaxBufferSize];
 

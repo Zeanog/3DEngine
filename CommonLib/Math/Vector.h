@@ -7,7 +7,7 @@
 
 template< UInt32 _NumDimensions, class _TChild >
 class AVector {
-	CLASS_TYPEDEFS( AVector );
+	CLASS_TYPEDEFS( AVector )
 
 public:
 	typedef _TChild	TChild;

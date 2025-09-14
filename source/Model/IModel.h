@@ -33,9 +33,9 @@ public:
 	}
 	virtual ~IModel(){}
 
-	virtual bool	loadImage(const StaticString& textureName);
-	virtual void		Position(const glm::vec3& pos);
-	virtual void		Position(Float32 x, Float32 y, Float32 z) {
+	virtual bool	LoadImage(const StaticString& textureName);
+	virtual void	Position(const glm::vec3& pos);
+	virtual void	Position(Float32 x, Float32 y, Float32 z) {
 		m_Position[0] = x;
 		m_Position[1] = y;
 		m_Position[2] = z;

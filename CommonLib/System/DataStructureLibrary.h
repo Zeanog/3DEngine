@@ -5,7 +5,7 @@
 
 template< class _TData >
 class DataStructureLibrary {
-	CLASS_TYPEDEFS(DataStructureLibrary);
+	CLASS_TYPEDEFS(DataStructureLibrary)
 	SINGLETON_DECLARATIONS(DataStructureLibrary);
 
 public:

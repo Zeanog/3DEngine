@@ -13,6 +13,7 @@ typedef unsigned char	Byte;
 typedef unsigned char	UInt8;
 typedef unsigned short	UInt16;
 typedef unsigned int	UInt32;
+typedef unsigned long long	UInt64;
 typedef char			Int8;
 typedef short			Int16;
 typedef int				Int32;
@@ -109,15 +110,23 @@ void DeleteArray( _TData*& ptr ) {
 
 template< class _TData >
 void DeleteContents( _TData& stlContainer ) {
-	/*FOREACH( iter, stlContainer ) {     
+	FOREACH( iter, stlContainer ) {     
 		DeletePtr( *iter );             
-	}*/
+	}
 }
 
 template< typename _TData >
 void Destroy( _TData& stlContainer ) {
 	DeleteContents( stlContainer );
 	stlContainer.clear();
+}
+
+template< typename _TData >
+void Release(_TData*& ptr) {
+	if (ptr) {
+		ptr->Release();
+	}
+	ptr = NULL;
 }
 
 #include "System\Functors\ParamType.h"

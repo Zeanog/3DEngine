@@ -57,7 +57,7 @@ protected:
 	UInt32	m_Hash;
 
 #if _DEBUG
-	const Char*	m_DebugPtr;
+	const Char*	m_DebugPtr = NULL;
 #endif
 
 public:

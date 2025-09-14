@@ -1,8 +1,11 @@
 #pragma once
 
 #include "AVoice.h"
-#include <xaudio2.h>
+#include "SourceVoiceCallbacks.h"
 #include "System\Functors\MultiFunctor.h"
+
+#include <xaudio2.h>
+#include <array>
 
 class Sound;
 
@@ -22,7 +25,25 @@ protected:
 
 public:
 	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format);
-	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format, const XAUDIO2_VOICE_SENDS* destVoices);
+
+	template<typename... Voices>
+	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format, Voices... destVoices) {
+		m_Format = format;
+
+		//Wrap this in a macro or something
+		std::array<XAUDIO2_SEND_DESCRIPTOR, sizeof...(Voices)> descriptors;
+		XAUDIO2_VOICE_SENDS sends{ descriptors.size(), descriptors.data() };
+
+		std::size_t i = 0;
+		(void)std::initializer_list<int>{
+			(descriptors[i++] = { 0, destVoices }, 0)...
+		};
+		//Wrap this in a macro or something
+
+		m_Callbacks = new SourceVoiceCallbacks(this);
+		HRESULT hr = audio->CreateSourceVoice(&m_Voice, &m_Format, 0, 2.0f, m_Callbacks, &sends);
+		assert(SUCCEEDED(hr));
+	}
 
 	virtual Bool	Submit(const Sound& sound);
 	virtual Bool	Submit(const Sound* sound);

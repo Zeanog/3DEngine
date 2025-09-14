@@ -15,12 +15,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message) {
 		case WM_SIZE:
 		{
-			application.setSize(LOWORD(lParam), HIWORD(lParam));
+			application.SetSize(LOWORD(lParam), HIWORD(lParam));
 			break;
 		}
 
 		case WM_MOUSEMOVE:
-			Singleton<InputSystem>::GetInstance()->GetMouse()->UpdatePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			//Singleton<InputSystem>::GetInstance()->GetMouse()->UpdatePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			//Singleton<DebugConsole>::GetInstance()->Write(String::Format("\rX: %d, Y: %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			break;
 
@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 	hWnd = CreateWindowEx(dwExStyle, TEXT("DeferredRenderingClass"), TEXT("Deferred rendering tutorial"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, width, height, NULL, NULL, hInstance, NULL);
 
-	if (!application.initialize(hWnd, width, height))
+	if (!application.Initialize(hWnd, width, height))
 		return 0;
 
 	ShowWindow(hWnd, SW_SHOW);
@@ -89,15 +89,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			}
 		}
 
-		if (!running) {
-			continue;
+		if (running) {
+			application.Update();
+			application.Render();
 		}
-
-		application.update();
-		application.render();
 	}
 
-	application.release();
+	application.Release();
 
 	return (int)msg.wParam;
 }

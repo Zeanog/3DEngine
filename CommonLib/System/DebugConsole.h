@@ -2,21 +2,18 @@
 
 #include "..\System/Typedefs.h"
 #include "..\System/Singleton.h"
-
+#include <windows.h>
 #include <stdio.h>
 
 class DebugConsole {
-	CLASS_TYPEDEFS(DebugConsole);
+	CLASS_TYPEDEFS(DebugConsole)
 
 	SINGLETON_DECLARATIONS(DebugConsole) {
-		m_IsOpen = false;
 	}
 
 protected:
-	int		m_OutputFileDescriptor;
-	FILE*	m_pOutput;
-
-	Bool	m_IsOpen;
+	FILE*		m_hOutputFile = NULL;
+	HANDLE		m_hStdOut = NULL;
 
 public:
 	Bool	Open();
@@ -24,10 +21,11 @@ public:
 	void	Close();
 
 	inline Bool	IsOpen() const {
-		return m_IsOpen;
+		return m_hOutputFile != NULL;
 	}
 
 	Bool	Write(const Char* msg);
+	Bool	Write(const Char* format, const Char* msg);
 
 protected:
 	Bool	AttachIO();

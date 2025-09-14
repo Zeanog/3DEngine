@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "System/AssetManager.h"
 #include "Rendering/Mesh.h"
 #include "Rendering/ModelLoaders/ModelLoader_FBX.h"

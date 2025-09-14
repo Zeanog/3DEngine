@@ -46,7 +46,7 @@ public:
 			return false;
 		}
 
-		UInt32 numElementsRead = fread( &val, sizeof(TValue), 1, m_File );
+		UInt32 numElementsRead = fread_s( &val, sizeof(TValue), sizeof(TValue), 1, m_File );
 		if( numElementsRead == 1 ) {
 			return true;
 		}
@@ -65,7 +65,7 @@ public:
 		Int32 remaining = Remaining();
 		assert( remaining >= amountToRead );
 
-		UInt32 numElementsRead = fread( (void*)val, sizeof(TValue), numElements, m_File );
+		UInt32 numElementsRead = fread_s( (void*)val, sizeof(TValue) * numElements, sizeof(TValue), numElements, m_File );
 		if( numElementsRead == numElements ) {
 			return true;
 		}
@@ -175,15 +175,4 @@ protected:
 		m_Length = Tell();
 		Seek( pos, SEEK_SET );
 	}
-};
-
-class ISerializable {
-protected:
-
-	ISerializable(File& file) {
-	}
-
-public:
-	virtual Bool	ReadFrom( File& file ) = 0;
-	virtual Bool	WriteTo( File& file ) const = 0;
 };

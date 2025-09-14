@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Typedefs.h"
+#include "System/Functors/ParamType.h"
 #include <map>
 
 template< typename _TKey, typename _TValue >
@@ -12,7 +13,7 @@ void DeleteContents( std::map<_TKey, _TValue*>& stlContainer ) {
 
 template< typename _TKey, typename _TValue >
 class AMap {
-	CLASS_TYPEDEFS(AMap);
+	CLASS_TYPEDEFS(AMap)
 
 public:
 	typedef _TKey	TKey;
@@ -22,7 +23,7 @@ public:
 	typedef typename TContainer::const_iterator	TConstIterator;
 
 protected:
-	TContainer	m_Data;
+	typename TContainer	m_Data;
 
 public:
 	TIterator	Begin() {
@@ -83,6 +84,10 @@ public:
 		return cend();
 	}*/
 
+	Bool	Contains(typename Param<TKey>::Type key) const {
+		return m_Data.cend() != m_Data.find(key);
+	}
+
 	TValue&	Find(typename Param<TKey>::Type key) {
 		return m_Data.at(key);
 	}
@@ -118,45 +123,45 @@ public:
 
 template< typename _TKey, typename _TValue >
 class Map : public AMap<_TKey, _TValue> {
-	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue) );
+	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue) )
 
 protected:
 
 public:
 };
 
-template< typename _TKey, typename _TValue >
-class Map<_TKey, _TValue*> : public AMap<_TKey, _TValue*> {
-	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue*));
-
-protected:
-
-public:
-	virtual void	Add(typename Param<TKey>::Type key, typename Param<_TValue*>::Type value) override {
-		m_Data.insert(TContainer::value_type(key, value));
-	}
-};
-
-template< typename _TKey, typename _TValue >
-class Map<_TKey, const _TValue*> : public AMap<_TKey, const _TValue*> {
-	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, const _TValue*));
-
-protected:
-
-public:
-	virtual void	Add(typename Param<TKey>::Type key, typename Param<const _TValue*>::Type value) override {
-		m_Data.insert(TContainer::value_type(key, value));
-	}
-};
+//template< typename _TKey, typename _TValue >
+//class Map<_TKey, _TValue*> : public AMap<_TKey, _TValue*> {
+//	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue*))
+//
+//protected:
+//
+//public:
+//	virtual void	Add(typename Param<_TKey>::Type key, typename Param<_TValue*>::Type value) override {
+//		m_Data.insert(typename TContainer::value_type(key, value));
+//	}
+//};
+//
+//template< typename _TKey, typename _TValue >
+//class Map<_TKey, const _TValue*> : public AMap<_TKey, const _TValue*> {
+//	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, const _TValue*))
+//
+//protected:
+//
+//public:
+//	virtual void	Add(typename Param<_TKey>::Type key, typename Param<const _TValue*>::Type value) override {
+//		m_Data.insert(typename TContainer::value_type(key, value));
+//	}
+//};
 
 
 template<typename _TKey, typename _TValue>
-class ContainerIterator<Map<_TKey, _TValue>> {
+class ContainerIterator< Map<_TKey, _TValue> > {
 public:
-	typedef typename Map<_TKey, _TValue>	TContainer;
+	typedef typename Map<_TKey, _TValue>				TContainer;
 	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
-	typedef typename TUndecorated::TIterator		Iterator;
-	typedef typename TUndecorated::TConstIterator	ConstIterator;
+	typedef typename TUndecorated::TIterator			Iterator;
+	typedef typename TUndecorated::TConstIterator		ConstIterator;
 
 	static Iterator	Begin(TUndecorated& container) {
 		return container.Begin();
