@@ -476,8 +476,11 @@ void GLApplication::LoadAssets()
 	String musicPath;
 	config.GetValue("Music", "Path", musicPath);
 
+	String soundPath;
+	config.GetValue("TestSound", "Path", soundPath);
+
 	Sound* sound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
-	Sound* sound2 = Singleton<SoundManager>::GetInstance()->Get("Data/Applause3.wav");
+	Sound* sound2 = Singleton<SoundManager>::GetInstance()->Get(soundPath);
 	SubmixVoice* mixVoice = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
 	SubmixVoice* mixVoice2 = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
 	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound, mixVoice);
