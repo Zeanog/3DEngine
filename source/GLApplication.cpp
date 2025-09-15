@@ -485,15 +485,43 @@ void GLApplication::LoadAssets()
 	SubmixVoice* mixVoice2 = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
 	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound, mixVoice);
 	SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2, mixVoice);
-	v->Start();
-	v2->Start();
-
+	
 	v->SetOutputTo(mixVoice->Voice(), mixVoice2->Voice());
 
 	IUnknown* pReverbEffect = nullptr;
 	XAudio2CreateReverb(&pReverbEffect);
-	v->SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, 1 });
+	verify( v->SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, 2 }) );
 	pReverbEffect->Release();
+
+	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {0};
+	// Start with default constants (macros) or adjust them
+	reverbParams.WetDryMix = 60.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
+	reverbParams.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
+	reverbParams.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
+	reverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
+	reverbParams.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
+	reverbParams.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
+	reverbParams.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+	reverbParams.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+	reverbParams.EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
+	reverbParams.LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
+	reverbParams.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
+	reverbParams.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
+	reverbParams.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
+	reverbParams.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
+	reverbParams.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
+	reverbParams.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
+	reverbParams.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
+	reverbParams.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
+	reverbParams.ReflectionsGain = -5.0f;//XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
+	reverbParams.ReverbGain = -5.0f;//XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
+	reverbParams.DecayTime = 0.7f;//XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
+	reverbParams.RoomSize = 10.0f;//XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
+	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
+	verify( v->SetEffectParameters(0, &reverbParams, sizeof(decltype(reverbParams))) );
+
+	v->Start();
+	v2->Start();
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));

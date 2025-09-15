@@ -2,4 +2,4 @@
 
 #include "../../System/Typedefs.h"
 
-const Char*	GetErrorMessage(int errorCode);
+const Char*	GetErrorMessage(UInt32 errorCode);
