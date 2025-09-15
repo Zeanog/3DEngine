@@ -73,8 +73,6 @@ SourceVoice* AudioSystem::CreateSourceVoice(Sound* sound, SubmixVoice* destVoice
 	return newVoice;
 }
 
-#include <xaudio2fx.h>
-
 SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate) {
 	SubmixVoice* newVoice = new SubmixVoice();
 	newVoice->Init(m_Audio2, numChannels, sampleRate);
