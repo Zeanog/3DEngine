@@ -64,18 +64,4 @@ public:
 	Bool	CommitChanges(UInt32 operationSet) {
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
 	}
-
-	/*template <typename... Voices>
-	constexpr XAUDIO2_VOICE_SENDS Build(Voices... voices) {
-		static constexpr UINT32 NumDescriptors = sizeof...(Voices);
-		XAUDIO2_SEND_DESCRIPTOR* descriptors = new XAUDIO2_SEND_DESCRIPTOR[NumDescriptors];
-		XAUDIO2_VOICE_SENDS sends{ NumDescriptors, descriptors };
-
-		std::size_t i = 0;
-		(void)std::initializer_list<int>{
-			(descriptors[i++] = { 0, voices }, 0)...
-		};
-
-		return sends;
-	}*/
 };

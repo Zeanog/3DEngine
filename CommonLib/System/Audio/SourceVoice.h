@@ -1,29 +1,27 @@
 #pragma once
 
-#include "AVoice.h"
+#include "ASourceVoice.h"
 #include "SourceVoiceCallbacks.h"
 #include "System\Functors\MultiFunctor.h"
-
-#include <xaudio2.h>
 #include <array>
 
 class Sound;
 
-class SourceVoice : public AVoice {
-	INHERITEDCLASS_TYPEDEFS(SourceVoice, AVoice)
+class SourceVoice : public ASourceVoice<IXAudio2SourceVoice>{
+	INHERITEDCLASS_TYPEDEFS(SourceVoice, ASourceVoice<IXAudio2SourceVoice>)
 
 	friend class AudioSystem;
 
 protected:
 	WAVEFORMATEX		m_Format;//TODO:  Is this needed here??
 
-	IXAudio2SourceVoice* m_Voice{};
-
 	class SourceVoiceCallbacks* m_Callbacks{};
 
-	virtual void		Destroy();
+	virtual void		Destroy() override;
 
 public:
+	DECLARE_GETSET(Voice)
+
 	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format);
 
 	template<typename... Voices>
@@ -55,14 +53,19 @@ public:
 	virtual Bool	Start(const Sound* sound, UInt32 operationSet);
 	virtual Bool	Start(UInt32 operationSet);
 
-	Float32			Volume() const;
-	Bool			Volume(Float32 newVolume) const;
+	virtual void SetFrequencyRatio(Float32 ratio) {
+		verify(SUCCEEDED(m_Voice->SetFrequencyRatio(ratio)));
+	}
 
-	void			SetFrequencyRatio(Float32 ratio);
-	void			SetFrequencyRatio(Float32 ratio, UInt32 operationSet);
-	Float32			GetFrequencyRatio() const;
+	virtual void SetFrequencyRatio(Float32 ratio, UInt32 operationSet) {
+		verify(SUCCEEDED(m_Voice->SetFrequencyRatio(ratio, operationSet)));
+	}
 
-	Bool			SetOutputVoices(const XAUDIO2_VOICE_SENDS* destVoices);
+	virtual Float32 GetFrequencyRatio() const {
+		Float32 ratio;
+		m_Voice->GetFrequencyRatio(&ratio);
+		return ratio;
+	}
 
 public:
 	MultiFunctor<TYPELIST_1(UINT32)>	OnVoiceProcessingPassStart;

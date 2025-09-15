@@ -36,16 +36,6 @@ MasteringVoice* AudioSystem::CreateMasteringVoice() {
 	return newVoice;
 }
 
-template<typename TArg>
-XAUDIO2_SEND_DESCRIPTOR	BuildSendList(TArg arg) {
-	return { 0, destVoice->Voice() };
-}
-
-template<typename TArg, typename... TArgs>
-XAUDIO2_SEND_DESCRIPTOR	BuildSendList(TArgs... args) {
-
-}
-
 SourceVoice* AudioSystem::CreateSourceVoice(const WAVEFORMATEX& format, SubmixVoice* destVoice) {
 	UINT64 hash = GenerateHash(format);
 	if (m_FormatMap.Contains(hash)) {
@@ -109,7 +99,7 @@ SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRat
 
 	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {};
 	// Start with default constants (macros) or adjust them
-	reverbParams.WetDryMix = 15.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
+	reverbParams.WetDryMix = 60.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
 	//reverbParams.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
 	//reverbParams.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
 	//reverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;

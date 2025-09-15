@@ -19,7 +19,7 @@ SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format) {
 //}
 
 void SourceVoice::Destroy() {
-	::DestroyVoice(m_Voice);
+	TSuper::Destroy();
 
 	DeletePtr(m_Callbacks);
 }
@@ -62,32 +62,4 @@ Bool SourceVoice::Start(const Sound* sound, UInt32 operationSet) {
 
 Bool SourceVoice::Start(UInt32 operationSet) {
 	return SUCCEEDED(m_Voice->Start(0, operationSet));
-}
-
-Float32 SourceVoice::Volume() const {
-	Float32 volume{};
-	m_Voice->GetVolume(&volume);
-	return volume;
-}
-
-Bool SourceVoice::Volume(Float32 newVolume) const {
-	return SUCCEEDED(m_Voice->SetVolume(newVolume));
-}
-
-void SourceVoice::SetFrequencyRatio(Float32 ratio) {
-	verify(SUCCEEDED(m_Voice->SetFrequencyRatio(ratio)));
-}
-
-void SourceVoice::SetFrequencyRatio(Float32 ratio, UInt32 operationSet) {
-	verify(SUCCEEDED(m_Voice->SetFrequencyRatio(ratio, operationSet)));
-}
-
-Float32 SourceVoice::GetFrequencyRatio() const {
-	Float32 ratio;
-	m_Voice->GetFrequencyRatio(&ratio);
-	return ratio;
-}
-
-Bool SourceVoice::SetOutputVoices(const XAUDIO2_VOICE_SENDS* destVoices) {
-	return SUCCEEDED(m_Voice->SetOutputVoices(destVoices));
 }

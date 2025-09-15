@@ -51,7 +51,7 @@ public:
 	void	showDeferredRendering(){ m_state = 0; }
 	void	showRenderTargets(){ m_state = 1; }
 
-private:
+protected:
 	// Methods
 	void	LoadAssets();
 	void	ReleaseAssets();
