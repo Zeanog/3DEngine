@@ -73,4 +73,20 @@ public:
 
 		SetEffectChain(&chain);
 	}
+
+	Bool EnableEffect(UInt32 index) {
+		return SUCCEEDED( m_Voice->EnableEffect(index) );
+	}
+
+	Bool EnableEffect(UInt32 index, UInt32 operationSet) {
+		return SUCCEEDED( m_Voice->EnableEffect(index, operationSet) );
+	}
+
+	Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
+		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
+	}
+
+	Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
+		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
+	}
 };
