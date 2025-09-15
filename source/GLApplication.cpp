@@ -12,6 +12,7 @@
 
 #include "System/Input/InputSystem.h"
 #include "System/Audio/AudioSystem.h"
+#include "System\Audio\SubmixVoice.h"
 #include "System/Configuration.h"
 
 #include "System/Win32/Window.h"
@@ -381,6 +382,7 @@ void GLApplication::Release()
 #include <System/Audio/Loaders/AudioLoader_RIFF.h>
 #include <System/Audio/SourceVoice.h>
 #include <System/Audio/Sound.h>
+#include <xaudio2fx.h>
 
 /**
 *	Load all the required assets
@@ -477,10 +479,18 @@ void GLApplication::LoadAssets()
 	Sound* sound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
 	Sound* sound2 = Singleton<SoundManager>::GetInstance()->Get("Data/Applause3.wav");
 	SubmixVoice* mixVoice = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
+	SubmixVoice* mixVoice2 = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
 	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound, mixVoice);
-	//SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2, mixVoice);
+	SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2, mixVoice);
 	v->Start();
-	//v2->Start();
+	v2->Start();
+
+	v->SetOutputTo(mixVoice->Voice(), mixVoice2->Voice());
+
+	IUnknown* pReverbEffect = nullptr;
+	XAudio2CreateReverb(&pReverbEffect);
+	v->SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, 1 });
+	pReverbEffect->Release();
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));

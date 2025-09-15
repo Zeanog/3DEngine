@@ -9,9 +9,6 @@ class AVoice {
 
 protected:
 	virtual void	Destroy() = 0;
-
-public:
-	//virtual Bool	Init(IXAudio2* audio, IXAudio2VoiceCallback* callback) = 0;
 };
 
 template< typename _TData >

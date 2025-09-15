@@ -1,31 +1,22 @@
 #pragma once
 
-#include "AVoice.h"
+#include "ASourceVoice.h"
 
-#include <xaudio2.h>
-
-class SubmixVoice : public AVoice {
-	INHERITEDCLASS_TYPEDEFS(SubmixVoice, AVoice)
+class SubmixVoice : public ASourceVoice<IXAudio2SubmixVoice> {
+	INHERITEDCLASS_TYPEDEFS(SubmixVoice, ASourceVoice<IXAudio2SubmixVoice>)
 
 	friend class AudioSystem;
 
 protected:
-	IXAudio2SubmixVoice* m_Voice{};
-
 	UInt32		m_NumChannels{};
 	UInt32		m_SampleRate{};
-
-protected:
-	virtual void	Destroy();
 
 public:
 	SubmixVoice();
 
-	DECLARE_GETSET(Voice)
-
 	virtual Bool	Init(IXAudio2* audio, UInt32 numChannels, UInt32 sampleRate);
 
-	Float32			Volume() const;
+	/*Float32			Volume() const;
 	Bool			Volume(Float32 newVolume) const;
-	Bool			Volume(Float32 newVolume, UInt32 operationSet) const;
+	Bool			Volume(Float32 newVolume, UInt32 operationSet) const;*/
 };

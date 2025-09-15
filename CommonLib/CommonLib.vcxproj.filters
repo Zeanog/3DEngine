@@ -276,6 +276,9 @@
     <ClInclude Include="System\Audio\SubmixVoice.h">
       <Filter>System\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="System\Audio\ASourceVoice.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">

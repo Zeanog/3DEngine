@@ -83,7 +83,7 @@ public:
 	}
 };
 
-template< class _TList >
+template< class _TList = TNull >
 class MultiFunctor;
 
 template<>
