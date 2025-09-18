@@ -122,17 +122,17 @@ public:
 	}
 };
 
-//#include "JsonSerializer.h"
-//
-//template<>
-//class JsonSerializer<String> {
-//public:
-//	static String	ReadFrom(const rapidjson::Value& jsonVal) {
-//		assert(jsonVal.IsString());
-//		return String(jsonVal.GetString());
-//	}
-//
-//	static Bool	ReadFrom(const rapidjson::Value& jsonVal, String& str) {
-//		str = ReadFrom(jsonVal);
-//	}
-//};
+#include "System/JsonSerializer.h"
+
+template<>
+class JsonSerializer<String> {
+public:
+	static String	ReadFrom(const rapidjson::Value& jsonVal) {
+		assert(jsonVal.IsString());
+		return String(jsonVal.GetString());
+	}
+
+	static Bool	ReadFrom(const rapidjson::Value& jsonVal, String& str) {
+		str = ReadFrom(jsonVal);
+	}
+};

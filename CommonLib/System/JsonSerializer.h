@@ -1,14 +1,10 @@
 #pragma once
 
 #include "Typedefs.h"
-#include "String.h"
-#include "StackString.h"
 #include "rapidjson\document.h"
 
 namespace rapidjson {
 	Bool	LoadFrom(const Char* filePath, rapidjson::Document& outDoc);
-	Bool	LoadFrom(const String& filePath, rapidjson::Document& outDoc);
-	Bool	LoadFrom(const StackString& filePath, rapidjson::Document& outDoc);
 };
 
 template< typename TData >

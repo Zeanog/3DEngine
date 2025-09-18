@@ -18,5 +18,7 @@ public:
 		return m_Data;
 	}
 
+	Float32		Duration() const;
+
 	Bool	UploadData(const AudioLoader& loader);
 };

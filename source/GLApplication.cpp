@@ -495,24 +495,17 @@ void GLApplication::LoadAssets()
 	assert(doc["TestSound"].IsObject());
 	soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 
-	Sound* sound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
-	Sound* sound2 = Singleton<SoundManager>::GetInstance()->Get(soundPath);
-	SubmixVoice* mixVoice = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
-	SubmixVoice* mixVoice2 = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
-	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound);
-	SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2);
-
-	v->SetOutputTo(mixVoice, mixVoice2);
-	v2->SetOutputTo(mixVoice);
+	Sound* musicSound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
+	Sound* fxSound = Singleton<SoundManager>::GetInstance()->Get(soundPath);
 	
 	IUnknown* pReverbEffect = nullptr;
 	XAudio2CreateReverb(&pReverbEffect);
-	verify(mixVoice->SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, mixVoice->NumChannels() }) );
+	verify( Singleton<AudioSystem>::GetInstance()->AddFxEffectDescriptors(pReverbEffect) );
 	pReverbEffect->Release();
 
 	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {0};
 	// Start with default constants (macros) or adjust them
-	reverbParams.WetDryMix = 80.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
+	reverbParams.WetDryMix = 90.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
 	reverbParams.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
 	reverbParams.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
 	reverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
@@ -535,11 +528,12 @@ void GLApplication::LoadAssets()
 	reverbParams.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
 	reverbParams.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
 	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
-	verify(mixVoice->SetEffectParameters(0, &reverbParams, sizeof(decltype(reverbParams))) );
-	mixVoice->EnableEffect(0);
+	verify(Singleton<AudioSystem>::GetInstance()->SetFxEffectParameters(0, &reverbParams, sizeof(decltype(reverbParams))));
+	Singleton<AudioSystem>::GetInstance()->EnableFxEffect(0);
 
-	//v->Start();
-	v2->Start();
+	auto musicVoice = Singleton<AudioSystem>::GetInstance()->PlayMusic(musicSound);
+	musicVoice->Volume(0.1);
+	auto fxVoice = Singleton<AudioSystem>::GetInstance()->PlayFx(fxSound);
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));
