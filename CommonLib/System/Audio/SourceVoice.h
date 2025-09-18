@@ -1,5 +1,6 @@
 #pragma once
 
+#include "..\Typedefs.h"
 #include "ASourceVoice.h"
 #include "SourceVoiceCallbacks.h"
 #include "System\Functors\MultiFunctor.h"
@@ -21,6 +22,8 @@ protected:
 
 public:
 	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format);
+
+	DECLARE_GETSET(Format);
 
 	//template<typename... Voices>
 	//SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format, Voices... destVoices) {

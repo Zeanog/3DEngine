@@ -17,15 +17,15 @@ public:
 		::DestroyVoice(m_Voice);
 	}
 
-	TVoiceInterface* Voice() {
+	virtual TVoiceInterface* Voice() {
 		return m_Voice;
 	}
 
-	const TVoiceInterface* Voice() const {
+	virtual const TVoiceInterface* Voice() const {
 		return m_Voice;
 	}
 
-	void Voice(TVoiceInterface* vi) {
+	virtual void Voice(TVoiceInterface* vi) {
 		m_Voice = vi;
 	}
 
@@ -73,23 +73,36 @@ public:
 		return SUCCEEDED(result);
 	}
 
-	template<typename... EffectDescripts>
-	Bool SetEffectDescriptors(EffectDescripts... effectDescripts) {
-		static constexpr UINT32 NumDescriptors = sizeof...(EffectDescripts);
-		XAUDIO2_EFFECT_DESCRIPTOR descriptors[NumDescriptors]{ effectDescripts... };
+	template<typename... EffectDescriptors>
+	Bool SetEffectDescriptors(EffectDescriptors... effectDescriptors) {
+		static constexpr UINT32 NumDescriptors = sizeof...(EffectDescriptors);
+		XAUDIO2_EFFECT_DESCRIPTOR descriptors[NumDescriptors]{ effectDescriptors... };
 		XAUDIO2_EFFECT_CHAIN chain{ NumDescriptors, descriptors };
 
 		return SetEffectChain(chain);
 	}
 
+	Bool SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR* effectDescriptors, UInt32 count) {
+		XAUDIO2_EFFECT_CHAIN chain{ count, effectDescriptors };
+		return SetEffectChain(chain);
+	}
+
+	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
+		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
+	}
+
+	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
+		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
+	}
+
 	Bool EnableEffect(UInt32 index) {
 		auto result = m_Voice->EnableEffect(index);
-		return SUCCEEDED( result );
+		return SUCCEEDED(result);
 	}
 
 	Bool EnableEffect(UInt32 index, UInt32 operationSet) {
 		auto result = m_Voice->EnableEffect(index, operationSet);
-		return SUCCEEDED( result );
+		return SUCCEEDED(result);
 	}
 
 	Bool DisableEffect(UInt32 index) {
@@ -100,13 +113,5 @@ public:
 	Bool DisableEffect(UInt32 index, UInt32 operationSet) {
 		auto result = m_Voice->DisableEffect(index, operationSet);
 		return SUCCEEDED(result);
-	}
-
-	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
-	}
-
-	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
 	}
 };

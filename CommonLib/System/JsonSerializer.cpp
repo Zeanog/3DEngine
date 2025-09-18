@@ -23,12 +23,4 @@ namespace rapidjson {
 		outDoc.Parse(jsonBody.CStr());
 		return !outDoc.IsNull();
 	}
-
-	Bool	LoadFrom(const String& filePath, rapidjson::Document& outDoc) {
-		return LoadFrom(filePath.CStr(), outDoc);
-	}
-
-	Bool	LoadFrom(const StackString& filePath, rapidjson::Document& outDoc) {
-		return LoadFrom(filePath.CStr(), outDoc);
-	}
 }

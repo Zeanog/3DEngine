@@ -180,57 +180,55 @@ public:
 	}
 };
 
-/*
-template<typename TElem>
-class JsonSerializer<List<TElem>> {
-public:
-	static List<TElem>	ReadFrom(const Value& root) {
-		List<TElem> outVal;
+//#include "JsonSerializer.h"
+//
+//template<typename TKey, typename TElem>
+//class JsonSerializer<Map<TKey, TElem>> {
+//public:
+//	static Map<TKey, TElem>	ReadFrom(const rapidjson::Value& root) {
+//		Map<TKey, TElem> outVal;
+//
+//		ReadFrom( root, outVal );
+//
+//		return outVal;
+//	}
+//
+//	static Bool	ReadFrom(const rapidjson::Value& root, Map<TKey, TElem>& outVal) {
+//		assert(root.IsObject());
+//
+//		for (auto iter = root.MemberBegin(); iter != root.MemberEnd(); ++iter) {
+//			rapidjson::Value elemVal = (iter->value);
+//			typename TElem elem = JsonSerializer<typename TElem>::ReadFrom(elemVal);
+//			outVal.Add(iter->name.GetString(), elem);
+//		}
+//
+//		return true;
+//	}
+//};
 
-		ReadFrom( root, outVal );
-
-		return outVal;
-	}
-
-	static Bool	ReadFrom(const Value& root, List<TElem>& outVal) {
-		assert(root.IsArray());
-
-		Value::ConstArray arr = root.GetArray();
-		for (Value::ConstArray::ConstValueIterator iter = arr.Begin(); iter != arr.End(); ++iter) {
-			Value elemVal = (*iter);
-			typename List<TElem>::TData elem = JsonSerializer<typename List<TElem>::TData>::ReadFrom(elemVal);
-			outVal.Add(elem);
-		}
-
-		return true;
-	}
-};
-
-template<typename TElem>
-class JsonSerializer<List<TElem*>> {
-public:
-	static List<TElem*>	ReadFrom(const Value& root) {
-		List<TElem*> outVal;
-
-		ReadFrom(root, outVal);
-
-		return outVal;
-	}
-
-	static Bool	ReadFrom(const Value& root, List<TElem*>& outVal) {
-		assert(root.IsArray());
-
-		DeleteContents(outVal);
-		outVal.Clear();
-
-		Value::ConstArray arr = root.GetArray();
-		for (Value::Array::ConstValueIterator iter = arr.Begin(); iter != arr.End(); ++iter) {
-			const Value::Array::ValueType* elemVal = iter;
-			typename List<TElem*>::TData* elem = JsonSerializer<typename List<TElem*>::TData*>::ReadFrom(*elemVal);
-			outVal.Add(elem);
-		}
-
-		return true;
-	}
-};
-*/
+//template<typename TElem>
+//class JsonSerializer<Map<StaticString, TElem*>> {
+//public:
+//	static Map<StaticString, TElem*>	ReadFrom(const rapidjson::Value& root) {
+//		Map<StaticString, TElem*> outVal;
+//
+//		ReadFrom(root, outVal);
+//
+//		return outVal;
+//	}
+//
+//	static Bool	ReadFrom(const rapidjson::Value& root, Map<StaticString, TElem*>& outVal) {
+//		assert(root.IsObject());
+//
+//		DeleteContents(outVal);
+//		outVal.Clear();
+//
+//		for (auto iter = root.MemberBegin(); iter != root.MemberEnd(); ++iter) {
+//			rapidjson::Value elemVal = (iter->value);
+//			typename TElem elem = JsonSerializer<typename TElem>::ReadFrom(elemVal);
+//			outVal.Add(iter->name.GetString(), elem);
+//		}
+//
+//		return true;
+//	}
+//};
