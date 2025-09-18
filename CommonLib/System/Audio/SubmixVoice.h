@@ -16,7 +16,7 @@ public:
 
 	virtual Bool	Init(IXAudio2* audio, UInt32 numChannels, UInt32 sampleRate);
 
-	/*Float32			Volume() const;
-	Bool			Volume(Float32 newVolume) const;
-	Bool			Volume(Float32 newVolume, UInt32 operationSet) const;*/
+	virtual UInt32	NumChannels() const override {
+		return m_NumChannels;
+	}
 };

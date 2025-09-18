@@ -5,7 +5,6 @@
 #include "Rendering/IndexBuffer.h"
 #include "System/List.h"
 #include "System/Map.h"
-#include "System/Json.h"
 #include "Images/Image.h"
 #include "Rendering/Joint.h"
 #include "System/Color.h"
@@ -310,25 +309,25 @@ public:
 		return val;
 	}*/
 
-	static Neo::Mesh::Material	ReadFrom(json_value* root) {
-		Neo::Mesh::Material outVal;
-		for (UInt32 ix = 0; ix < root->u.object.length; ++ix) {
-			if (!String::StrICmp(root->u.object.values[ix].name, "Index")) {
-				outVal.Index = (Int32)root->u.object.values[ix].value->u.integer;
-				continue;
-			}
+	//static Neo::Mesh::Material	ReadFrom(json_value* root) {
+	//	Neo::Mesh::Material outVal;
+	//	for (UInt32 ix = 0; ix < root->u.object.length; ++ix) {
+	//		if (!String::StrICmp(root->u.object.values[ix].name, "Index")) {
+	//			outVal.Index = (Int32)root->u.object.values[ix].value->u.integer;
+	//			continue;
+	//		}
 
-			if (!String::StrICmp(root->u.object.values[ix].name, "PolyCount")) {
-				outVal.PolyCount = (Int32)root->u.object.values[ix].value->u.integer;
-				continue;
-			}
+	//		if (!String::StrICmp(root->u.object.values[ix].name, "PolyCount")) {
+	//			outVal.PolyCount = (Int32)root->u.object.values[ix].value->u.integer;
+	//			continue;
+	//		}
 
-			/*if (!String::StrICmp(root->u.object.values[ix].name, "TexturePath")) {
-				outVal.TexturePath = root->u.object.values[ix].value->u.string.ptr;
-				continue;
-			}*/
-		}
+	//		/*if (!String::StrICmp(root->u.object.values[ix].name, "TexturePath")) {
+	//			outVal.TexturePath = root->u.object.values[ix].value->u.string.ptr;
+	//			continue;
+	//		}*/
+	//	}
 
-		return outVal;
-	}
+	//	return outVal;
+	//}
 };

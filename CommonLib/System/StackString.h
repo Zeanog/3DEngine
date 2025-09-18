@@ -1,13 +1,14 @@
 #pragma once
 
-//#include "String.h"
+#include "String.h"
 
 class StackString : public AString {
 public:
 
 protected:
 	Char * m_pData = NULL;
-	Int32	m_Size = -1;
+	UInt32	m_Size = 0;
+	UInt32	m_Allocated = 0;
 
 protected:
 	StackString() {}
@@ -16,6 +17,7 @@ public:
 	StackString(Char* buffer, Int32 size) {
 		m_pData = buffer;
 		m_Size = size;
+		m_Allocated = size;
 	}
 
 	/*virtual Bool	ReadFrom(json_value* val) {
@@ -32,12 +34,17 @@ public:
 		return m_pData;
 	}
 
-	Int32	Length() const {
-		return String::StrLen(m_pData);
+	UInt32	Length() const {
+		return m_Size;
 	}
 
-	Int32	Allocated() const {
-		return m_Size;
+	UInt32	Allocated() const {
+		return m_Allocated;
+	}
+
+	void	Resize(UInt32 newSize) {
+		assert(newSize < Allocated());
+		m_Size = newSize;
 	}
 
 	/*Bool	operator<(const String& rhs) const {
@@ -58,7 +65,7 @@ public:
 	}
 
 	StackString&	operator=(const String& rhs) {
-		String::StrCpy(m_pData, m_Size, rhs.CStr());
+		String::StrCpy(m_pData, m_Allocated, rhs.CStr());
 		return *this;
 	}
 
@@ -68,12 +75,12 @@ public:
 	}*/
 
 	StackString&	operator=(const StackString& rhs) {
-		String::StrCpy(m_pData, m_Size, rhs.CStr());
+		String::StrCpy(m_pData, m_Allocated, rhs.CStr());
 		return *this;
 	}
 
 	StackString&	operator=(const Char* rhs) {
-		String::StrCpy(m_pData, m_Size, rhs);
+		String::StrCpy(m_pData, m_Allocated, rhs);
 		return *this;
 	}
 

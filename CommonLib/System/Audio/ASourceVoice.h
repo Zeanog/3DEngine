@@ -8,7 +8,7 @@ class ASourceVoice : public AVoice {
 	INHERITEDCLASS_TYPEDEFS(ASourceVoice, AVoice)
 
 protected:
-	TVoiceInterface* m_Voice;
+	TVoiceInterface* m_Voice{};
 
 	ASourceVoice() {} //Hide constructor to make it like an abstract class
 
@@ -28,6 +28,8 @@ public:
 	void Voice(TVoiceInterface* vi) {
 		m_Voice = vi;
 	}
+
+	virtual UInt32	NumChannels() const = 0;
 
 	virtual Float32 Volume() const {
 		Float32 volume{};
@@ -54,8 +56,8 @@ public:
 		XAUDIO2_VOICE_SENDS sends{ NumDescriptors, descriptors };
 
 		std::size_t i = 0;
-		(void)std::initializer_list<int>{
-			(descriptors[i++] = { 0, destVoices }, 0)...
+		std::initializer_list<int>{
+			(descriptors[i++] = { 0, destVoices->Voice() }, 0)...
 		};
 
 		return SetOutputVoices(&sends);
@@ -63,17 +65,11 @@ public:
 
 	virtual Bool SetEffectChain(const XAUDIO2_EFFECT_CHAIN& chain) {
 		auto result = m_Voice->SetEffectChain(&chain);
-		if (FAILED(result)) {
-			return SUCCEEDED(GetLastError());
-		}
 		return SUCCEEDED(result);
 	}
 
 	virtual Bool SetEffectChain(const XAUDIO2_EFFECT_CHAIN* chain) {
 		auto result = m_Voice->SetEffectChain(chain);
-		if (FAILED(result)) {
-			return SUCCEEDED(GetLastError());
-		}
 		return SUCCEEDED(result);
 	}
 
@@ -96,57 +92,15 @@ public:
 		return SUCCEEDED( result );
 	}
 
-	/*
-	IUnknown* pReverbAPO = nullptr;
-	verify(SUCCEEDED(XAudio2CreateReverb(&pReverbAPO)));
+	Bool DisableEffect(UInt32 index) {
+		auto result = m_Voice->DisableEffect(index);
+		return SUCCEEDED(result);
+	}
 
-	// Define the effect descriptor
-	XAUDIO2_EFFECT_DESCRIPTOR effectDesc = { 0 };
-	effectDesc.InitialState = TRUE;  // Start enabled
-	effectDesc.OutputChannels = numChannels;  // must match what voice can output or chain requirement
-	effectDesc.pEffect = pReverbAPO;
-
-	// Define the effect chain
-	XAUDIO2_EFFECT_CHAIN effectChain = { 0 };
-	effectChain.EffectCount = 1;
-	effectChain.pEffectDescriptors = &effectDesc;
-
-	// Attach the effect chain to the source voice
-	verify(SUCCEEDED(newVoice->Voice()->SetEffectChain(&effectChain)));
-	pReverbAPO->Release();
-
-	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {};
-	// Start with default constants (macros) or adjust them
-	reverbParams.WetDryMix = 60.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
-	//reverbParams.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
-	//reverbParams.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
-	//reverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
-	//reverbParams.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-	//reverbParams.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-	//reverbParams.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	//reverbParams.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	//reverbParams.EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
-	//reverbParams.LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
-	//reverbParams.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-	//reverbParams.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
-	//reverbParams.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-	//reverbParams.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
-	//reverbParams.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
-	//reverbParams.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
-	//reverbParams.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
-	//reverbParams.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
-	reverbParams.ReflectionsGain = -5.0f;//XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
-	reverbParams.ReverbGain = -5.0f;//XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
-	reverbParams.DecayTime = 0.7f;//XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
-	reverbParams.RoomSize = 10.0f;//XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
-	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
-
-	// Set the parameters on voice, effect index 0 since that's where reverb is
-	verify(newVoice->SetEffectParameters(0, &reverbParams, sizeof(reverbParams)));
-
-	// If needed, ensure effect is enabled (it was set to InitialState=TRUE above)
-	verify(newVoice->EnableEffect(0));
-	*/
+	Bool DisableEffect(UInt32 index, UInt32 operationSet) {
+		auto result = m_Voice->DisableEffect(index, operationSet);
+		return SUCCEEDED(result);
+	}
 
 	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
 		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));

@@ -235,7 +235,7 @@ public:
 template<typename TElem>
 class JsonSerializer<List<TElem>> {
 public:
-	static List<TElem>	ReadFrom(const Value& root) {
+	static List<TElem>	ReadFrom(const rapidjson::Value& root) {
 		List<TElem> outVal;
 
 		ReadFrom( root, outVal );
@@ -243,7 +243,7 @@ public:
 		return outVal;
 	}
 
-	static Bool	ReadFrom(const Value& root, List<TElem>& outVal) {
+	static Bool	ReadFrom(const rapidjson::Value& root, List<TElem>& outVal) {
 		assert(root.IsArray());
 
 		Value::ConstArray arr = root.GetArray();
@@ -256,7 +256,7 @@ public:
 		return true;
 	}
 
-	static Bool	ReadFrom(json_value* root, List<TElem>& outVal) {
+	/*static Bool	ReadFrom(json_value* root, List<TElem>& outVal) {
 		assert(root->type == json_type::json_array);
 
 		for (UInt32 ix = 0; ix < root->u.array.length; ++ix) {
@@ -264,13 +264,13 @@ public:
 		}
 
 		return true;
-	}
+	}*/
 };
 
 template<typename TElem>
 class JsonSerializer<List<TElem*>> {
 public:
-	static List<TElem*>	ReadFrom(const Value& root) {
+	static List<TElem*>	ReadFrom(const rapidjson::Value& root) {
 		List<TElem*> outVal;
 
 		ReadFrom(root, outVal);
@@ -278,7 +278,7 @@ public:
 		return outVal;
 	}
 
-	static Bool	ReadFrom(const Value& root, List<TElem*>& outVal) {
+	static Bool	ReadFrom(const rapidjson::Value& root, List<TElem*>& outVal) {
 		assert(root.IsArray());
 
 		DeleteContents(outVal);
@@ -286,19 +286,9 @@ public:
 
 		Value::ConstArray arr = root.GetArray();
 		FOREACH(iter, arr) {
-			const Value::Array::ValueType* elemVal = iter;
+			const rapidjson::Value::Array::ValueType* elemVal = iter;
 			typename List<TElem*>::TData* elem = JsonSerializer<typename List<TElem*>::TData*>::ReadFrom(*elemVal);
 			outVal.Add(elem);
-		}
-
-		return true;
-	}
-
-	static Bool	ReadFrom(json_value* root, List<TElem*>& outVal) {
-		assert(root->type == json_type::json_array);
-
-		for (int ix = 0; ix < root->u.array.length; ++ix) {
-			outVal.Add(JsonSerializer<TElem*>::ReadFrom(root->u.array.values[ix]));
 		}
 
 		return true;

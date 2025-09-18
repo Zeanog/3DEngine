@@ -384,6 +384,8 @@ void GLApplication::Release()
 #include <System/Audio/Sound.h>
 #include <xaudio2fx.h>
 
+#include "System/JsonSerializer.h"
+
 /**
 *	Load all the required assets
 */
@@ -404,7 +406,7 @@ void GLApplication::LoadAssets()
 	verify(m_LightingProgram_Directional.Create("data/deferredLighting.vert", "data/deferredLighting_Directional.frag", NULL));
 	verify(m_LightingProgram_Spot.Create("data/deferredLighting.vert", "data/deferredLighting_Spot.frag", NULL));
 	verify(m_LightingProgram_Point.Create("data/deferredLighting.vert", "data/deferredLighting_Point.frag", NULL));
-	
+
 	verify(m_RenderModel_UnlitProgram.Create("data/deferredShading.vert", "data/deferredShading_Unlit.frag", NULL));
 	verify(m_RenderModelProgram.Create("data/deferredShading.vert", "data/deferredShading.frag", NULL));
 	verify(m_ShadowMapGenerationProgram.Create("data/shadowMap.vert", "data/shadowMap.frag", NULL));
@@ -432,16 +434,16 @@ void GLApplication::LoadAssets()
 	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(7, 2.5, 0);
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
-//
-//	ALight* light = NULL;
-//	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
-//	light = new Light_Directional(dir);
-//#if CAST_SHADOWS
-//	light->CastsShadows(true);
-//#endif
-//	m_Lights.push_back(light);
+	//
+	//	ALight* light = NULL;
+	//	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
+	//	light = new Light_Directional(dir);
+	//#if CAST_SHADOWS
+	//	light->CastsShadows(true);
+	//#endif
+	//	m_Lights.push_back(light);
 
-	//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
+		//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
 #if CAST_SHADOWS
 	//light->CastsShadows(true);
 #endif
@@ -453,7 +455,7 @@ void GLApplication::LoadAssets()
 	spotLight->QuadraticAttenuation(0.01f);
 	spotLight->Exponent(2);
 #if CAST_SHADOWS
-		spotLight->CastsShadows(true);
+	spotLight->CastsShadows(true);
 #endif
 	m_Lights.push_back(spotLight);
 
@@ -462,40 +464,55 @@ void GLApplication::LoadAssets()
 	//model->Position(-2, 2.5f, 0);
 	//m_Models.push_back(model);
 
-	Configuration config;
+	//Configuration config;
 
-	config.LoadFrom("Data/Scene.ini");
+	//config.LoadFrom("Data/Scene.ini");
 	String modelPath;
-	config.GetValue("Model", "Path", modelPath);
+	//config.GetValue("Model", "Path", modelPath);
 
+	
+
+	//Audio
+	String musicPath;
+	//config.GetValue("Music", "Path", musicPath);
+
+	String soundPath;
+	//config.GetValue("TestSound", "Path", soundPath);
+
+	rapidjson::Document	doc;
+	verify(rapidjson::LoadFrom("Data/Scene.json", doc));
+
+	assert(doc["Model"].IsObject());
+	auto& docVal = doc["Model"];
+	modelPath = docVal.FindMember("Path")->value.GetString();
 	model = new Model(modelPath.CStr());
 	model->Position(glm::vec3(-2, 2.5f, 0));
 	m_Models.push_back(model);
 
-	//Audio
-	String musicPath;
-	config.GetValue("Music", "Path", musicPath);
+	assert(doc["Music"].IsObject());
+	musicPath = doc["Music"].FindMember("Path")->value.GetString();
 
-	String soundPath;
-	config.GetValue("TestSound", "Path", soundPath);
+	assert(doc["TestSound"].IsObject());
+	soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 
 	Sound* sound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
 	Sound* sound2 = Singleton<SoundManager>::GetInstance()->Get(soundPath);
 	SubmixVoice* mixVoice = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
 	SubmixVoice* mixVoice2 = Singleton<AudioSystem>::GetInstance()->CreateSubmixVoice(1, 44100);
-	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound, mixVoice);
-	SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2, mixVoice);
-	
-	v->SetOutputTo(mixVoice->Voice(), mixVoice2->Voice());
+	SourceVoice* v = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound);
+	SourceVoice* v2 = Singleton<AudioSystem>::GetInstance()->CreateSourceVoice(sound2);
 
+	v->SetOutputTo(mixVoice, mixVoice2);
+	v2->SetOutputTo(mixVoice);
+	
 	IUnknown* pReverbEffect = nullptr;
 	XAudio2CreateReverb(&pReverbEffect);
-	verify( v->SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, 2 }) );
+	verify(mixVoice->SetEffectDescriptors(XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, mixVoice->NumChannels() }) );
 	pReverbEffect->Release();
 
 	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {0};
 	// Start with default constants (macros) or adjust them
-	reverbParams.WetDryMix = 60.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
+	reverbParams.WetDryMix = 80.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
 	reverbParams.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
 	reverbParams.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
 	reverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
@@ -513,14 +530,15 @@ void GLApplication::LoadAssets()
 	reverbParams.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
 	reverbParams.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
 	reverbParams.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
-	reverbParams.ReflectionsGain = -5.0f;//XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
-	reverbParams.ReverbGain = -5.0f;//XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
-	reverbParams.DecayTime = 0.7f;//XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
-	reverbParams.RoomSize = 10.0f;//XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
+	reverbParams.ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
+	reverbParams.ReverbGain = XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
+	reverbParams.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
+	reverbParams.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
 	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
-	verify( v->SetEffectParameters(0, &reverbParams, sizeof(decltype(reverbParams))) );
+	verify(mixVoice->SetEffectParameters(0, &reverbParams, sizeof(decltype(reverbParams))) );
+	mixVoice->EnableEffect(0);
 
-	v->Start();
+	//v->Start();
 	v2->Start();
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));

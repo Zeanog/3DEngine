@@ -25,40 +25,47 @@ protected:
 
 	List<AVoice*>	m_Voices{};
 
-	Map<UINT64, SourceVoice*>	m_FormatMap{};
+	Map<UINT64, List<SourceVoice*>>	m_FormatToSourceMap{};
 
 protected:
 	MasteringVoice* CreateMasteringVoice();
 
 	static UINT64		GenerateHash(const WAVEFORMATEX& format) {
-		auto val = (UINT64)format.nChannels << 56 | (UINT64)format.nSamplesPerSec << 32 | (UINT64)format.wBitsPerSample << 16 | format.wFormatTag;
+		static constexpr Byte numChannelShift = 56;
+		static constexpr Byte samplesPerSecShift = 32;
+		static constexpr Byte bitsPerSampleShift = 16;
 
-		assert( (val >> 56) == format.nChannels );
-		assert( ((val >> 32) & 0xFFFF ) == format.nSamplesPerSec );
-		assert( ((val >> 16) & 0xFF) == format.wBitsPerSample );
+		auto val = (UINT64)format.nChannels << numChannelShift | (UINT64)format.nSamplesPerSec << samplesPerSecShift | (UINT64)format.wBitsPerSample << bitsPerSampleShift | format.wFormatTag;
+
+		assert( (val >> numChannelShift) == format.nChannels );
+		assert( ((val >> samplesPerSecShift) & 0xFFFF ) == format.nSamplesPerSec );
+		assert( ((val >> bitsPerSampleShift) & 0xFF) == format.wBitsPerSample );
 		assert( (val & 0xFF) == format.wFormatTag );
 
 		return val;
 	}
 
-	Bool FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) {
-		UINT64 hash = GenerateHash(format);
-		if (!m_FormatMap.Contains(hash)) {
-			outVoice = nullptr;
-			return false;
-		}
+	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
+		static constexpr Byte numChannelShift = 16;
 
-		outVoice = m_FormatMap[hash];
-		return true;
+		auto val = (UINT64)numChannels << numChannelShift | (UINT64)sampleRate;
+
+		assert((val >> numChannelShift) == numChannels);
+		assert((val & 0xFF) == sampleRate);
+
+		return val;
 	}
+
+	Bool FindSourceVoice(const WAVEFORMATEX& format, UINT64& outHash, SourceVoice*& outVoice);
 	
 public:
 	virtual Bool	Init();
 	virtual void	Release();
 
-	SourceVoice* CreateSourceVoice(const WAVEFORMATEX& format, SubmixVoice* destVoice);
+	//SourceVoice* CreateSourceVoice(const WAVEFORMATEX& format, SubmixVoice* destVoice);
 	SourceVoice* CreateSourceVoice(const WAVEFORMATEX& format);
-	SourceVoice* CreateSourceVoice(Sound* sound, SubmixVoice* destVoice);
+	//SourceVoice* CreateSourceVoice(Sound* sound, SubmixVoice* destVoice);
+	SourceVoice* CreateSourceVoice(const Sound* sound);
 	SubmixVoice* CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
 
 	Bool	CommitChanges(UInt32 operationSet) {

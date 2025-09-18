@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "StackString.h"
 
 class File {
 public:
@@ -74,6 +75,30 @@ public:
 		return false;
 	}
 
+	Bool ReadContents(String& outContents) {
+		assert(IsOpen());
+
+		outContents.Resize(Length());
+		UInt32 numElementsRead = fread_s((void*)outContents.CStr(), outContents.Length(), 1, outContents.Length(), m_File);
+		outContents.Resize(numElementsRead);
+
+		assert(!ReportedError());
+		return numElementsRead <= outContents.Length();
+	}
+
+	Bool ReadContents(StackString& outContents) {
+		assert(IsOpen());
+
+		UInt32 numElementsRead = fread_s((void*)outContents.CStr(), outContents.Length(), 1, outContents.Length(), m_File);
+		assert(numElementsRead <= outContents.Allocated());
+
+		outContents.Resize(numElementsRead);
+		outContents[numElementsRead] = '\0';//numElementsRead == outContents.Allocated() will cause us to put a character out of bounds
+
+		assert(!ReportedError());
+		return outContents.Length() == String::StrLen(outContents.CStr());
+	}
+
 	template< typename TValue >
 	Bool	Write( const TValue& val ) {
 		if( !IsOpen()) {
@@ -108,7 +133,7 @@ public:
 		return false;
 	}
 
-	Int32	Length() const {
+	UInt32	Length() const {
 		assert( IsOpen() );
 		return m_Length;
 	}
@@ -138,10 +163,9 @@ public:
 
 	bool	ReportedError() const {
 		assert( IsOpen() );
-
-		bool err = !ferror( m_File );
+		auto errNum = errno;
 		UInt32 remaining = Length() - Tell();
-		return err;
+		return errNum > 0;
 	}
 
 	FILE*	GetHandle() {

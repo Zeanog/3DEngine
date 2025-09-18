@@ -114,9 +114,6 @@
     <ClInclude Include="Rendering\RenderDef.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="System\json.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\TypeSerializer.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -311,9 +308,6 @@
     <ClCompile Include="Rendering\RenderDef.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="System\json.c">
-      <Filter>System</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\Mesh.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
@@ -412,6 +406,9 @@
     </ClCompile>
     <ClCompile Include="System\Audio\SubmixVoice.cpp">
       <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\JsonSerializer.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

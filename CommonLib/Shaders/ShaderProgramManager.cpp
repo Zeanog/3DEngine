@@ -1,6 +1,6 @@
 #include "ShaderProgramManager.h"
 
-#include "../System/Json.h"
+#include "rapidjson/rapidjson.h"
 
 ShaderProgramManager::ShaderProgramManager() {
 }

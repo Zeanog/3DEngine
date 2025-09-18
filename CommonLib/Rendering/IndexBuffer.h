@@ -6,7 +6,6 @@
 #include "System\List.h"
 
 #include "System\JsonSerializer.h"
-#include "System\json.h"
 
 class IndexBuffer : public IJsonSerializable {
 	CLASS_TYPEDEFS( IndexBuffer )
@@ -52,7 +51,7 @@ public:
 		return *this;
 	}
 
-	virtual Bool	ReadFrom(json_value* root) {
+	/*virtual Bool	ReadFrom(json_value* root) {
 		Int32	size = root->u.array.length;
 
 		Clear();
@@ -61,7 +60,7 @@ public:
 		}
 
 		return true;
-	}
+	}*/
 
 	/*virtual Bool	WriteTo( File& file ) const {
 		Int32 size = m_Indices.Length();
@@ -71,10 +70,10 @@ public:
 	}*/
 };
 
-template<>
-class JsonSerializer<IndexBuffer> {
-public:
-	static Bool	ReadFrom(json_value* jsonVal, IndexBuffer& list) {
-		return list.ReadFrom(jsonVal);
-	}
-};
+//template<>
+//class JsonSerializer<IndexBuffer> {
+//public:
+//	static Bool	ReadFrom(json_value* jsonVal, IndexBuffer& list) {
+//		return list.ReadFrom(jsonVal);
+//	}
+//};

@@ -562,7 +562,7 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 }
 
 Bool MeshLoader_Simple::Load(const StaticString& path) {
-	File file;
+	/*File file;
 
 	if (!file.Open(path, "rb")) {
 		return false;
@@ -576,79 +576,81 @@ Bool MeshLoader_Simple::Load(const StaticString& path) {
 	Bool validRead = Load(root);
 	json_value_free(root);
 	root = NULL;
-	return validRead;
-}
+	return validRead;*/
 
-Bool MeshLoader_Simple::Load(json_value* root) {
-	if (root->type != json_type::json_object) {
-		return false;
-	}
-
-	json_value* obj = root;
-
-	if (root->type == json_type::json_string) {
-		File file;
-
-		file.Open(root->u.string.ptr, "rb");
-
-		UInt32 dataLength = file.Length();
-		Char* encodedJson = STACK_ALLOC(Char, dataLength + 1);
-		file.Read(encodedJson, dataLength);
-		file.Close();
-
-		obj = json_parse(encodedJson, dataLength);
-	}
-
-	if (obj->type != json_type::json_object) {
-		if (obj != root) {
-			json_value_free(obj);
-		}
-		return false;
-	}
-
-	IndexBuffer* ib = NULL;
-	for (UInt32 ix = 0; ix < obj->u.object.length; ++ix) {
-		if (!String::StrICmp(obj->u.object.values[ix].name, "vertexBuffer")) {
-			if (!m_VertexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
-				if (obj != root) {
-					json_value_free(obj);
-				}
-				return false;
-			}
-			continue;
-		}
-
-		if (!String::StrICmp(obj->u.object.values[ix].name, "indexBuffer")) {
-			if (!m_IndexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
-				if (obj != root) {
-					json_value_free(obj);
-				}
-				return false;
-			}
-			continue;
-		}
-
-		//if (!String::StrICmp(obj->u.object.values[ix].name, "parts")) {
-		//	if (!JsonSerializer<List<Neo::Mesh::MaterialSlot_Texture*>>::ReadFrom(obj->u.object.values[ix].value, m_MaterialSlots)) {
-		//		if (obj != root) {
-		//			json_value_free(obj);
-		//		}
-		//		return false;
-		//	}
-
-		//	//Validate Material Data
-		//	for (int im = 0; im < m_MaterialSlots.Length(); ++im) {
-		//		assert(m_MaterialSlots[im].Index >= 0 && m_MaterialSlots[im].EndIndex() < m_IndexBuffer.Count());
-		//	}
-		//	continue;
-		//}
-	}
-
-	if (obj != root) {
-		json_value_free(obj);
-	}
 	return true;
 }
+
+//Bool MeshLoader_Simple::Load(json_value* root) {
+//	//if (root->type != json_type::json_object) {
+//	//	return false;
+//	//}
+//
+//	//json_value* obj = root;
+//
+//	//if (root->type == json_type::json_string) {
+//	//	File file;
+//
+//	//	file.Open(root->u.string.ptr, "rb");
+//
+//	//	UInt32 dataLength = file.Length();
+//	//	Char* encodedJson = STACK_ALLOC(Char, dataLength + 1);
+//	//	file.Read(encodedJson, dataLength);
+//	//	file.Close();
+//
+//	//	obj = json_parse(encodedJson, dataLength);
+//	//}
+//
+//	//if (obj->type != json_type::json_object) {
+//	//	if (obj != root) {
+//	//		json_value_free(obj);
+//	//	}
+//	//	return false;
+//	//}
+//
+//	//IndexBuffer* ib = NULL;
+//	//for (UInt32 ix = 0; ix < obj->u.object.length; ++ix) {
+//	//	if (!String::StrICmp(obj->u.object.values[ix].name, "vertexBuffer")) {
+//	//		if (!m_VertexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
+//	//			if (obj != root) {
+//	//				json_value_free(obj);
+//	//			}
+//	//			return false;
+//	//		}
+//	//		continue;
+//	//	}
+//
+//	//	if (!String::StrICmp(obj->u.object.values[ix].name, "indexBuffer")) {
+//	//		if (!m_IndexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
+//	//			if (obj != root) {
+//	//				json_value_free(obj);
+//	//			}
+//	//			return false;
+//	//		}
+//	//		continue;
+//	//	}
+//
+//	//	//if (!String::StrICmp(obj->u.object.values[ix].name, "parts")) {
+//	//	//	if (!JsonSerializer<List<Neo::Mesh::MaterialSlot_Texture*>>::ReadFrom(obj->u.object.values[ix].value, m_MaterialSlots)) {
+//	//	//		if (obj != root) {
+//	//	//			json_value_free(obj);
+//	//	//		}
+//	//	//		return false;
+//	//	//	}
+//
+//	//	//	//Validate Material Data
+//	//	//	for (int im = 0; im < m_MaterialSlots.Length(); ++im) {
+//	//	//		assert(m_MaterialSlots[im].Index >= 0 && m_MaterialSlots[im].EndIndex() < m_IndexBuffer.Count());
+//	//	//	}
+//	//	//	continue;
+//	//	//}
+//	//}
+//
+//	//if (obj != root) {
+//	//	json_value_free(obj);
+//	//}
+//	return true;
+//}
 
 glm::mat4 MeshLoader_Simple::GetJointLocalTransform(const StaticString& jointName, Float32 time) const {
 	return glm::identity<glm::mat4>();

@@ -1,7 +1,5 @@
 #include "ShaderManager_Fragment.h"
 
-#include "../System/Json.h"
-
 ShaderManager_Fragment::ShaderManager_Fragment() {
 }
 
