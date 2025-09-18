@@ -124,14 +124,6 @@ public:
 		norm.Normalize();
 		return norm;
 	}
-
-	Bool	ReadFrom(json_value* root) {
-		for (int ix = 0; ix < root->u.object.length; ++ix) {
-			JsonSerializer<Float32>::ReadFrom( root->u.object.values[ix].value, m_Data[ix] );
-		}
-		
-		return true;
-	}
 };
 
 template< Byte _NumDimensions >
@@ -244,19 +236,19 @@ public:
 	}
 };
 
-template<Byte _NumDimensions>
-class JsonSerializer<Vector<_NumDimensions>> {
-public:
-	static Vector<_NumDimensions>	ReadFrom(json_value* root) {
-		Vector<_NumDimensions>	val;
-		ReadFrom(root, val);
-		return val;
-	}
-
-	static Bool	ReadFrom(json_value* root, Vector<_NumDimensions>& outVal) {
-		for (UInt32 ix = 0; ix < root->u.array.length; ++ix) {
-			outVal[ix] = JsonSerializer<Float32>::ReadFrom(root->u.array.values[ix]);
-		}
-		return true;
-	}
-};
+//template<Byte _NumDimensions>
+//class JsonSerializer<Vector<_NumDimensions>> {
+//public:
+//	static Vector<_NumDimensions>	ReadFrom(json_value* root) {
+//		Vector<_NumDimensions>	val;
+//		ReadFrom(root, val);
+//		return val;
+//	}
+//
+//	static Bool	ReadFrom(json_value* root, Vector<_NumDimensions>& outVal) {
+//		for (UInt32 ix = 0; ix < root->u.array.length; ++ix) {
+//			outVal[ix] = JsonSerializer<Float32>::ReadFrom(root->u.array.values[ix]);
+//		}
+//		return true;
+//	}
+//};

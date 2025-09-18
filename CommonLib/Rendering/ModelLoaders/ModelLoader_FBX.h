@@ -97,7 +97,7 @@ class MeshLoader_Simple : public AMeshLoader {
 public:
 
 protected:
-	Bool	Load(json_value* root);
+	//Bool	Load(json_value* root);
 	//Bool	LoadComponents(json_value* rootObj);
 
 public:

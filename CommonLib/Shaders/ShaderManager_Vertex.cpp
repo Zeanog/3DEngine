@@ -1,7 +1,5 @@
 #include "ShaderManager_Vertex.h"
 
-#include "../System/Json.h"
-
 ShaderManager_Vertex::ShaderManager_Vertex() {
 }
 

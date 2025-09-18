@@ -8,7 +8,6 @@
 #include "System/File.h"
 #include "System/IJsonSerializable.h"
 #include "System/JsonSerializer.h"
-#include "System/json.h"
 
 class VertexBuffer : public IJsonSerializable {
 	CLASS_TYPEDEFS( VertexBuffer )
@@ -109,7 +108,7 @@ public:
 		return *this;
 	}
 
-	virtual Bool	ReadFrom(json_value* root) {
+	/*virtual Bool	ReadFrom(json_value* root) {
 		if (root->type != json_type::json_object) {
 			return false;
 		}
@@ -125,7 +124,7 @@ public:
 		}
 
 		return true;
-	}
+	}*/
 
 	/*virtual Bool	WriteTo( File& file ) const {
 		UInt32 size = m_Positions.Length();

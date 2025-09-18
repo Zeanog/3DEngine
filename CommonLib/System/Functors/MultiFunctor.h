@@ -132,7 +132,7 @@ public:
 
 	virtual void	operator()(TParam1 param1) override {
 		//typename TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, this->m_Listeners) {
+		FOREACH_CONST(iter, m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1);
 			}
@@ -141,7 +141,7 @@ public:
 		return;
 	}
 	virtual void	operator()(TParam1 param1) const override {
-		FOREACH_CONST(iter, this->m_Listeners) {
+		FOREACH_CONST(iter, m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1);
 			}
@@ -166,7 +166,7 @@ public:
 	}
 
 	virtual void	operator()(TParam1 param1, TParam2 param2) override {
-		FOREACH_CONST(iter, this->m_Listeners) {
+		FOREACH_CONST(iter, m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1, param2);
 			}
@@ -175,7 +175,7 @@ public:
 		return;
 	}
 	virtual void	operator()(TParam1 param1, TParam2 param2) const override {
-		FOREACH_CONST(iter, this->m_Listeners) {
+		FOREACH_CONST(iter, m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1, param2);
 			}
@@ -202,7 +202,7 @@ public:
 
 	virtual void	operator()(TParam1 param1, TParam2 param2, TParam3 param3) override {
 		//typename TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, this->m_Listeners) {
+		FOREACH_CONST(iter, m_Listeners) {
 			if(iter->IsValid()) {
 				(*iter)(param1, param2, param3);
 			}
@@ -212,7 +212,7 @@ public:
 	}
 	virtual void	operator()(TParam1 param1, TParam2 param2, TParam3 param3) const override {
 		//typename TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, this->m_Listeners) {
+		FOREACH_CONST(iter, m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1, param2, param3);
 			}

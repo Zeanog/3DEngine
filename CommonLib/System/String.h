@@ -37,7 +37,7 @@ public:
 		return const_cast<Char*>(m_Data.c_str());
 	}
 
-	Int32	Length() const {
+	UInt32	Length() const {
 		return m_Data.size();
 	}
 
@@ -68,6 +68,10 @@ public:
 		return *this;
 	}
 
+	void	Resize(UInt32 newSize) {
+		m_Data.resize(newSize);
+	}
+
 	Int32 FindLastOf( Char ch, Int32 offset ) const {
 		return m_Data.find_last_of( ch, offset );
 	}
@@ -85,7 +89,7 @@ public:
 	}
 
 public:
-	inline static Int32	StrLen( const Char* str ) {
+	inline static UInt32	StrLen( const Char* str ) {
 		return strlen( str );
 	}
 
@@ -118,17 +122,17 @@ public:
 	}
 };
 
-#include "JsonSerializer.h"
-
-template<>
-class JsonSerializer<String> {
-public:
-	static String	ReadFrom(const rapidjson::Value& jsonVal) {
-		assert(jsonVal.IsString());
-		return String(jsonVal.GetString());
-	}
-
-	static Bool	ReadFrom(const rapidjson::Value& jsonVal, String& str) {
-		str = ReadFrom(jsonVal);
-	}
-};
+//#include "JsonSerializer.h"
+//
+//template<>
+//class JsonSerializer<String> {
+//public:
+//	static String	ReadFrom(const rapidjson::Value& jsonVal) {
+//		assert(jsonVal.IsString());
+//		return String(jsonVal.GetString());
+//	}
+//
+//	static Bool	ReadFrom(const rapidjson::Value& jsonVal, String& str) {
+//		str = ReadFrom(jsonVal);
+//	}
+//};

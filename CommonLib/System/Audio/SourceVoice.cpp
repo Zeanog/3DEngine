@@ -53,7 +53,7 @@ Bool SourceVoice::Start(const Sound& sound, UInt32 operationSet) {
 }
 
 Bool SourceVoice::Start(const Sound* sound, UInt32 operationSet) {
-	m_Voice->FlushSourceBuffers();
+	//m_Voice->FlushSourceBuffers();
 	if (!Submit(sound)) {
 		return false;
 	}

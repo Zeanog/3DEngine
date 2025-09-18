@@ -1,0 +1,11 @@
+{
+	"Model": {
+		"Path": "Data/Cicada.fbx"
+	},
+	"Music": {
+		"Path": "Data/sample-1.ogg"
+	},
+	"TestSound": {
+		"Path": "Data/baseball_hit.wav"
+	}
+}
