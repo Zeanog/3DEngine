@@ -122,18 +122,18 @@ public:
 	}
 
 	virtual Bool SetFxEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		return SUCCEEDED(m_FxMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
+		return m_FxMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
 	}
 
 	virtual Bool SetFxEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-		return SUCCEEDED(m_FxMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
+		return m_FxMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
 	}
 
 	virtual Bool SetMusicEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		return SUCCEEDED(m_MusicMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
+		return m_MusicMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
 	}
 
 	virtual Bool SetMusicEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-		return SUCCEEDED(m_MusicMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
+		return m_MusicMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
 	}
 };

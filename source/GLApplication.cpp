@@ -460,40 +460,22 @@ void GLApplication::LoadAssets()
 	m_Lights.push_back(spotLight);
 
 	Model* model = NULL;
-	//model = new Model("Data/Cube.mesh");
-	//model->Position(-2, 2.5f, 0);
-	//m_Models.push_back(model);
-
-	//Configuration config;
-
-	//config.LoadFrom("Data/Scene.ini");
-	String modelPath;
-	//config.GetValue("Model", "Path", modelPath);
-
-	
-
-	//Audio
-	String musicPath;
-	//config.GetValue("Music", "Path", musicPath);
-
-	String soundPath;
-	//config.GetValue("TestSound", "Path", soundPath);
 
 	rapidjson::Document	doc;
 	verify(rapidjson::LoadFrom("Data/Scene.json", doc));
 
 	assert(doc["Model"].IsObject());
 	auto& docVal = doc["Model"];
-	modelPath = docVal.FindMember("Path")->value.GetString();
+	StaticString modelPath = docVal.FindMember("Path")->value.GetString();
 	model = new Model(modelPath.CStr());
 	model->Position(glm::vec3(-2, 2.5f, 0));
 	m_Models.push_back(model);
 
 	assert(doc["Music"].IsObject());
-	musicPath = doc["Music"].FindMember("Path")->value.GetString();
+	StaticString musicPath = doc["Music"].FindMember("Path")->value.GetString();
 
 	assert(doc["TestSound"].IsObject());
-	soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
+	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 
 	Sound* musicSound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
 	Sound* fxSound = Singleton<SoundManager>::GetInstance()->Get(soundPath);
@@ -532,7 +514,7 @@ void GLApplication::LoadAssets()
 	Singleton<AudioSystem>::GetInstance()->EnableFxEffect(0);
 
 	auto musicVoice = Singleton<AudioSystem>::GetInstance()->PlayMusic(musicSound);
-	musicVoice->Volume(0.1);
+	musicVoice->Volume(0.1f);
 	auto fxVoice = Singleton<AudioSystem>::GetInstance()->PlayFx(fxSound);
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
