@@ -15,19 +15,11 @@ Bool AudioSystem::Init() {
 	}
 
 	m_MasteringVoice = CreateMasteringVoice();
-
-	m_MusicMixVoice = CreateSubmixVoice(1, 44100);
-	m_FxMixVoice = CreateSubmixVoice(1, 44100);
-
-	m_SoundCategoryMap.Add(m_MusicMixVoice, Map<UINT64, List<SourceVoice*>>{});
-	m_SoundCategoryMap.Add(m_FxMixVoice, Map<UINT64, List<SourceVoice*>>{});
-
 	return true;
 }
 
 void AudioSystem::Release() {
-	m_MusicMixVoice = nullptr;
-	m_FxMixVoice = nullptr;
+	m_CategoryMap.Clear();
 
 	FOREACH(iter, m_Voices) {
 		(*iter)->Destroy();
@@ -61,41 +53,39 @@ UINT64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
 	return val;
 }
 
+SubmixVoice* AudioSystem::GetCategory(const StaticString& name) const {
+	assert(m_CategoryMap.Contains(name));
+	return m_CategoryMap[name];
+}
+
+Bool AudioSystem::AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate) {
+	assert(!m_CategoryMap.Contains(name));
+
+	m_CategoryMap.Add(name, CreateSubmixVoice(numChannels, sampleRate));
+	return true;
+}
+
 UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 	static constexpr Byte numChannelShift = 56;
 	static constexpr Byte samplesPerSecShift = 32;
 
 	auto val = (UINT64)numChannels << numChannelShift | (UINT64)sampleRate << samplesPerSecShift;
 
-	assert(((val >> numChannelShift) & 0xFF) == numChannels);
-	assert(((val >> samplesPerSecShift) & 0xFF) == sampleRate);
+	assert(((val >> numChannelShift) & std::numeric_limits<Byte>::max()) == numChannels);
+	assert(((val >> samplesPerSecShift) & std::numeric_limits<Byte>::max()) == sampleRate);
 
 	return val;
 }
 
-SourceVoice* AudioSystem::PlayFx(const Sound& snd) {
-	auto voice = CreateSourceVoice(m_FxMixVoice, snd);
+SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound& snd) {
+	auto voice = CreateSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify( voice->Start() );
 	return voice;
 }
 
-SourceVoice* AudioSystem::PlayMusic(const Sound& snd) {
-	auto voice = CreateSourceVoice(m_MusicMixVoice, snd);
-	//voice->Volume(1.0f);//TODO: Set volume back to full
-	verify(voice->Start());
-	return voice;
-}
-
-SourceVoice* AudioSystem::PlayFx(const Sound* snd) {
-	auto voice = CreateSourceVoice(m_FxMixVoice, snd);
-	//voice->Volume(1.0f);//TODO: Set volume back to full
-	verify(voice->Start());
-	return voice;
-}
-
-SourceVoice* AudioSystem::PlayMusic(const Sound* snd) {
-	auto voice = CreateSourceVoice(m_MusicMixVoice, snd);
+SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound* snd) {
+	auto voice = CreateSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
@@ -156,10 +146,6 @@ SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRat
 
 Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) {
 	outVoice = nullptr;
-
-	if (!m_SoundCategoryMap.Contains(voiceCategory)) {
-		return false;
-	}
 
 	auto& categoryMap = m_SoundCategoryMap[voiceCategory];
 

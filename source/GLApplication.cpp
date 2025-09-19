@@ -479,10 +479,13 @@ void GLApplication::LoadAssets()
 
 	Sound* musicSound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
 	Sound* fxSound = Singleton<SoundManager>::GetInstance()->Get(soundPath);
-	
+
+	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
+	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
+
 	IUnknown* pReverbEffect = nullptr;
 	XAudio2CreateReverb(&pReverbEffect);
-	verify( Singleton<AudioSystem>::GetInstance()->AddFxEffectDescriptors(pReverbEffect) );
+	verify( Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors("Fx", pReverbEffect) );
 	pReverbEffect->Release();
 
 	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {0};
@@ -510,12 +513,12 @@ void GLApplication::LoadAssets()
 	reverbParams.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
 	reverbParams.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
 	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
-	verify(Singleton<AudioSystem>::GetInstance()->SetFxEffectParameters(0, &reverbParams, sizeof(decltype(reverbParams))));
-	Singleton<AudioSystem>::GetInstance()->EnableFxEffect(0);
+	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
+	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
 
-	auto musicVoice = Singleton<AudioSystem>::GetInstance()->PlayMusic(musicSound);
+	auto musicVoice = Singleton<AudioSystem>::GetInstance()->Play("Music", musicSound);
 	musicVoice->Volume(0.1f);
-	auto fxVoice = Singleton<AudioSystem>::GetInstance()->PlayFx(fxSound);
+	auto fxVoice = Singleton<AudioSystem>::GetInstance()->Play("Fx", fxSound);
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));
