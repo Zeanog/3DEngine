@@ -128,11 +128,7 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 		return false;
 	}
 
-	auto categoryMap = m_SoundCategoryMap[voiceCategory];
-	if (categoryMap.Contains(outHash)) {
-		return false;
-	}
-	
+	auto& categoryMap = m_SoundCategoryMap[voiceCategory];
 	auto& list = categoryMap[outHash];
 	for (UInt32 ix = 0; ix < list.Length(); ++ix) {
 		auto v = list[ix];
@@ -148,7 +144,7 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice) {
 	assert(m_SoundCategoryMap.Contains(voiceCategory));
 
-	auto categoryVoiceMap = m_SoundCategoryMap[voiceCategory];
+	auto& categoryVoiceMap = m_SoundCategoryMap[voiceCategory];
 	auto hash = GenerateHash(voice->Format());
 	auto voiceList = categoryVoiceMap[hash];
 	voiceList.Add(voice);
