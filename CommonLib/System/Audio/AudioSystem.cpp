@@ -5,6 +5,9 @@
 #include "SourceVoice.h"
 #include "SubmixVoice.h"
 
+#include <cstdint>
+#include <limits>
+
 Bool AudioSystem::Init() {
 	HRESULT hr = ::XAudio2Create(&m_Audio2, 0, XAUDIO2_USE_DEFAULT_PROCESSOR);
 	if (FAILED(hr)) {
@@ -39,26 +42,61 @@ void AudioSystem::Release() {
 	::Release(m_Audio2);
 }
 
+#undef max
+UINT64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
+	static constexpr Byte numChannelShift = 56;
+	static constexpr Byte samplesPerSecShift = 32;
+	static constexpr auto samplesPerSecMask = std::numeric_limits<UInt16>::max();
+	static constexpr Byte bitsPerSampleShift = 16;
+	static constexpr auto bitsPerSampleMask = std::numeric_limits<Byte>::max();
+	static constexpr auto formatTagMask = std::numeric_limits<Byte>::max();
+
+	auto val = (UINT64)format.nChannels << numChannelShift | (UINT64)format.nSamplesPerSec << samplesPerSecShift | (UINT64)format.wBitsPerSample << bitsPerSampleShift | format.wFormatTag;
+
+	assert((val >> numChannelShift) == format.nChannels);
+	assert(((val >> samplesPerSecShift) & samplesPerSecMask) == format.nSamplesPerSec);
+	assert(((val >> bitsPerSampleShift) & bitsPerSampleMask) == format.wBitsPerSample);
+	assert((val & formatTagMask) == format.wFormatTag);
+
+	return val;
+}
+
+UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
+	static constexpr Byte numChannelShift = 56;
+	static constexpr Byte samplesPerSecShift = 32;
+
+	auto val = (UINT64)numChannels << numChannelShift | (UINT64)sampleRate << samplesPerSecShift;
+
+	assert(((val >> numChannelShift) & 0xFF) == numChannels);
+	assert(((val >> samplesPerSecShift) & 0xFF) == sampleRate);
+
+	return val;
+}
+
 SourceVoice* AudioSystem::PlayFx(const Sound& snd) {
 	auto voice = CreateSourceVoice(m_FxMixVoice, snd);
+	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify( voice->Start() );
 	return voice;
 }
 
 SourceVoice* AudioSystem::PlayMusic(const Sound& snd) {
 	auto voice = CreateSourceVoice(m_MusicMixVoice, snd);
+	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
 }
 
 SourceVoice* AudioSystem::PlayFx(const Sound* snd) {
 	auto voice = CreateSourceVoice(m_FxMixVoice, snd);
+	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
 }
 
 SourceVoice* AudioSystem::PlayMusic(const Sound* snd) {
 	auto voice = CreateSourceVoice(m_MusicMixVoice, snd);
+	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
 }
@@ -83,28 +121,26 @@ MasteringVoice* AudioSystem::CreateMasteringVoice() {
 
 SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format) {
 	SourceVoice* voice{};
-	UINT64 hash{};
-	if (FindSourceVoice(voiceCategory, format, hash, voice)) {
+	if (FindSourceVoice(voiceCategory, format, voice)) {
 		return voice;
 	}
 
-	SourceVoice* newVoice = new SourceVoice(m_Audio2, format);
-	verify(AddSourceVoice(voiceCategory, newVoice));
-	return newVoice;
+	voice = new SourceVoice(m_Audio2, format);
+	verify(AddSourceVoice(voiceCategory, voice));
+	return voice;
 }
 
 SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const Sound* sound) {
 	SourceVoice* voice{};
-	UINT64 hash{};
-	if (FindSourceVoice(voiceCategory, sound->Format()->Format, hash, voice)) {
+	if (FindSourceVoice(voiceCategory, sound->Format()->Format, voice)) {
 		return voice;
 	}
 
-	SourceVoice* newVoice = new SourceVoice(m_Audio2, sound->Format()->Format);
-	verify(AddSourceVoice(voiceCategory, newVoice));
+	voice = new SourceVoice(m_Audio2, sound->Format()->Format);
+	verify(AddSourceVoice(voiceCategory, voice));
 
-	newVoice->Submit(sound);
-	return newVoice;
+	voice->Submit(sound);
+	return voice;
 }
 
 SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const Sound& sound) {
@@ -118,10 +154,7 @@ SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRat
 	return newVoice;
 }
 
-Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, UINT64& outHash, SourceVoice*& outVoice) {
-	outVoice = nullptr;
-
-	outHash = GenerateHash(format);
+Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) {
 	outVoice = nullptr;
 
 	if (!m_SoundCategoryMap.Contains(voiceCategory)) {
@@ -129,7 +162,9 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 	}
 
 	auto& categoryMap = m_SoundCategoryMap[voiceCategory];
-	auto& list = categoryMap[outHash];
+
+	UInt64 hash = GenerateHash(format);
+	auto& list = categoryMap[hash];
 	for (UInt32 ix = 0; ix < list.Length(); ++ix) {
 		auto v = list[ix];
 		if (!v->IsPlaying()) {
