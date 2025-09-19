@@ -26,8 +26,7 @@ protected:
 
 	Map<const SubmixVoice*, Map<UINT64, List<SourceVoice*>>>	m_SoundCategoryMap{};
 
-	SubmixVoice* m_MusicMixVoice{};
-	SubmixVoice* m_FxMixVoice{};
+	Map<const StaticString, SubmixVoice*>		m_CategoryMap;
 
 protected:
 	MasteringVoice* CreateMasteringVoice();
@@ -37,6 +36,8 @@ protected:
 
 	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice);
 	Bool AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
+
+	SubmixVoice* GetCategory(const StaticString& name) const;
 
 	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
 	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
@@ -51,65 +52,36 @@ public:
 	virtual Bool	Init();
 	virtual void	Release();
 
-	SourceVoice* PlayFx(const Sound& snd);
-	SourceVoice* PlayMusic(const Sound& snd);
+	Bool		AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
 
-	SourceVoice* PlayFx(const Sound* snd);
-	SourceVoice* PlayMusic(const Sound* snd);
-
+	SourceVoice* Play(const StaticString& categoryName, const Sound& snd);
+	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
+	
 	//XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, fxMixVoice->NumChannels() }
 	template<typename... Effects>
-	Bool AddFxEffectDescriptors(Effects... effects) {
+	Bool AddEffectDescriptors(const StaticString& categoryName, Effects... effects) {
 		static constexpr UINT32 NumDescriptors = sizeof...(Effects);
 		XAUDIO2_EFFECT_DESCRIPTOR descriptors[NumDescriptors];
 
-		std::size_t i = 0;
-		std::initializer_list<int>{
-			(descriptors[i++] = { effects, true, m_FxMixVoice->NumChannels() }, 0)...
-		};
-
-		return m_FxMixVoice->SetEffectDescriptors(descriptors, NumDescriptors);
-	}
-
-	/*template<typename... EffectDescriptors>
-	Bool SetFxEffectDescriptors(EffectDescriptors... effectDescriptors) {
-		return m_FxMixVoice->SetEffectDescriptors(effectDescriptors...);
-	}*/
-
-	template<typename... Effects>
-	Bool AddMusicEffectDescriptors(Effects... effects) {
-		static constexpr UINT32 NumDescriptors = sizeof...(Effects);
-		XAUDIO2_EFFECT_DESCRIPTOR descriptors[NumDescriptors];
+		auto category = GetCategory(categoryName);
 
 		std::size_t i = 0;
 		std::initializer_list<int>{
-			(descriptors[i++] = { effects, true, m_MusicMixVoice->NumChannels() }, 0)...
+			(descriptors[i++] = { effects, true, category->NumChannels() }, 0)...
 		};
 
-		return m_MusicMixVoice->SetEffectDescriptors(&descriptors);
+		return category->SetEffectDescriptors(descriptors, NumDescriptors);
 	}
 
-	virtual Bool	EnableFxEffect(UInt32 index) {
-		return m_FxMixVoice->EnableEffect(index);
+	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index) {
+		return GetCategory(categoryName)->EnableEffect(index);
 	}
 
-	virtual Bool	EnableMusicEffect(UInt32 index) {
-		return m_MusicMixVoice->EnableEffect(index);
+	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
+		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
 	}
 
-	virtual Bool SetFxEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		return m_FxMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
-	}
-
-	virtual Bool SetFxEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-		return m_FxMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
-	}
-
-	virtual Bool SetMusicEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		return m_MusicMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
-	}
-
-	virtual Bool SetMusicEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-		return m_MusicMixVoice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
+	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
+		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
 	}
 };
