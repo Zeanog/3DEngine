@@ -32,33 +32,10 @@ protected:
 protected:
 	MasteringVoice* CreateMasteringVoice();
 
-	static UINT64		GenerateHash(const WAVEFORMATEX& format) {
-		static constexpr Byte numChannelShift = 56;
-		static constexpr Byte samplesPerSecShift = 32;
-		static constexpr Byte bitsPerSampleShift = 16;
+	static UINT64		GenerateHash(const WAVEFORMATEX& format);
+	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
 
-		auto val = (UINT64)format.nChannels << numChannelShift | (UINT64)format.nSamplesPerSec << samplesPerSecShift | (UINT64)format.wBitsPerSample << bitsPerSampleShift | format.wFormatTag;
-
-		assert( (val >> numChannelShift) == format.nChannels );
-		assert( ((val >> samplesPerSecShift) & 0xFFFF ) == format.nSamplesPerSec );
-		assert( ((val >> bitsPerSampleShift) & 0xFF) == format.wBitsPerSample );
-		assert( (val & 0xFF) == format.wFormatTag );
-
-		return val;
-	}
-
-	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
-		static constexpr Byte numChannelShift = 16;
-
-		auto val = (UINT64)numChannels << numChannelShift | (UINT64)sampleRate;
-
-		assert((val >> numChannelShift) == numChannels);
-		assert((val & 0xFF) == sampleRate);
-
-		return val;
-	}
-
-	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, UINT64& outHash, SourceVoice*& outVoice);
+	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice);
 	Bool AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
 
 	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
@@ -70,7 +47,6 @@ protected:
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
 	}
 
-	
 public:
 	virtual Bool	Init();
 	virtual void	Release();
