@@ -10,6 +10,7 @@ class Sound {
 protected:
 	const XAUDIO2_BUFFER*		m_Data{};
 	const WAVEFORMATEXTENSIBLE*	m_Format{};
+	Float32						m_Duration{};
 
 public:
 	DECLARE_GETSET( Format )
@@ -18,7 +19,7 @@ public:
 		return m_Data;
 	}
 
-	Float32		Duration() const;
+	DECLARE_GETSET( Duration )
 
 	Bool	UploadData(const AudioLoader& loader);
 };
