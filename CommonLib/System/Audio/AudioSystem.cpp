@@ -91,6 +91,15 @@ SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound* sn
 	return voice;
 }
 
+#include "System\Audio\Loaders\SoundManager.h"
+SourceVoice* AudioSystem::Play(const StaticString& categoryName, const StaticString& filePath, Sound*& outSnd) {
+	outSnd = Singleton<SoundManager>::GetInstance()->Get(filePath);
+	auto voice = CreateSourceVoice(GetCategory(categoryName), outSnd);
+	//voice->Volume(1.0f);//TODO: Set volume back to full
+	verify(voice->Start());
+	return voice;
+}
+
 MasteringVoice* AudioSystem::CreateMasteringVoice() {
 	MasteringVoice* newVoice = new MasteringVoice();
 	newVoice->Init(m_Audio2);

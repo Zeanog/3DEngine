@@ -481,8 +481,8 @@ void GLApplication::LoadAssets()
 	assert(doc["TestSound"].IsObject());
 	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 
-	Sound* musicSound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
-	Sound* fxSound = Singleton<SoundManager>::GetInstance()->Get(soundPath);
+	//Sound* musicSound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
+	//Sound* fxSound = Singleton<SoundManager>::GetInstance()->Get(soundPath);
 
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
@@ -520,10 +520,14 @@ void GLApplication::LoadAssets()
 	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
 	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
 
-	auto musicVoice = Singleton<AudioSystem>::GetInstance()->Play("Music", musicSound);
-	auto duration = musicSound->Duration();
+	Sound* musicSound{};
+	auto musicVoice = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, musicSound);
+	auto musicDuration = musicSound->Duration();
 	musicVoice->Volume(0.1f);
-	auto fxVoice = Singleton<AudioSystem>::GetInstance()->Play("Fx", fxSound);
+
+	Sound* fxSound{};
+	auto fxVoice = Singleton<AudioSystem>::GetInstance()->Play("Fx", soundPath, fxSound);
+	auto fxDuration = fxSound->Duration();
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));
@@ -543,6 +547,7 @@ void GLApplication::ReleaseAssets()
 	Destroy(m_Lights);
 
 	Singleton<ImageManager>::GetInstance()->Shutdown();
+	Singleton<SoundManager>::GetInstance()->Shutdown();
 	Singleton<MeshManager>::GetInstance()->Shutdown();
 
 	Singleton<ShaderManager_Vertex>::GetInstance()->Shutdown();
