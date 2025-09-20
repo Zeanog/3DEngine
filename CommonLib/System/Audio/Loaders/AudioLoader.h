@@ -45,6 +45,7 @@ public:
 	}
 
 	virtual std::unique_ptr<Byte>&& Data() {
+		assert(m_AudioData.get());
 		return std::move(m_AudioData);
 	}
 
