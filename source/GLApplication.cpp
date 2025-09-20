@@ -7,6 +7,7 @@
 #include "System/Typedefs.h"
 #include "System/Input/VirtualKey.h"
 #include "Images/ImageManager.h"
+#include "System/Audio/Loaders/SoundManager.h"
 #include "Lighting/Light.h"
 #include "Rendering/Model.h"
 
@@ -149,11 +150,14 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 
 	if (keyboardState.KeyIsDown(DIK_R)) {
 		Singleton<ImageManager>::GetInstance()->ReloadAll();
+		Singleton<SoundManager>::GetInstance()->ReloadAll();
 	}
 
 	if (keyboardState.KeyIsDown(DIK_F3)) {
+		//TODO: Find a way to let us close the debug console with out closing the entire program
 		if (!Singleton<DebugConsole>::GetInstance()->IsOpen()) {
 			verify(Singleton<DebugConsole>::GetInstance()->Open());
+			//::SetForegroundWindow(m_hWnd);
 		}
 		else {
 			Singleton<DebugConsole>::GetInstance()->Close();

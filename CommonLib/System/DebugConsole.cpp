@@ -1,8 +1,9 @@
 #include "../System/DebugConsole.h"
 #include "../System/Win32/Error.h"
 #include "String.h"
+#include "StaticString.h"
 
-Bool DebugConsole::Open() {
+Bool DebugConsole::Open() {//TODO: Make sure the console doesn't get focus unless clicked on
 	if (IsOpen()) {
 		return true;
 	}
@@ -39,11 +40,14 @@ void DebugConsole::DetachIO() {
 		return;
 	}
 	fclose(m_hOutputFile);
+	m_hOutputFile = nullptr;
 }
 
 Bool	DebugConsole::Write(const Char* msg) {
 	OutputDebugString(msg);
-	printf_s(msg);
+	if (IsOpen()) {
+		printf_s(msg);
+	}
 	return true;
 }
 

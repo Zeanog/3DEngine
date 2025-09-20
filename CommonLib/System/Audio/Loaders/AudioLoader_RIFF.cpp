@@ -11,9 +11,7 @@ enum FourCC : UInt32 {
 	XWMA = 'XWMA',
 	DPDS = 'dpds'
 };
-#endif
-
-#ifndef _XBOX //Little-Endian
+#else //Little-Endian
 enum FourCC : UInt32 {
 	RIFF = 'FFIR',
 	DATA = 'atad',
