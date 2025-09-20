@@ -25,31 +25,33 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     m_Format.dwChannelMask = (m_Format.Format.nChannels == 1) ? SPEAKER_FRONT_CENTER : (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT);
     m_Format.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 
-    std::vector<BYTE> buffer;
-    buffer.reserve(1024 * 1024); // Allocate a buffer for audio data
+    long total_sections = ov_streams(&oggFile);
+    ogg_int64_t total_samples = ov_pcm_total(&oggFile, -1);
+    
+    // Calculate total size in bytes for a 16-bit, interleaved buffer
+    // 16-bit samples = 2 bytes per sample
+    ogg_int64_t total_bytes = total_samples * sizeof(short) * vi->channels;
+    BYTE* buffer = new BYTE[total_bytes];
 
-    // Read and decode OGG data into PCM format
-    char pcmData[4096];
-    int bytesRead = 0;
-    int section = 0;
+    long bytes_read_total = 0;
+    int current_section = 0;
 
-    while (true) {
-        bytesRead = ov_read(&oggFile, pcmData, sizeof(pcmData), 0, 2, 1, &section);
-        if (bytesRead == 0) {
+    while (bytes_read_total < total_bytes) {
+        long bytes_read = ov_read(&oggFile, (char*)buffer + bytes_read_total, total_bytes - bytes_read_total, 0, 2, 1, &current_section);
+
+        if(bytes_read == 0) {
             break; // End of file
         }
-        else if (bytesRead < 0) {
+        else if (bytes_read < 0) {
             
             return false;
         }
-        buffer.insert(buffer.end(), pcmData, pcmData + bytesRead);
+        bytes_read_total += bytes_read;
     }
 
     ov_clear(&oggFile);
 
-    m_AudioDataSize = static_cast<UINT32>(buffer.size());
-    BYTE* data = new BYTE[m_AudioDataSize];
-    memcpy_s(data, m_AudioDataSize, buffer.data(), buffer.size());
-    m_AudioData.reset(data);
+    m_AudioDataSize = total_bytes;
+    m_AudioData.reset(buffer);
     return true;
 }
