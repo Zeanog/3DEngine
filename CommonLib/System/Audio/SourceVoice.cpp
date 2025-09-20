@@ -29,7 +29,7 @@ Bool SourceVoice::Submit(const Sound& sound) {
 }
 
 Bool SourceVoice::Submit(const Sound* sound) {
-	return SUCCEEDED(m_Voice->SubmitSourceBuffer(sound->Data()));
+	return SUCCEEDED(m_Voice->SubmitSourceBuffer(sound->Buffer()));
 }
 
 Bool SourceVoice::Start(const Sound& sound) {

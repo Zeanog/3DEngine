@@ -122,11 +122,11 @@ SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const WA
 
 SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const Sound* sound) {
 	SourceVoice* voice{};
-	if (FindSourceVoice(voiceCategory, sound->Format()->Format, voice)) {
+	if (FindSourceVoice(voiceCategory, sound->Format().Format, voice)) {
 		return voice;
 	}
 
-	voice = new SourceVoice(m_Audio2, sound->Format()->Format);
+	voice = new SourceVoice(m_Audio2, sound->Format().Format);
 	verify(AddSourceVoice(voiceCategory, voice));
 
 	voice->Submit(sound);

@@ -517,6 +517,7 @@ void GLApplication::LoadAssets()
 	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
 
 	auto musicVoice = Singleton<AudioSystem>::GetInstance()->Play("Music", musicSound);
+	auto duration = musicSound->Duration();
 	musicVoice->Volume(0.1f);
 	auto fxVoice = Singleton<AudioSystem>::GetInstance()->Play("Fx", fxSound);
 

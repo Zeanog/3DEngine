@@ -4,10 +4,13 @@
 #include "..\..\String.h"
 #include "..\..\StaticString.h"
 #include <xaudio2.h>
+#include <memory>
 
 class AudioLoader {
 protected:
-	XAUDIO2_BUFFER			m_BufferInfo{};
+	std::unique_ptr<BYTE>	m_AudioData;
+	UInt32					m_AudioDataSize;
+
 	WAVEFORMATEXTENSIBLE	m_Format{};
 
 public:
@@ -22,25 +25,30 @@ public:
 	}
 
 	virtual UInt32	Length() const {
-		return m_BufferInfo.AudioBytes;
+		return m_AudioDataSize;
 	}
 
 	virtual Bool	IsValid() const {
-		return m_BufferInfo.pAudioData != nullptr;
+		return m_AudioData != nullptr;
 	}
 
-	virtual const WAVEFORMATEXTENSIBLE* Format() const {
-		return &m_Format;
+	virtual void	Clear() {
+
 	}
 
-	virtual WAVEFORMATEXTENSIBLE* Format() {
-		return &m_Format;
+	virtual const WAVEFORMATEXTENSIBLE& Format() const {
+		return m_Format;
 	}
 
-	virtual const Byte* Data() const {
-		return m_BufferInfo.pAudioData;
+	virtual WAVEFORMATEXTENSIBLE& Format() {
+		return m_Format;
 	}
 
-	virtual const XAUDIO2_BUFFER* Buffer() const { return &m_BufferInfo; }
-	virtual XAUDIO2_BUFFER* Buffer() { return &m_BufferInfo; }
+	virtual std::unique_ptr<Byte>&& Data() {
+		return std::move(m_AudioData);
+	}
+
+	UInt32	DataSize() const {
+		return m_AudioDataSize;
+	}
 };
