@@ -22,7 +22,7 @@ enum FourCC : UInt32 {
 };
 #endif
 
-Bool FindChunk(File& file, UInt32 fourcc, UInt32& dwChunkSize, UInt32& dwChunkDataPosition)
+Bool FindChunk(File& file, UInt32 fourcc, UInt32& outChunkSize, UInt32& outChunkDataPosition)
 {
     file.Seek(0, SEEK_SET);
 
@@ -62,8 +62,8 @@ Bool FindChunk(File& file, UInt32 fourcc, UInt32& dwChunkSize, UInt32& dwChunkDa
 
         if (dwChunkType == fourcc)
         {
-            dwChunkSize = dwChunkDataSize;
-            dwChunkDataPosition = dwOffset;
+            outChunkSize = dwChunkDataSize;
+            outChunkDataPosition = dwOffset;
             return true;
         }
 
@@ -72,7 +72,7 @@ Bool FindChunk(File& file, UInt32 fourcc, UInt32& dwChunkSize, UInt32& dwChunkDa
         if (bytesRead >= dwRIFFDataSize) return false;
     }
 
-    return true;
+    return false;
 }
 
 Bool AudioLoader_RIFF::Load(const Char* fileName) {
@@ -88,8 +88,10 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	UInt32 dwChunkSize{};
 	UInt32 dwChunkPosition{};
 
+	//TODO: All these FindChunk calls are probably inefficient
+
 	//check the file type, should be fourccWAVE or 'XWMA'
-	FindChunk(file, FourCC::RIFF, dwChunkSize, dwChunkPosition);
+	verify(FindChunk(file, FourCC::RIFF, dwChunkSize, dwChunkPosition));
 	file.Seek(dwChunkPosition, SEEK_SET);
 
 	UInt32 filetype{};
@@ -98,22 +100,22 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 		return false;
 	}
 
-	FindChunk(file, FourCC::FMT, dwChunkSize, dwChunkPosition);
+	verify(FindChunk(file, FourCC::FMT, dwChunkSize, dwChunkPosition));
 	file.Seek(dwChunkPosition, SEEK_SET);
-
 	if (!file.Read(m_Format)) {
 		return false;
 	}
 
-	FindChunk(file, FourCC::DATA, dwChunkSize, dwChunkPosition);
+	verify(FindChunk(file, FourCC::DATA, dwChunkSize, dwChunkPosition));
 	file.Seek(dwChunkPosition, SEEK_SET);
 
 	BYTE* data = new BYTE[dwChunkSize];
 	if (!file.Read(data, dwChunkSize)) {
+		DeletePtr(data);
 		return false;
 	}
-
-	m_AudioData.reset(data);
+	
+	m_AudioData.reset(data);//Take ownership of the data
 	m_AudioDataSize = dwChunkSize;
 	
 	return true;

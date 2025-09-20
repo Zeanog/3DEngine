@@ -56,6 +56,7 @@ public:
 
 	SourceVoice* Play(const StaticString& categoryName, const Sound& snd);
 	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
+	SourceVoice* Play(const StaticString& categoryName, const StaticString& filePath, Sound*& outSnd);
 	
 	//XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, fxMixVoice->NumChannels() }
 	template<typename... Effects>

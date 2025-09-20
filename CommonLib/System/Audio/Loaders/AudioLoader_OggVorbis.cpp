@@ -36,7 +36,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     int current_section = 0;
 
     while (bytes_read_total < m_AudioDataSize) {
-        long bytes_read = ov_read(&oggFile, (char*)buffer + bytes_read_total, m_AudioDataSize - bytes_read_total, 0, 2, 1, &current_section);
+        auto bytes_read = ov_read(&oggFile, (char*)buffer + bytes_read_total, m_AudioDataSize - bytes_read_total, 0, 2, 1, &current_section);
 
         if(bytes_read == 0) {
             break; // End of file

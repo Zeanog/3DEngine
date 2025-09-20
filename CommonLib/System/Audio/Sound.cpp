@@ -9,7 +9,7 @@ Bool Sound::UploadData(AudioLoader& loader) {
 
 	m_Format = loader.Format();
 
-	m_Data = loader.Data();
+	m_Data = loader.Data();//Take ownership of the data
 	assert(!loader.IsValid());
 
 	m_Buffer.pAudioData = m_Data.get();
