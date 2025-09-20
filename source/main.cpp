@@ -21,7 +21,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_MOUSEMOVE:
 			//Singleton<InputSystem>::GetInstance()->GetMouse()->UpdatePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			//Singleton<DebugConsole>::GetInstance()->Write(String::Format("\rX: %d, Y: %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+			//Singleton<DebugConsole>::GetInstance()->Write(String::Format("\rX: %d, Y: %d\n", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+			break;
+
+		case WM_CLOSE:
 			break;
 
 		case WM_DESTROY:
@@ -35,10 +38,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // Main entry point
-int WINAPI WinMain(HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPSTR    lpCmdLine,
-	int       nCmdShow)
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PWSTR pCmdLine, _In_ int nCmdShow)
 {
 	MSG msg;
 	WNDCLASS windowClass;

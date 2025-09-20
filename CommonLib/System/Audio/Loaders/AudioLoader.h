@@ -33,7 +33,8 @@ public:
 	}
 
 	virtual void	Clear() {
-
+		m_AudioDataSize = 0;
+		assert(!m_AudioData.get());
 	}
 
 	virtual const WAVEFORMATEXTENSIBLE& Format() const {

@@ -1,6 +1,7 @@
 #include "SoundManager.h"
 #include "AudioLoader_RIFF.h"
 #include "AudioLoader_OggVorbis.h"
+#include "System/DebugConsole.h"
 
 SoundManager::SoundManager() {
 	m_Loaders[StaticString(".wav")] = new AudioLoader_RIFF();
@@ -17,8 +18,10 @@ Sound* SoundManager::Get(const StaticString& path) {
 		return asset;
 	}
 
+	Singleton<DebugConsole>::GetInstance()->Write("Loading %s...\n", path.CStr());
+
 	asset = new Sound();
-	if (!LoadSound(path, asset)) {
+	if (!Load(path, asset)) {
 		DeletePtr(asset);
 		return NULL;
 	}
@@ -29,6 +32,6 @@ Sound* SoundManager::Get(const StaticString& path) {
 
 void SoundManager::ReloadAll() {
 	FOREACH(iter, m_Assets) {
-		LoadSound(iter->first, iter->second);
+		Load(iter->first, iter->second);
 	}
 }

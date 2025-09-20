@@ -2,6 +2,7 @@
 #include "ImageLoader_RAW.h"
 #include "ImageLoader_TGA.h"
 #include "ImageLoader_PNG.h"
+#include "System/DebugConsole.h"
 //#include "ImageLoader_JPG.h"
 
 ImageManager::ImageManager() {
@@ -25,8 +26,10 @@ const Neo::Image* ImageManager::Get(const StaticString& path) {
 		return image;
 	}
 
+	Singleton<DebugConsole>::GetInstance()->Write("Loading %s...\n", path.CStr());
+
 	image = new Neo::Image;
-	if (!LoadImage(path, image)) {
+	if (!Load(path, image)) {
 		DeletePtr(image);
 		return NULL;
 	}
@@ -37,6 +40,6 @@ const Neo::Image* ImageManager::Get(const StaticString& path) {
 
 void ImageManager::ReloadAll() {
 	FOREACH(iter, m_Images) {
-		LoadImage(iter->first, iter->second);
+		Load(iter->first, iter->second);
 	}
 }

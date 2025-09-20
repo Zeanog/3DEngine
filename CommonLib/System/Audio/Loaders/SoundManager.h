@@ -37,7 +37,7 @@ public:
 	void	ReloadAll();
 
 protected:
-	Bool	LoadSound(const StaticString& fp, Sound* asset) {
+	Bool	Load(const StaticString& fp, Sound* asset) {
 		assert(asset);
 
 		THandlerContainer::iterator iter = m_Loaders.find(StaticString(FilePath::GetExtension(fp)));

@@ -2,10 +2,10 @@
 #include <vorbis\vorbisfile.h>
 #include <xaudio2.h>
 
+
 #define WAVE_FORMAT_VORBIS1   0x674f // 'Og'
 
 Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
- 
     OggVorbis_File oggFile;
     if (ov_fopen(fileName, &oggFile) < 0) {
         //std::cerr << "Failed to open OGG file" << std::endl;
@@ -28,14 +28,15 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     long total_sections = ov_streams(&oggFile);
     ogg_int64_t total_samples = ov_pcm_total(&oggFile, -1);
     
-    ogg_int64_t total_bytes = total_samples * (m_Format.Format.wBitsPerSample / 8.0f) * vi->channels;
-    BYTE* buffer = new BYTE[total_bytes];
+    m_AudioDataSize = total_samples * (m_Format.Format.wBitsPerSample / 8.0f) * vi->channels;
+    BYTE* buffer = new BYTE[m_AudioDataSize];
+    m_AudioData.reset(buffer);//Make sure we are in charge of the data in case we exit early
 
-    long bytes_read_total = 0;
+    UInt32 bytes_read_total = 0;
     int current_section = 0;
 
-    while (bytes_read_total < total_bytes) {
-        long bytes_read = ov_read(&oggFile, (char*)buffer + bytes_read_total, total_bytes - bytes_read_total, 0, 2, 1, &current_section);
+    while (bytes_read_total < m_AudioDataSize) {
+        long bytes_read = ov_read(&oggFile, (char*)buffer + bytes_read_total, m_AudioDataSize - bytes_read_total, 0, 2, 1, &current_section);
 
         if(bytes_read == 0) {
             break; // End of file
@@ -49,7 +50,5 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
 
     ov_clear(&oggFile);
 
-    m_AudioDataSize = total_bytes;
-    m_AudioData.reset(buffer);
     return true;
 }
