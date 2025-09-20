@@ -66,7 +66,6 @@
     <ClInclude Include="System\DataStructureLibrary.h" />
     <ClInclude Include="System\DebugConsole.h" />
     <ClInclude Include="System\File.h" />
-    <ClInclude Include="System\File_RIFF.h" />
     <ClInclude Include="System\Flash\Dispatcher.h" />
     <ClInclude Include="System\Flash\SWF.h" />
     <ClInclude Include="System\Functors\FunctionHandler.h" />
@@ -139,7 +138,6 @@
     <ClCompile Include="System\Color.cpp" />
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
-    <ClCompile Include="System\File_RIFF.cpp" />
     <ClCompile Include="System\JsonSerializer.cpp" />
     <ClCompile Include="System\StaticString.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />
