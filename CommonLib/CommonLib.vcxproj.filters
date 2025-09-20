@@ -252,9 +252,6 @@
     <ClInclude Include="System\Audio\Loaders\AudioLoader.h">
       <Filter>System\Audio\Loaders</Filter>
     </ClInclude>
-    <ClInclude Include="System\File_RIFF.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h">
       <Filter>System\Audio\Loaders</Filter>
     </ClInclude>
@@ -385,9 +382,6 @@
     </ClCompile>
     <ClCompile Include="System\Audio\SourceVoice.cpp">
       <Filter>System\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="System\File_RIFF.cpp">
-      <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\Audio\Sound.cpp">
       <Filter>System\Audio</Filter>

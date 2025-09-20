@@ -41,7 +41,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
             break; // End of file
         }
         else if (bytes_read < 0) {
-            
+            ov_clear(&oggFile);
             return false;
         }
         bytes_read_total += bytes_read;
