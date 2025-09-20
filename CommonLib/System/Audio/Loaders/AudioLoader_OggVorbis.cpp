@@ -28,9 +28,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     long total_sections = ov_streams(&oggFile);
     ogg_int64_t total_samples = ov_pcm_total(&oggFile, -1);
     
-    // Calculate total size in bytes for a 16-bit, interleaved buffer
-    // 16-bit samples = 2 bytes per sample
-    ogg_int64_t total_bytes = total_samples * sizeof(short) * vi->channels;
+    ogg_int64_t total_bytes = total_samples * (m_Format.Format.wBitsPerSample / 8.0f) * vi->channels;
     BYTE* buffer = new BYTE[total_bytes];
 
     long bytes_read_total = 0;
