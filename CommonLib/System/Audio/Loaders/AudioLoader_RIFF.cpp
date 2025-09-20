@@ -6,8 +6,8 @@
 Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	File_RIFF	file;
 
-	m_BufferInfo.AudioBytes = 0;
-	m_BufferInfo.pAudioData = nullptr;
+	m_AudioDataSize = 0;
+	m_AudioData = nullptr;
 
 	if (!file.Open(fileName, "rb")) {
 		return false;
@@ -34,16 +34,15 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	}
 
 	file.FindChunk(File_RIFF::FourCC::DATA, dwChunkSize, dwChunkPosition);
-	BYTE* pDataBuffer = new BYTE[dwChunkSize];
-
 	file.Seek(dwChunkPosition, SEEK_SET);
-	if (!file.Read(pDataBuffer, dwChunkSize)) {
+
+	BYTE* data = new BYTE[dwChunkSize];
+	if (!file.Read(data, dwChunkSize)) {
 		return false;
 	}
 
-	m_BufferInfo.AudioBytes = dwChunkSize;  //size of the audio buffer in bytes
-	m_BufferInfo.pAudioData = pDataBuffer;  //buffer containing audio data
-	m_BufferInfo.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
-
+	m_AudioData.reset(data);
+	m_AudioDataSize = dwChunkSize;
+	
 	return true;
 }

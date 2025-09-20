@@ -2,24 +2,26 @@
 
 #include "System\Typedefs.h"
 #include <xaudio2.h>
+#include <memory>
 
 class SourceVoice;
 class AudioLoader;
 
 class Sound {
 protected:
-	const XAUDIO2_BUFFER*		m_Data{};
-	const WAVEFORMATEXTENSIBLE*	m_Format{};
+	std::unique_ptr<BYTE>		m_Data;
+
+	XAUDIO2_BUFFER				m_Buffer{};
+	WAVEFORMATEXTENSIBLE		m_Format{};
 	Float32						m_Duration{};
 
 public:
 	DECLARE_GETSET( Format )
-
-	const XAUDIO2_BUFFER* Data() const {
-		return m_Data;
-	}
-
 	DECLARE_GETSET( Duration )
 
-	Bool	UploadData(const AudioLoader& loader);
+	const XAUDIO2_BUFFER* Buffer() const {
+		return &m_Buffer;
+	}
+
+	Bool	UploadData(AudioLoader& loader);
 };

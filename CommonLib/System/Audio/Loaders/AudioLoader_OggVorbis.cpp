@@ -47,10 +47,9 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
 
     ov_clear(&oggFile);
 
-    m_BufferInfo.AudioBytes = static_cast<UINT32>(buffer.size());
-    BYTE* data = new BYTE[m_BufferInfo.AudioBytes];
-    memcpy_s(data, m_BufferInfo.AudioBytes, buffer.data(), buffer.size());
-    m_BufferInfo.pAudioData = data;
-    m_BufferInfo.Flags = XAUDIO2_END_OF_STREAM;
+    m_AudioDataSize = static_cast<UINT32>(buffer.size());
+    BYTE* data = new BYTE[m_AudioDataSize];
+    memcpy_s(data, m_AudioDataSize, buffer.data(), buffer.size());
+    m_AudioData.reset(data);
     return true;
 }
