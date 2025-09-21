@@ -14,7 +14,7 @@ class SourceVoice : public ASourceVoice<IXAudio2SourceVoice>{
 	friend class AudioSystem;
 
 protected:
-	WAVEFORMATEX		m_Format;
+	WAVEFORMATEX		m_Format{};
 
 	class SourceVoiceCallbacks* m_Callbacks{};
 
@@ -60,11 +60,11 @@ public:
 	}
 
 public:
-	Delegate<TYPELIST_1(UINT32)>			OnVoiceProcessingPassStart;
-	Delegate<>								OnVoiceProcessingPassEnd;
-	Delegate<>								OnStreamEnd;
-	Delegate<TYPELIST_1(void*)>				OnBufferStart;
-	Delegate<TYPELIST_1(void*)>				OnBufferEnd;
-	Delegate<TYPELIST_1(void*)>				OnLoopEnd;
-	Delegate<TYPELIST_2(void*, HRESULT)>	OnVoiceError;
+	Delegate<TYPELIST_1(UINT32)>						OnVoiceProcessingPassStart;
+	Delegate<>											OnVoiceProcessingPassEnd;
+	Delegate<>											OnStreamEnd;
+	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferStart;
+	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferEnd;//TODO: Setup a callback to sort this voice list in the AudioSystem
+	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnLoopEnd;
+	Delegate<TYPELIST_3(SourceVoice*, void*, HRESULT)>	OnVoiceError;
 };

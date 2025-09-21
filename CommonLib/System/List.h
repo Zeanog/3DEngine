@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Typedefs.h"
+#include "System/Functors/Functor.h"
 #include "File.h"
 
 #include <vector>
 #include <typeinfo>
+#include <algorithm> // For std::sort
 
 template< typename _TData >
 class AList {
@@ -144,11 +146,16 @@ public:
 		}
 		return *this;
 	}
+
+	template<typename TFunc>
+	void Sort(TFunc func) {
+		std::sort(Begin(), End(), func);
+	}
 };
 
 template< typename _TData >
 class List : public AList<_TData> {
-	INHERITEDCLASS_TYPEDEFS( List, AList<_TData> );
+	INHERITEDCLASS_TYPEDEFS( List, AList<_TData> )
 
 public:
 	typedef typename TSuper::TData	TData;
