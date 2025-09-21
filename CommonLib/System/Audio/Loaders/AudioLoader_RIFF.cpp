@@ -79,7 +79,7 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	File	file;
 
 	m_AudioDataSize = 0;
-	m_AudioData = nullptr;
+	m_AudioData.reset(nullptr);
 
 	if (!file.Open(fileName, "rb")) {
 		return false;

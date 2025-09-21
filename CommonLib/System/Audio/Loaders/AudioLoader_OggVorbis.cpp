@@ -6,6 +6,9 @@
 #define WAVE_FORMAT_VORBIS1   0x674f // 'Og'
 
 Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
+    m_AudioDataSize = 0;
+    m_AudioData.reset(nullptr);//Clear the pointer;
+
     OggVorbis_File oggFile;
     if (ov_fopen(fileName, &oggFile) < 0) {
         //std::cerr << "Failed to open OGG file" << std::endl;
@@ -30,7 +33,6 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     
     m_AudioDataSize = total_samples * (m_Format.Format.wBitsPerSample / 8.0f) * vi->channels;
     BYTE* buffer = new BYTE[m_AudioDataSize];
-    m_AudioData.reset(buffer);//Make sure we are in charge of the data in case we exit early
 
     UInt32 bytes_read_total = 0;
     int current_section = 0;
@@ -42,12 +44,14 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
             break; // End of file
         }
         else if (bytes_read < 0) {
+            DeletePtr(buffer);
             ov_clear(&oggFile);
             return false;
         }
         bytes_read_total += bytes_read;
     }
 
+    m_AudioData.reset(buffer);//Make sure we are in charge of the data in case we exit early
     ov_clear(&oggFile);
 
     return true;

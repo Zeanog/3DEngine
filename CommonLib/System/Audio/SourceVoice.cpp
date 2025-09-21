@@ -10,14 +10,6 @@ SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format) {
 	assert(SUCCEEDED(hr));
 }
 
-//SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format, const XAUDIO2_VOICE_SENDS* destVoices) {
-//	m_Format = format;
-//
-//	m_Callbacks = new SourceVoiceCallbacks(this);
-//	HRESULT hr = audio->CreateSourceVoice(&m_Voice, &m_Format, 0, 2.0f, m_Callbacks, destVoices);
-//	assert(SUCCEEDED(hr));
-//}
-
 void SourceVoice::Destroy() {
 	TSuper::Destroy();
 

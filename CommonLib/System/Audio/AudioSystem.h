@@ -24,9 +24,11 @@ protected:
 
 	List<AVoice*>	m_Voices{};
 
-	Map<const SubmixVoice*, Map<UINT64, List<SourceVoice*>>>	m_SoundCategoryMap{};
+	Map<SubmixVoice*, Map<UINT64, List<SourceVoice*>>>	m_CategoryToVoiceListMap{};
+	Map<SourceVoice*, SubmixVoice*>						m_VoiceToCategoryMap{};
 
-	Map<const StaticString, SubmixVoice*>		m_CategoryMap;
+	Map<StaticString, SubmixVoice*>								m_CategoryNameToVoiceMap{};
+	Map<SubmixVoice*, StaticString>								m_VoiceToCategoryNameMap{};
 
 protected:
 	MasteringVoice* CreateMasteringVoice();
@@ -36,8 +38,10 @@ protected:
 
 	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice);
 	Bool AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
+	void OnBufferEndHandler(SourceVoice* voice, void* v);
 
 	SubmixVoice* GetCategory(const StaticString& name) const;
+	const StaticString& GetCategoryName(SubmixVoice* categoryVoice) const;
 
 	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
 	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
@@ -58,7 +62,6 @@ public:
 	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
 	SourceVoice* Play(const StaticString& categoryName, const StaticString& filePath, Sound*& outSnd);
 	
-	//XAUDIO2_EFFECT_DESCRIPTOR{ pReverbEffect , true, fxMixVoice->NumChannels() }
 	template<typename... Effects>
 	Bool AddEffectDescriptors(const StaticString& categoryName, Effects... effects) {
 		static constexpr UINT32 NumDescriptors = sizeof...(Effects);

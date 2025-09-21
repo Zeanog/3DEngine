@@ -16,8 +16,14 @@ protected:
 	Float32						m_Duration{};
 
 public:
+	~Sound();
+
 	DECLARE_GETSET( Format )
 	DECLARE_GETSET( Duration )
+
+	void		SetContext(void* cxt) {
+		m_Buffer.pContext = cxt;
+	}
 
 	const XAUDIO2_BUFFER* Buffer() const {
 		return &m_Buffer;
