@@ -87,10 +87,10 @@ public:
 #define FOREACH_CONST( iterName, stlContainer )	\
 	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
-#define RFOREACH( iterName, stlContainer )	\
+#define FOREACH_R( iterName, stlContainer )	\
 	for( typename ContainerIterator<decltype(stlContainer)>::ReverseIterator iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
-#define RFOREACH_CONST( iterName, stlContainer )	\
+#define FOREACH_CONST_R( iterName, stlContainer )	\
 	for( typename ContainerIterator<decltype(stlContainer)>::ConstReverseIterator iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
