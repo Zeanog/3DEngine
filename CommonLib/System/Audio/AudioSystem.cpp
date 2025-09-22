@@ -148,7 +148,7 @@ SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRat
 	return newVoice;
 }
 
-Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) {
+Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const {
 	outVoice = nullptr;
 
 	std::lock_guard<std::mutex> guard(m_Mutex);
@@ -184,18 +184,18 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 
 	voice->OnBufferEnd.AddListener(this, &AudioSystem::OnBufferEndHandler);
 
-	voice->SetOutputTo(voiceCategory);
-
-	return true;
+	return voice->SetOutputTo(voiceCategory);
 }
 
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* v) {
+	std::lock_guard<std::mutex> guard(m_Mutex);
+
 	Sound* snd = (Sound*)v;
 	auto category = m_VoiceToCategoryMap[voice];
 	auto& voiceListMap = m_CategoryToVoiceListMap[category];
 	auto& voiceList = voiceListMap[GenerateHash(snd->Format().Format)];
 
-	std::lock_guard<std::mutex> guard(m_Mutex);
+	//Place the voice to the back of the list so we can find open voices quickly
 	voiceList.Remove(voice);
-	voiceList.Add(voice);//Put the voice to the back so we can find open voices quickly
+	voiceList.Add(voice);
 };

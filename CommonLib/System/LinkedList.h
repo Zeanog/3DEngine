@@ -77,20 +77,16 @@ public:
 	}
 	//
 
-	TData&	operator[](UInt32 index) {
-		return m_Data[index];
-	}
-
-	const TData&	operator[](UInt32 index) const {
-		return m_Data[index];
-	}
-
 	UInt32	Length() const {
 		return m_Data.size();
 	}
 
 	void	Add(const TData& data) {
 		m_Data.push_back(data);
+	}
+
+	void	AddFront(const TData& data) {
+		m_Data.push_front(data);
 	}
 
 	void	Remove(const TData& data) {
@@ -121,18 +117,17 @@ public:
 		return m_Data.cend();
 	}
 
-	void	EnsureSize(UInt32 size) {
-		if (size > Length()) {
-			m_Data.reserve(size);
-		}
-	}
-
 	void	Resize(UInt32 size) {
 		m_Data.resize(size);
 	}
 
 	void	Clear() {
 		m_Data.clear();
+	}
+
+	template<typename TFunc>
+	void Sort(TFunc func) {
+		m_Data.sort(func);
 	}
 
 	/*virtual Bool	ReadFrom( File& file ) {

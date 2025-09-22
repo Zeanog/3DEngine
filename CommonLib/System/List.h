@@ -183,8 +183,15 @@ class List : public AList<_TData> {
 public:
 	typedef typename TSuper::TData	TData;
 
-	typedef typename TSuper::TIterator		TIterator;
-	typedef typename TSuper::TConstIterator	TConstIterator;
+	typedef typename TSuper::iterator					TIterator;
+	typedef typename TSuper::const_iterator				TConstIterator;
+	typedef typename TSuper::reverse_iterator			TReverseIterator;
+	typedef typename TSuper::const_reverse_iterator		TConstReverseIterator;
+
+	typedef typename TSuper::iterator					iterator;
+	typedef typename TSuper::const_iterator				const_iterator;
+	typedef typename TSuper::reverse_iterator			reverse_iterator;
+	typedef typename TSuper::const_reverse_iterator		const_reverse_iterator;
 
 protected:
 
@@ -199,13 +206,20 @@ public:
 
 template<typename _TData>
 class List<_TData*> : public AList<_TData*> {
-	INHERITEDCLASS_TYPEDEFS(List, AList<_TData*>);
+	INHERITEDCLASS_TYPEDEFS(List, AList<_TData*>)
 
 public:
 	typedef typename _TData	TData;
 
-	typedef typename TSuper::TIterator		TIterator;
-	typedef typename TSuper::TConstIterator	TConstIterator;
+	typedef typename TSuper::iterator					TIterator;
+	typedef typename TSuper::const_iterator				TConstIterator;
+	typedef typename TSuper::reverse_iterator			TReverseIterator;
+	typedef typename TSuper::const_reverse_iterator		TConstReverseIterator;
+
+	typedef typename TSuper::iterator					iterator;
+	typedef typename TSuper::const_iterator				const_iterator;
+	typedef typename TSuper::reverse_iterator			reverse_iterator;
+	typedef typename TSuper::const_reverse_iterator		const_reverse_iterator;
 
 protected:
 
