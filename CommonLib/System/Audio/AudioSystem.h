@@ -3,8 +3,11 @@
 #include "System\Typedefs.h"
 #include "System/Singleton.h"
 #include "System\List.h"
+#include "System\LinkedList.h"
 #include "System\Map.h"
 #include "SubmixVoice.h"
+
+#include <mutex>
 #include <xaudio2.h>
 
 class AVoice;
@@ -24,11 +27,13 @@ protected:
 
 	List<AVoice*>	m_Voices{};
 
-	Map<SubmixVoice*, Map<UINT64, List<SourceVoice*>>>	m_CategoryToVoiceListMap{};
-	Map<SourceVoice*, SubmixVoice*>						m_VoiceToCategoryMap{};
+	Map<SubmixVoice*, Map<UINT64, LinkedList<SourceVoice*>>>	m_CategoryToVoiceListMap{};
+	Map<SourceVoice*, SubmixVoice*>								m_VoiceToCategoryMap{};
 
 	Map<StaticString, SubmixVoice*>								m_CategoryNameToVoiceMap{};
 	Map<SubmixVoice*, StaticString>								m_VoiceToCategoryNameMap{};
+
+	static std::mutex							m_Mutex;
 
 protected:
 	MasteringVoice* CreateMasteringVoice();

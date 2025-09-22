@@ -11,9 +11,17 @@ class ALinkedList {
 public:
 	typedef _TData	TData;
 	typedef std::list<TData>	TContainer;
+	typedef typename TContainer::value_type	TValue;
+
 	typedef typename TContainer::iterator	TIterator;
 	typedef typename TContainer::const_iterator	TConstIterator;
-	typedef typename TContainer::value_type	TValue;
+	typedef typename TContainer::reverse_iterator	TReverseIterator;
+	typedef typename TContainer::const_reverse_iterator	TConstReverseIterator;
+
+	typedef typename TContainer::iterator				iterator;
+	typedef typename TContainer::const_iterator			const_iterator;
+	typedef typename TContainer::reverse_iterator		reverse_iterator;
+	typedef typename TContainer::const_reverse_iterator	const_reverse_iterator;
 
 protected:
 	TContainer	m_Data;
@@ -34,6 +42,40 @@ public:
 	TConstIterator	End() const {
 		return m_Data.end();
 	}
+
+	TIterator	begin() {
+		return m_Data.begin();
+	}
+
+	TIterator	end() {
+		return m_Data.end();
+	}
+
+	TConstIterator	cbegin() const {
+		return m_Data.cbegin();
+	}
+
+	TConstIterator	cend() const {
+		return m_Data.cend();
+	}
+
+	//
+	TReverseIterator	rbegin() {
+		return m_Data.rbegin();
+	}
+
+	TReverseIterator	rend() {
+		return m_Data.rend();
+	}
+
+	TConstReverseIterator	crbegin() const {
+		return m_Data.crbegin();
+	}
+
+	TConstReverseIterator	crend() const {
+		return m_Data.crend();
+	}
+	//
 
 	TData&	operator[](UInt32 index) {
 		return m_Data[index];
@@ -112,8 +154,15 @@ public:
 public:
 	typedef typename _TData	TData;
 
-	typedef typename TSuper::TIterator		TIterator;
-	typedef typename TSuper::TConstIterator	TConstIterator;
+	typedef typename TSuper::iterator	TIterator;
+	typedef typename TSuper::const_iterator	TConstIterator;
+	typedef typename TSuper::reverse_iterator	TReverseIterator;
+	typedef typename TSuper::const_reverse_iterator	TConstReverseIterator;
+
+	typedef typename TSuper::iterator				iterator;
+	typedef typename TSuper::const_iterator			const_iterator;
+	typedef typename TSuper::reverse_iterator		reverse_iterator;
+	typedef typename TSuper::const_reverse_iterator	const_reverse_iterator;
 
 protected:
 
@@ -125,8 +174,12 @@ class ContainerIterator<LinkedList<TData>> {
 public:
 	typedef typename LinkedList<TData>	TContainer;
 	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
-	typedef typename TUndecorated::TIterator		Iterator;
-	typedef typename TUndecorated::TConstIterator	ConstIterator;
+	
+	typedef typename TUndecorated::iterator	Iterator;
+	typedef typename TUndecorated::const_iterator	ConstIterator;
+
+	typedef typename TUndecorated::reverse_iterator	ReverseIterator;
+	typedef typename TUndecorated::const_reverse_iterator	ConstReverseIterator;
 
 	static Iterator	Begin(TUndecorated& container) {
 		return container.Begin();
@@ -142,5 +195,60 @@ public:
 
 	static ConstIterator	End(const TUndecorated& container) {
 		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(TUndecorated& container) {
+		return container.rbegin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		return container.crbegin();
+	}
+	static ReverseIterator	ReverseEnd(TUndecorated& container) {
+		return container.rend();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		return container.crend();
+	}
+};
+
+template<class TData>
+class ContainerIterator<const LinkedList<TData>&> {
+public:
+	typedef typename LinkedList<TData> TContainer;
+	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
+	typedef typename TUndecorated::iterator	Iterator;
+	typedef typename TUndecorated::const_iterator	ConstIterator;
+
+	typedef typename TUndecorated::reverse_iterator	ReverseIterator;
+	typedef typename TUndecorated::const_reverse_iterator	ConstReverseIterator;
+
+	static Iterator	Begin(TUndecorated& container) {
+		return container.Begin();
+	}
+
+	static ConstIterator	Begin(const TUndecorated& container) {
+		return container.Begin();
+	}
+
+	static Iterator	End(TUndecorated& container) {
+		return container.End();
+	}
+
+	static ConstIterator	End(const TUndecorated& container) {
+		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(TUndecorated& container) {
+		return container.rbegin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		return container.crbegin();
+	}
+	static ReverseIterator	ReverseEnd(TUndecorated& container) {
+		return container.rend();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		return container.crend();
 	}
 };

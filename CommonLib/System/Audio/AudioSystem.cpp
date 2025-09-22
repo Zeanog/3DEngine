@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <limits>
 
+std::mutex AudioSystem::m_Mutex;
+
 Bool AudioSystem::Init() {
 	HRESULT hr = ::XAudio2Create(&m_Audio2, 0, XAUDIO2_USE_DEFAULT_PROCESSOR);
 	if (FAILED(hr)) {
@@ -149,12 +151,14 @@ SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRat
 Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) {
 	outVoice = nullptr;
 
+	std::lock_guard<std::mutex> guard(m_Mutex);
 	auto& categoryMap = m_CategoryToVoiceListMap[voiceCategory];
 
 	UInt64 hash = GenerateHash(format);
 	auto& voiceList = categoryMap[hash];
-	for (UInt32 ix = 0; ix < voiceList.Length(); ++ix) {
-		auto v = voiceList[ix];
+	
+	RFOREACH_CONST(iter, voiceList) {
+		auto v = *iter;
 		if (!v->IsPlaying()) {
 			outVoice = v;
 			return true;
@@ -167,10 +171,14 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice) {
 	assert(m_CategoryToVoiceListMap.Contains(voiceCategory));
 
+	std::lock_guard<std::mutex> guard(m_Mutex);
+
 	auto& categoryVoiceMap = m_CategoryToVoiceListMap[voiceCategory];
 	auto hash = GenerateHash(voice->Format());
 	auto& voiceList = categoryVoiceMap[hash];
+
 	voiceList.Add(voice);
+
 	m_Voices.Add(voice);
 	m_VoiceToCategoryMap.Add(voice, voiceCategory);
 
@@ -187,16 +195,7 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* v) {
 	auto& voiceListMap = m_CategoryToVoiceListMap[category];
 	auto& voiceList = voiceListMap[GenerateHash(snd->Format().Format)];
 
-	//Put non-playing voices at the top of the list.  Speed up finding open voices
-	voiceList.Sort([](const SourceVoice* lhs, const SourceVoice* rhs) {
-		if (!lhs->IsPlaying()) {
-			return true;
-		}
-
-		if (!rhs->IsPlaying()) {
-			return false;
-		}
-
-		return true;
-	});
+	std::lock_guard<std::mutex> guard(m_Mutex);
+	voiceList.Remove(voice);
+	voiceList.Add(voice);//Put the voice to the back so we can find open voices quickly
 };

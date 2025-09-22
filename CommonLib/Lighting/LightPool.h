@@ -16,6 +16,8 @@ public:
 	typedef TSuper::TContainer		TContainer;
 	typedef TSuper::Iterator		Iterator;
 	typedef TSuper::ConstIterator	ConstIterator;
+	typedef TSuper::ReverseIterator		ReverseIterator;
+	typedef TSuper::ConstReverseIterator	ConstReverseIterator;
 
 protected:
 
@@ -31,6 +33,8 @@ public:
 	typedef TSuper::TContainer		TContainer;
 	typedef TSuper::Iterator		Iterator;
 	typedef TSuper::ConstIterator	ConstIterator;
+	typedef TSuper::ReverseIterator		ReverseIterator;
+	typedef TSuper::ConstReverseIterator	ConstReverseIterator;
 
 protected:
 	std::vector<Float32>	m_Positions;
@@ -49,6 +53,8 @@ public:
 	typedef TSuper::TContainer		TContainer;
 	typedef TSuper::Iterator		Iterator;
 	typedef TSuper::ConstIterator	ConstIterator;
+	typedef TSuper::ReverseIterator		ReverseIterator;
+	typedef TSuper::ConstReverseIterator	ConstReverseIterator;
 
 protected:
 	std::vector<Float32>	m_Positions;

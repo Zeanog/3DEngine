@@ -47,23 +47,37 @@ template< class TContainer >
 class ContainerIterator {
 public:
 	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
 	typedef typename TUndecorated::iterator	Iterator;
 	typedef typename TUndecorated::const_iterator	ConstIterator;
+
+	typedef typename TUndecorated::reverse_iterator	ReverseIterator;
+	typedef typename TUndecorated::const_reverse_iterator	ConstReverseIterator;
 
 	static Iterator	Begin(typename TUndecorated& container) {
 		return container.begin();
 	}
-
 	static ConstIterator	Begin(const typename TUndecorated& container) {
 		return container.cbegin();
 	}
-
 	static Iterator	End(typename TUndecorated& container) {
 		return container.end();
 	}
-
 	static ConstIterator	End(const typename TUndecorated& container) {
 		return container.cend();
+	}
+
+	static ReverseIterator	ReverseBegin(typename TUndecorated& container) {
+		return container.rbegin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		return container.crbegin();
+	}
+	static ReverseIterator	ReverseEnd(typename TUndecorated& container) {
+		return container.rend();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		return container.crend();
 	}
 };
 
@@ -72,6 +86,12 @@ public:
 
 #define FOREACH_CONST( iterName, stlContainer )	\
 	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
+
+#define RFOREACH( iterName, stlContainer )	\
+	for( typename ContainerIterator<decltype(stlContainer)>::ReverseIterator iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
+
+#define RFOREACH_CONST( iterName, stlContainer )	\
+	for( typename ContainerIterator<decltype(stlContainer)>::ConstReverseIterator iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
 

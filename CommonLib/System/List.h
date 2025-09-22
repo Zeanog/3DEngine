@@ -16,10 +16,15 @@ public:
 	typedef _TData	TData;
 	typedef std::vector<TData>	TContainer;
 
-	typedef typename TContainer::iterator		TIterator;
-	typedef typename TContainer::const_iterator	TConstIterator;
-	typedef typename TContainer::iterator		iterator;
-	typedef typename TContainer::const_iterator	const_iterator;
+	typedef typename TContainer::iterator					TIterator;
+	typedef typename TContainer::const_iterator				TConstIterator;
+	typedef typename TContainer::reverse_iterator			TReverseIterator;
+	typedef typename TContainer::const_reverse_iterator		TConstReverseIterator;
+
+	typedef typename TContainer::iterator					iterator;
+	typedef typename TContainer::const_iterator				const_iterator;
+	typedef typename TContainer::reverse_iterator			reverse_iterator;
+	typedef typename TContainer::const_reverse_iterator		const_reverse_iterator;
 
 protected:
 	TContainer	m_Data;
@@ -63,7 +68,7 @@ public:
 
 	Int32	FindIndexOf(const TData& data) const {
 		Int32 index = 0;
-		FOREACH(elem, m_Data) {
+		FOREACH_CONST(elem, m_Data) {
 			if (*elem != data) {
 				++index;
 				continue;
@@ -128,13 +133,31 @@ public:
 		return m_Data.end();
 	}
 
-	TConstIterator	begin() const {
-		return m_Data.begin();
+	TConstIterator	cbegin() const {
+		return m_Data.cbegin();
 	}
 
-	TConstIterator	end() const {
-		return m_Data.end();
+	TConstIterator	cend() const {
+		return m_Data.cend();
 	}
+
+	//
+	TReverseIterator	rbegin() {
+		return m_Data.rbegin();
+	}
+
+	TReverseIterator	rend() {
+		return m_Data.rend();
+	}
+
+	TConstReverseIterator	crbegin() const {
+		return m_Data.crbegin();
+	}
+
+	TConstReverseIterator	crend() const {
+		return m_Data.crend();
+	}
+	// 
 
 	void	Clear() {
 		m_Data.clear();

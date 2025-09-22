@@ -8,11 +8,15 @@ class Pool {
 public:
 	typedef _TData		TData;
 	typedef std::list<TData*>					TContainer;
-	typedef typename TContainer::iterator		Iterator;
-	typedef typename TContainer::const_iterator	ConstIterator;
+	typedef typename TContainer::iterator				Iterator;
+	typedef typename TContainer::const_iterator			ConstIterator;
+	typedef typename TContainer::reverse_iterator		ReverseIterator;
+	typedef typename TContainer::const_reverse_iterator	ConstReverseIterator;
 
-	typedef typename TContainer::iterator		iterator;
-	typedef typename TContainer::iterator	const_iterator;
+	typedef typename TContainer::iterator				iterator;
+	typedef typename TContainer::const_iterator			const_iterator;
+	typedef typename TContainer::reverse_iterator		reverse_iterator;
+	typedef typename TContainer::const_reverse_iterator	const_reverse_iterator;
 
 protected:
 	TContainer	m_Container;
@@ -57,7 +61,7 @@ public:
 		return m_Container.end();
 	}
 
-	ConstIterator	end() const {
+	ConstIterator	cend() {
 		return m_Container.cend();
 	}
 
@@ -65,7 +69,7 @@ public:
 		return m_Container.begin();
 	}
 
-	ConstIterator	begin() const {
+	ConstIterator	cbegin() {
 		return m_Container.cbegin();
 	}
 };
