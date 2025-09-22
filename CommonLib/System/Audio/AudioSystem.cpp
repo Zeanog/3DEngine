@@ -70,8 +70,12 @@ const StaticString& AudioSystem::GetCategoryName(SubmixVoice* categoryVoice) con
 Bool AudioSystem::AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate) {
 	assert(!m_CategoryNameToVoiceMap.Contains(name));
 
-	m_CategoryNameToVoiceMap.Add(name, CreateSubmixVoice(numChannels, sampleRate));
-	m_VoiceToCategoryNameMap.Add(m_CategoryNameToVoiceMap[name], name);
+	auto voice = CreateSubmixVoice(numChannels, sampleRate);
+	m_CategoryNameToVoiceMap.Add(name, voice);
+	m_VoiceToCategoryNameMap.Add(voice, name);
+
+	m_CategoryToVoiceListMap.Add(voice, Map<UINT64, LinkedList<SourceVoice*>>());
+
 	return true;
 }
 
@@ -153,6 +157,9 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 
 	std::lock_guard<std::mutex> guard(m_Mutex);
 	auto& categoryMap = m_CategoryToVoiceListMap[voiceCategory];
+	if (categoryMap.Length() <= 0) {
+		return false;
+	}
 
 	UInt64 hash = GenerateHash(format);
 	auto& voiceList = categoryMap[hash];
@@ -175,6 +182,10 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 
 	auto& categoryVoiceMap = m_CategoryToVoiceListMap[voiceCategory];
 	auto hash = GenerateHash(voice->Format());
+
+	if (!categoryVoiceMap.Contains(hash)) {
+		categoryVoiceMap.Add(hash, LinkedList<SourceVoice*>());
+	}
 	auto& voiceList = categoryVoiceMap[hash];
 
 	voiceList.Add(voice);
