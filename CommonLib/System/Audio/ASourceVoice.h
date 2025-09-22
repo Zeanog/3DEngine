@@ -33,19 +33,23 @@ public:
 
 	virtual Float32 Volume() const {
 		Float32 volume{};
+		assert(m_Voice);
 		m_Voice->GetVolume(&volume);
 		return volume;
 	}
 
 	virtual Bool Volume(Float32 newVolume) const {
+		assert(m_Voice);
 		return SUCCEEDED(m_Voice->SetVolume(newVolume));
 	}
 
 	virtual Bool			Volume(Float32 newVolume, UInt32 operationSet) const {
+		assert(m_Voice);
 		return SUCCEEDED(m_Voice->SetVolume(newVolume, operationSet));
 	}
 
 	virtual Bool SetOutputVoices(const XAUDIO2_VOICE_SENDS* destVoices) {
+		assert(m_Voice);
 		return SUCCEEDED(m_Voice->SetOutputVoices(destVoices));
 	}
 
@@ -64,11 +68,13 @@ public:
 	}
 
 	virtual Bool SetEffectChain(const XAUDIO2_EFFECT_CHAIN& chain) {
+		assert(m_Voice);
 		auto result = m_Voice->SetEffectChain(&chain);
 		return SUCCEEDED(result);
 	}
 
 	virtual Bool SetEffectChain(const XAUDIO2_EFFECT_CHAIN* chain) {
+		assert(m_Voice);
 		auto result = m_Voice->SetEffectChain(chain);
 		return SUCCEEDED(result);
 	}
@@ -88,29 +94,35 @@ public:
 	}
 
 	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
+		assert(m_Voice);
 		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
 	}
 
 	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
+		assert(m_Voice);
 		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
 	}
 
 	Bool EnableEffect(UInt32 index) {
+		assert(m_Voice);
 		auto result = m_Voice->EnableEffect(index);
 		return SUCCEEDED(result);
 	}
 
 	Bool EnableEffect(UInt32 index, UInt32 operationSet) {
+		assert(m_Voice);
 		auto result = m_Voice->EnableEffect(index, operationSet);
 		return SUCCEEDED(result);
 	}
 
 	Bool DisableEffect(UInt32 index) {
+		assert(m_Voice);
 		auto result = m_Voice->DisableEffect(index);
 		return SUCCEEDED(result);
 	}
 
 	Bool DisableEffect(UInt32 index, UInt32 operationSet) {
+		assert(m_Voice);
 		auto result = m_Voice->DisableEffect(index, operationSet);
 		return SUCCEEDED(result);
 	}

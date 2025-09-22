@@ -13,6 +13,7 @@ SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format) {
 void SourceVoice::Destroy() {
 	TSuper::Destroy();
 
+	//Destroy the voice first to avoid possible dangling callback pointer
 	DeletePtr(m_Callbacks);
 }
 
@@ -21,6 +22,7 @@ Bool SourceVoice::Submit(const Sound& sound) {
 }
 
 Bool SourceVoice::Submit(const Sound* sound) {
+	assert(m_Voice);
 	return SUCCEEDED(m_Voice->SubmitSourceBuffer(sound->Buffer()));
 }
 
@@ -29,6 +31,7 @@ Bool SourceVoice::Start(const Sound& sound) {
 }
 
 Bool SourceVoice::Start(const Sound* sound) {
+	assert(m_Voice);
 	m_Voice->FlushSourceBuffers();
 	if (!Submit(sound)) {
 		return false;
@@ -37,6 +40,7 @@ Bool SourceVoice::Start(const Sound* sound) {
 }
 
 Bool SourceVoice::Start() {
+	assert(m_Voice);
 	return SUCCEEDED(m_Voice->Start());
 }
 
@@ -53,5 +57,6 @@ Bool SourceVoice::Start(const Sound* sound, UInt32 operationSet) {
 }
 
 Bool SourceVoice::Start(UInt32 operationSet) {
+	assert(m_Voice);
 	return SUCCEEDED(m_Voice->Start(0, operationSet));
 }

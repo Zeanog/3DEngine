@@ -162,3 +162,24 @@ Param<decltype(m_##name)>::Type		name() const {					\
 void			name(Param<decltype(m_##name)>::Type val) {			\
 	m_##name = val;								\
 }
+
+#define ABSTRACT_GETSET_EX( type, propName )								\
+virtual typename Param<type>::Type		propName() const = 0;				\
+virtual void			propName(typename Param<type>::Type val) = 0;
+
+#define DEFINE_GETSET_EX( propName, name )									\
+inline Param<decltype(name)>::Type		propName() const {					\
+	return name;															\
+}																			\
+inline void	__fastcall propName(Param<decltype(name)>::Type val) {			\
+	name = val;																\
+}
+
+#define DEFINE_MEMBER_EX( type, propName, name )	\
+protected:											\
+type	name;										\
+public:												\
+DEFINE_GETSET_EX( propName, name )					\
+private:
+
+#define DEFINE_GETSET( name )	DEFINE_GETSET_EX(decltype(m_##name), name, m_##name)

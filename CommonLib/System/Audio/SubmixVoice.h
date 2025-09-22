@@ -19,4 +19,8 @@ public:
 	virtual UInt32	NumChannels() const override {
 		return m_NumChannels;
 	}
+
+	UInt32	SampleRate() const {
+		return m_SampleRate;
+	}
 };

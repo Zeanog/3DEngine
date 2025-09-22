@@ -41,7 +41,7 @@ protected:
 	static UINT64		GenerateHash(const WAVEFORMATEX& format);
 	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
 
-	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice);
+	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
 	Bool AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
 	void OnBufferEndHandler(SourceVoice* voice, void* v);
 

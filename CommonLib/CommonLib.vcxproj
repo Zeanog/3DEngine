@@ -82,6 +82,7 @@
     <ClInclude Include="System\Input\Mouse.h" />
     <ClInclude Include="System\Input\VirtualKey.h" />
     <ClInclude Include="System\JsonSerializer.h" />
+    <ClInclude Include="System\LinkedList.h" />
     <ClInclude Include="System\List.h" />
     <ClInclude Include="System\Map.h" />
     <ClInclude Include="System\Pool.h" />

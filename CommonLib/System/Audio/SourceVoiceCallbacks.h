@@ -13,17 +13,17 @@ protected:
 public:
 	SourceVoiceCallbacks(SourceVoice* source);
 
-	virtual void __stdcall OnVoiceProcessingPassStart(UINT32 bytesRequired);
+	virtual void __stdcall OnVoiceProcessingPassStart(UINT32 bytesRequired) override;
 
-	virtual void __stdcall OnVoiceProcessingPassEnd();
+	virtual void __stdcall OnVoiceProcessingPassEnd() override;
 
-	virtual void __stdcall OnStreamEnd();
+	virtual void __stdcall OnStreamEnd() override;
 
-	virtual void __stdcall OnBufferStart(void* pBufferContext);
+	virtual void __stdcall OnBufferStart(void* pBufferContext) override;
 
-	virtual void __stdcall OnBufferEnd(void* pBufferContext);
+	virtual void __stdcall OnBufferEnd(void* pBufferContext) override;
 
-	virtual void __stdcall OnLoopEnd(void* pBufferContext);
+	virtual void __stdcall OnLoopEnd(void* pBufferContext) override;
 
-	virtual void __stdcall OnVoiceError(void* pBufferContext, HRESULT error);
+	virtual void __stdcall OnVoiceError(void* pBufferContext, HRESULT error) override;
 };

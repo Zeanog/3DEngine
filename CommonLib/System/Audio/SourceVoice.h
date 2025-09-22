@@ -54,6 +54,7 @@ public:
 	}
 
 	virtual Bool IsPlaying() const {
+		assert(m_Voice);
 		XAUDIO2_VOICE_STATE state;
 		m_Voice->GetState(&state);
 		return state.BuffersQueued > 0;

@@ -9,7 +9,7 @@ class MasteringVoice : public AVoice {
 	friend class AudioSystem;
 
 protected:
-	IXAudio2MasteringVoice* m_Voice = nullptr;
+	IXAudio2MasteringVoice* m_Voice{};
 
 	virtual void	Destroy();
 
