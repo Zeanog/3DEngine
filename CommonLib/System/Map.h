@@ -19,8 +19,16 @@ public:
 	typedef _TKey	TKey;
 	typedef _TValue	TValue;
 	typedef std::map<TKey, TValue>	TContainer;
+
 	typedef typename TContainer::iterator	TIterator;
 	typedef typename TContainer::const_iterator	TConstIterator;
+	typedef typename TContainer::reverse_iterator	TReverseIterator;
+	typedef typename TContainer::const_reverse_iterator	TConstReverseIterator;
+
+	typedef typename TContainer::iterator				iterator;
+	typedef typename TContainer::const_iterator			const_iterator;
+	typedef typename TContainer::reverse_iterator		reverse_iterator;
+	typedef typename TContainer::const_reverse_iterator	const_reverse_iterator;
 
 protected:
 	typename TContainer	m_Data;
@@ -41,6 +49,40 @@ public:
 	TConstIterator	End() const {
 		return m_Data.end();
 	}
+
+	TIterator	begin() {
+		return m_Data.begin();
+	}
+
+	TIterator	end() {
+		return m_Data.end();
+	}
+
+	TConstIterator	begin() const {
+		return m_Data.cbegin();
+	}
+
+	TConstIterator	end() const {
+		return m_Data.cend();
+	}
+
+	//
+	TReverseIterator	rbegin() {
+		return m_Data.rbegin();
+	}
+
+	TReverseIterator	rend() {
+		return m_Data.rend();
+	}
+
+	TConstReverseIterator	crbegin() {
+		return m_Data.crbegin();
+	}
+
+	TConstReverseIterator	crend() {
+		return m_Data.crend();
+	}
+	// 
 
 	TValue&	operator[](typename Param<TKey>::Type key) {
 		return m_Data[key];
@@ -160,8 +202,12 @@ class ContainerIterator< Map<_TKey, _TValue> > {
 public:
 	typedef typename Map<_TKey, _TValue>				TContainer;
 	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
-	typedef typename TUndecorated::TIterator			Iterator;
-	typedef typename TUndecorated::TConstIterator		ConstIterator;
+	
+	typedef typename TUndecorated::iterator	Iterator;
+	typedef typename TUndecorated::const_iterator	ConstIterator;
+
+	typedef typename TUndecorated::reverse_iterator	ReverseIterator;
+	typedef typename TUndecorated::const_reverse_iterator	ConstReverseIterator;
 
 	static Iterator	Begin(TUndecorated& container) {
 		return container.Begin();
@@ -177,6 +223,19 @@ public:
 
 	static ConstIterator	End(const TUndecorated& container) {
 		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(TUndecorated& container) {
+		return container.rbegin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		return container.crbegin();
+	}
+	static ReverseIterator	ReverseEnd(TUndecorated& container) {
+		return container.rend();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		return container.crend();
 	}
 };
 
