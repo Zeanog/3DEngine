@@ -62,7 +62,7 @@ protected:
 
 public:
 	virtual Bool	Init();
-	virtual void	Release();
+	virtual void	Destroy();
 
 	Bool		AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
 
