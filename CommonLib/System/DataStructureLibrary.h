@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../System/Singleton.h"
+#include "System/Singleton.h"
 #include <list>
 
 template< class _TData >
 class DataStructureLibrary {
 	CLASS_TYPEDEFS(DataStructureLibrary)
-	SINGLETON_DECLARATIONS(DataStructureLibrary);
+	SINGLETON_DECLARATIONS(DataStructureLibrary) {}
 
 public:
 	typedef _TData	TData;

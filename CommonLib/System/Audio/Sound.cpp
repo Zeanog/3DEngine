@@ -14,12 +14,11 @@ Bool Sound::UploadData(AudioLoader& loader) {
 	m_Format = loader.Format();
 
 	m_Data = loader.Data();//Take ownership of the data
-	assert(!loader.IsValid());
+	assert(!loader.IsValid());//Verify that the pointer is nullptr
+	loader.Clear();
 
 	m_Buffer.pAudioData = m_Data.get();
 	m_Buffer.pContext = this;
 	m_Duration = (Float32)m_Buffer.AudioBytes / ((Float32)(m_Format.Format.wBitsPerSample / 8.0f) * (Float32)m_Format.Format.nSamplesPerSec);
-
-	loader.Clear();
 	return true;
 }

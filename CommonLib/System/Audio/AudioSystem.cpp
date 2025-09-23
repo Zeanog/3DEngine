@@ -74,7 +74,7 @@ Bool AudioSystem::AddCategory(const StaticString& name, UInt32 numChannels, UInt
 	m_CategoryNameToVoiceMap.Add(name, voice);
 	m_VoiceToCategoryNameMap.Add(voice, name);
 
-	m_CategoryToVoiceListMap.Add(voice, Map<UINT64, LinkedList<SourceVoice*>>());
+	m_CategoryToVoiceListMap.Add(voice, TFormatToVoiceList());
 
 	return true;
 }
@@ -93,14 +93,14 @@ UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 }
 
 SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound& snd) {
-	auto voice = CreateSourceVoice(GetCategory(categoryName), snd);
+	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
 }
 
 SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound* snd) {
-	auto voice = CreateSourceVoice(GetCategory(categoryName), snd);
+	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
@@ -112,10 +112,21 @@ SourceVoice* AudioSystem::Play(const StaticString& categoryName, const StaticStr
 	if (!outSnd) {
 		return nullptr;
 	}
-	auto voice = CreateSourceVoice(GetCategory(categoryName), outSnd);
+	auto voice = GetSourceVoice(GetCategory(categoryName), outSnd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
+}
+
+void AudioSystem::StopAll() {
+	FOREACH(iterVoiceFormatMap, m_CategoryToVoiceListMap) {
+		FOREACH(iterVoiceList, iterVoiceFormatMap->second) {
+			FOREACH(iterVoice, iterVoiceList->second) {
+				auto v = *iterVoice;
+				v->Stop();
+			}
+		}
+	}
 }
 
 MasteringVoice* AudioSystem::CreateMasteringVoice() {
@@ -124,7 +135,7 @@ MasteringVoice* AudioSystem::CreateMasteringVoice() {
 	return newVoice;
 }
 
-SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format) {
+SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format) {
 	SourceVoice* voice{};
 	if (FindSourceVoice(voiceCategory, format, voice)) {
 		return voice;
@@ -135,14 +146,14 @@ SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const WA
 	return voice;
 }
 
-SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const Sound* sound) {
-	SourceVoice* voice = CreateSourceVoice(voiceCategory, sound->Format().Format);
+SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const Sound* sound) {
+	SourceVoice* voice = GetSourceVoice(voiceCategory, sound->Format().Format);
 	voice->Submit(sound);
 	return voice;
 }
 
-SourceVoice* AudioSystem::CreateSourceVoice(SubmixVoice* voiceCategory, const Sound& sound) {
-	return CreateSourceVoice(voiceCategory, &sound);
+SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const Sound& sound) {
+	return GetSourceVoice(voiceCategory, &sound);
 }
 
 SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate) {
@@ -156,6 +167,7 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 	outVoice = nullptr;
 
 	std::lock_guard<std::mutex> guard(m_Mutex);
+
 	auto& categoryMap = m_CategoryToVoiceListMap[voiceCategory];
 	if (categoryMap.Length() <= 0) {
 		return false;
@@ -184,10 +196,9 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 	auto hash = GenerateHash(voice->Format());
 
 	if (!categoryVoiceMap.Contains(hash)) {
-		categoryVoiceMap.Add(hash, LinkedList<SourceVoice*>());
+		categoryVoiceMap.Add(hash, TVoiceList());
 	}
 	auto& voiceList = categoryVoiceMap[hash];
-
 	voiceList.Add(voice);
 
 	m_Voices.Add(voice);
@@ -198,15 +209,46 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 	return voice->SetOutputTo(voiceCategory);
 }
 
-void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* v) {
+void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
-	Sound* snd = (Sound*)v;
+	assert(context);
+	Sound* snd = (Sound*)context;
 	auto category = m_VoiceToCategoryMap[voice];
 	auto& voiceListMap = m_CategoryToVoiceListMap[category];
 	auto& voiceList = voiceListMap[GenerateHash(snd->Format().Format)];
+
+	//assert(!voice->IsPlaying());
 
 	//Place the voice to the back of the list so we can find open voices quickly
 	voiceList.Remove(voice);
 	voiceList.Add(voice);
 };
+
+//#include "System/DataStructureLibrary.h"
+
+void AudioSystem::ReloadAssets() {
+	//List<SourceVoice*>* playingVoices = Singleton<DataStructureLibrary<List<SourceVoice*>>>::GetInstance()->CheckOut();
+	//playingVoices->Clear();
+
+	////Store which voices are playing
+	//FOREACH(iterVoiceFormatMap, m_CategoryToVoiceListMap) {
+	//	FOREACH(iterVoiceList, iterVoiceFormatMap->second) {
+	//		FOREACH(iterVoice, iterVoiceList->second) {
+	//			auto v = *iterVoice;
+	//			if (v->IsPlaying()) {
+	//				playingVoices->Add(v);// This will lose any voices playing with an operationSet
+	//			}
+	//			v->Stop();
+	//		}
+	//	}
+	//}
+	//Singleton<SoundManager>::GetInstance()->ReloadAll();
+
+	//FOREACH(iter, *playingVoices) {
+	//	auto v = *iter;
+	//	v->Start();
+	//}
+
+	//Singleton<DataStructureLibrary<List<SourceVoice*>>>::GetInstance()->Return(playingVoices);
+}

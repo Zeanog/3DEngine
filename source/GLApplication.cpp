@@ -150,7 +150,7 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 
 	if (keyboardState.KeyIsDown(DIK_R)) {
 		Singleton<ImageManager>::GetInstance()->ReloadAll();
-		Singleton<SoundManager>::GetInstance()->ReloadAll();
+		Singleton<AudioSystem>::GetInstance()->ReloadAssets();
 	}
 
 	if (keyboardState.KeyIsDown(DIK_F3)) {
@@ -488,7 +488,7 @@ void GLApplication::LoadAssets()
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
 
 	IUnknown* pReverbEffect = nullptr;
-	XAudio2CreateReverb(&pReverbEffect);
+	verify(SUCCEEDED(XAudio2CreateReverb(&pReverbEffect)));
 	verify( Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors("Fx", pReverbEffect) );
 	pReverbEffect->Release();
 

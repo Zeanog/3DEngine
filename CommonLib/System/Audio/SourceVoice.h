@@ -14,8 +14,6 @@ class SourceVoice : public ASourceVoice<IXAudio2SourceVoice>{
 	friend class AudioSystem;
 
 protected:
-	WAVEFORMATEX		m_Format{};
-
 	class SourceVoiceCallbacks* m_Callbacks{};
 
 	virtual void		Destroy() override;
@@ -23,7 +21,7 @@ protected:
 public:
 	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format);
 
-	DECLARE_GETSET(Format)
+	DEFINE_MEMBER_EX(WAVEFORMATEX, Format)
 
 	virtual UInt32	NumChannels() const override {
 		return m_Format.nChannels;
@@ -38,6 +36,14 @@ public:
 	virtual Bool	Start(const Sound& sound, UInt32 operationSet);
 	virtual Bool	Start(const Sound* sound, UInt32 operationSet);
 	virtual Bool	Start(UInt32 operationSet);
+
+	virtual Bool	Stop() {
+		return Stop(0);
+	}
+
+	virtual Bool	Stop( UInt32 operationSet ) {
+		return SUCCEEDED(m_Voice->Stop(0, operationSet));
+	}
 
 	virtual void SetFrequencyRatio(Float32 ratio) {
 		verify(SUCCEEDED(m_Voice->SetFrequencyRatio(ratio)));
@@ -65,7 +71,7 @@ public:
 	Delegate<>											OnVoiceProcessingPassEnd;
 	Delegate<>											OnStreamEnd;
 	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferStart;
-	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferEnd;//TODO: Setup a callback to sort this voice list in the AudioSystem
+	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferEnd;
 	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnLoopEnd;
 	Delegate<TYPELIST_3(SourceVoice*, void*, HRESULT)>	OnVoiceError;
 };
