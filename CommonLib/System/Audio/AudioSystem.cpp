@@ -20,7 +20,7 @@ Bool AudioSystem::Init() {
 	return true;
 }
 
-void AudioSystem::Release() {
+void AudioSystem::Destroy() {
 	m_CategoryToVoiceListMap.Clear();
 	m_CategoryNameToVoiceMap.Clear();
 	m_VoiceToCategoryMap.Clear();

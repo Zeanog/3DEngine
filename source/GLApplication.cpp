@@ -369,21 +369,18 @@ void GLApplication::Render()
 */
 void GLApplication::Release()
 {
+	Singleton<AudioSystem>::GetInstance()->Destroy();
 	ReleaseAssets();
-
-	Singleton<AudioSystem>::GetInstance()->Release();
 
 	wglMakeCurrent(m_hDC, 0);
 	wglDeleteContext(m_hRC);
 
 	ReleaseDC(m_hWnd, m_hDC);
 
-	verify(SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED)));
+	CoUninitialize();
 }
 
 #include "Rendering/ModelLoaders/MeshManager.h"
-#include <System/Audio/Loaders/SoundManager.h>
-#include <System/Audio/Loaders/AudioLoader_RIFF.h>
 #include <System/Audio/SourceVoice.h>
 #include <System/Audio/Sound.h>
 #include <xaudio2fx.h>
