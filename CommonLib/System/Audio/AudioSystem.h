@@ -20,14 +20,17 @@ class AudioSystem {
 	SINGLETON_DECLARATIONS(AudioSystem) {
 	}
 
+	typedef LinkedList<SourceVoice*>	TVoiceList;
+	typedef Map<UInt64, TVoiceList>		TFormatToVoiceList;
+
 protected:
-	IXAudio2*		m_Audio2{};
+	IXAudio2* m_Audio2{};
 
 	MasteringVoice* m_MasteringVoice{};
 
 	List<AVoice*>	m_Voices{};
 
-	Map<SubmixVoice*, Map<UINT64, LinkedList<SourceVoice*>>>	m_CategoryToVoiceListMap{};
+	Map<SubmixVoice*, Map<UInt64, LinkedList<SourceVoice*>>>	m_CategoryToVoiceListMap{};
 	Map<SourceVoice*, SubmixVoice*>								m_VoiceToCategoryMap{};
 
 	Map<StaticString, SubmixVoice*>								m_CategoryNameToVoiceMap{};
@@ -41,19 +44,19 @@ protected:
 	static UINT64		GenerateHash(const WAVEFORMATEX& format);
 	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
 
-	Bool FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
-	Bool AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
-	void OnBufferEndHandler(SourceVoice* voice, void* v);
+	Bool				FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
+	Bool				AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
+	void				OnBufferEndHandler(SourceVoice* voice, void* context);
 
 	SubmixVoice* GetCategory(const StaticString& name) const;
 	const StaticString& GetCategoryName(SubmixVoice* categoryVoice) const;
 
-	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
-	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
-	SourceVoice* CreateSourceVoice(SubmixVoice* voiceCategory, const Sound& sound);
+	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
+	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
+	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const Sound& sound);
 
 	SubmixVoice* CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
-	Bool	CommitChanges(UInt32 operationSet) {
+	Bool		CommitChanges(UInt32 operationSet) {
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
 	}
 
@@ -66,7 +69,9 @@ public:
 	SourceVoice* Play(const StaticString& categoryName, const Sound& snd);
 	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
 	SourceVoice* Play(const StaticString& categoryName, const StaticString& filePath, Sound*& outSnd);
-	
+
+	void StopAll();
+
 	template<typename... Effects>
 	Bool AddEffectDescriptors(const StaticString& categoryName, Effects... effects) {
 		static constexpr UINT32 NumDescriptors = sizeof...(Effects);
@@ -93,4 +98,6 @@ public:
 	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
 		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
 	}
+
+	void ReloadAssets();
 };

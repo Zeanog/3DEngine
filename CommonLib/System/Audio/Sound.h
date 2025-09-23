@@ -18,8 +18,8 @@ protected:
 public:
 	~Sound();
 
-	DECLARE_GETSET( Format )
-	DECLARE_GETSET( Duration )
+	DECLARE_GETSET(Format)
+	DECLARE_GETSET(Duration)
 
 	void		SetContext(void* cxt) {
 		m_Buffer.pContext = cxt;

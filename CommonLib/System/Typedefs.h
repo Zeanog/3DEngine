@@ -13,7 +13,7 @@ typedef unsigned char	Byte;
 typedef unsigned char	UInt8;
 typedef unsigned short	UInt16;
 typedef unsigned int	UInt32;
-typedef unsigned long long	UInt64;
+typedef unsigned __int64	UInt64;
 typedef char			Int8;
 typedef short			Int16;
 typedef int				Int32;
@@ -175,11 +175,11 @@ inline void	__fastcall propName(Param<decltype(name)>::Type val) {			\
 	name = val;																\
 }
 
-#define DEFINE_MEMBER_EX( type, propName, name )	\
+#define DEFINE_MEMBER_EX( type, propName )	\
 protected:											\
-type	name;										\
+type	m_##propName{};										\
 public:												\
-DEFINE_GETSET_EX( propName, name )					\
+DEFINE_GETSET_EX( propName, m_##propName )					\
 private:
 
 #define DEFINE_GETSET( name )	DEFINE_GETSET_EX(decltype(m_##name), name, m_##name)
