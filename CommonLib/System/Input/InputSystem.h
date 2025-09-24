@@ -56,6 +56,6 @@ public:
 			m_Mouse.Acquire();
 		}
 
-		return false;
+		return true;
 	}
 };

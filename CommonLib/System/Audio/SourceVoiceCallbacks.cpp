@@ -8,17 +8,17 @@ SourceVoiceCallbacks::SourceVoiceCallbacks(SourceVoice* source) {
 
 void SourceVoiceCallbacks::OnVoiceProcessingPassStart(UINT32 bytesRequired) {
 	assert(m_Voice);
-	m_Voice->OnVoiceProcessingPassStart(bytesRequired);
+	m_Voice->OnVoiceProcessingPassStart(m_Voice, bytesRequired);
 }
 
 void SourceVoiceCallbacks::OnVoiceProcessingPassEnd() {
 	assert(m_Voice);
-	m_Voice->OnVoiceProcessingPassEnd();
+	m_Voice->OnVoiceProcessingPassEnd(m_Voice);
 }
 
 void SourceVoiceCallbacks::OnStreamEnd() {
 	assert(m_Voice);
-	m_Voice->OnStreamEnd();
+	m_Voice->OnStreamEnd(m_Voice);
 }
 
 void SourceVoiceCallbacks::OnBufferStart(void* pBufferContext) {

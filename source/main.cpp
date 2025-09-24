@@ -20,12 +20,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		case WM_MOUSEMOVE:
-			//Singleton<InputSystem>::GetInstance()->GetMouse()->UpdatePosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			//Singleton<DebugConsole>::GetInstance()->Write(String::Format("\rX: %d, Y: %d\n", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			break;
 
-		case WM_CLOSE:
+		case WM_CLOSE: {
 			break;
+		}
 
 		case WM_DESTROY:
 		{

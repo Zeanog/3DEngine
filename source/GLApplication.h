@@ -17,7 +17,7 @@ class IModel;
 class Model;
 
 class GLApplication {
-	CLASS_TYPEDEFS(GLApplication);
+	CLASS_TYPEDEFS(GLApplication)
 
 protected:
 	Functor<void, TYPELIST_1(Mouse::State)>		OnMouseChangedFunctor;
@@ -64,16 +64,16 @@ protected:
 	CameraInterpolator				m_Camera;
 
 	// Fields
-	std::vector<IModel*> m_PrevModels;
-	Neo::Bounds			m_Bounds;
-	std::vector<Model*> m_Models;
+	std::vector<IModel*> m_PrevModels{};
+	Neo::Bounds			m_Bounds{};
+	std::vector<Model*> m_Models{};
 
 	Functor<void>		OnRenderShadows;
 
-	DeferredRendering*	m_deferredRendering;
-	FrameBufferObject*	m_multipleRenderTarget;
+	DeferredRendering* m_deferredRendering{};
+	FrameBufferObject* m_multipleRenderTarget{};
 
-	std::vector<ALight*>		m_Lights;
+	std::vector<ALight*>	m_Lights{};
 	ShaderProgram_GLSL 	m_RenderModelProgram;
 
 	ShaderProgram_GLSL 	m_LightingProgram_Directional;
@@ -83,15 +83,15 @@ protected:
 	ShaderProgram_GLSL 	m_RenderModel_UnlitProgram;
 	ShaderProgram_GLSL	m_ShadowMapGenerationProgram;
 
-	int					m_windowWidth;
-	int					m_windowHeight;
+	int					m_windowWidth{};
+	int					m_windowHeight{};
 
-	HGLRC				m_hRC;	// Rendering's context
-	HDC					m_hDC;	// Device's context
-	HWND				m_hWnd; // Window's handle
+	HGLRC				m_hRC{};	// Rendering's context
+	HDC					m_hDC{};	// Device's context
+	HWND				m_hWnd{}; // Window's handle
 
-	float				m_DeltaTime;
-	UInt64				m_CurrentTime;
-	UInt64				m_PrevTick;
-	unsigned char		m_state; // 0 - Normal render, 1 - Show render targets
+	float				m_DeltaTime{};
+	UInt64				m_CurrentTime{};
+	UInt64				m_PrevTick{};
+	unsigned char		m_state{}; // 0 - Normal render, 1 - Show render targets
 };

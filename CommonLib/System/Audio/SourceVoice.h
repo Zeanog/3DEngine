@@ -66,10 +66,21 @@ public:
 		return state.BuffersQueued > 0;
 	}
 
+	virtual Sound* CurrentPlayingSound() const {
+		assert(m_Voice);
+		XAUDIO2_VOICE_STATE state;
+		m_Voice->GetState(&state);
+		if (state.BuffersQueued <= 0) {
+			return nullptr;
+		}
+		//This is assuming we set a sounds context to itself
+		return (Sound*)state.pCurrentBufferContext;
+	}
+
 public:
-	Delegate<TYPELIST_1(UINT32)>						OnVoiceProcessingPassStart;
-	Delegate<>											OnVoiceProcessingPassEnd;
-	Delegate<>											OnStreamEnd;
+	Delegate<TYPELIST_2(SourceVoice*, UINT32)>			OnVoiceProcessingPassStart;
+	Delegate<TYPELIST_1(SourceVoice*)>					OnVoiceProcessingPassEnd;
+	Delegate<TYPELIST_1(SourceVoice*)>					OnStreamEnd;
 	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferStart;
 	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnBufferEnd;
 	Delegate<TYPELIST_2(SourceVoice*, void*)>			OnLoopEnd;
