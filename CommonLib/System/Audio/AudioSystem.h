@@ -46,6 +46,7 @@ protected:
 
 	Bool				FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
 	Bool				AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
+	void				OnBufferStartHandler(SourceVoice* voice, void* context);
 	void				OnBufferEndHandler(SourceVoice* voice, void* context);
 
 	SubmixVoice* GetCategory(const StaticString& name) const;

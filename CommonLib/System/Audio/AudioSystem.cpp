@@ -204,10 +204,18 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 	m_Voices.Add(voice);
 	m_VoiceToCategoryMap.Add(voice, voiceCategory);
 
+	voice->OnBufferStart.AddListener(this, &AudioSystem::OnBufferStartHandler);
 	voice->OnBufferEnd.AddListener(this, &AudioSystem::OnBufferEndHandler);
 
 	return voice->SetOutputTo(voiceCategory);
 }
+
+void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
+	std::lock_guard<std::mutex> guard(m_Mutex);
+
+	assert(context);
+	Sound* snd = (Sound*)context;
+};
 
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	std::lock_guard<std::mutex> guard(m_Mutex);

@@ -15,13 +15,9 @@
 #include "System/Audio/AudioSystem.h"
 #include "System\Audio\SubmixVoice.h"
 #include "System/Configuration.h"
-
-#include "System/Win32/Window.h"
-#include <glm/vec3.hpp>
-
 #include "Math/MathUtils.h"
 #include "Lighting/LightPool.h"
-#include <glm/gtc/type_ptr.hpp>
+#include "System/Win32/Window.h"
 
 Int64		xMousePrev = 0;
 Int64		yMousePrev = 0;
@@ -141,30 +137,31 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 		TranslateCamera(0.0f, 1.0f, 0.0f);
 	}
 
-	if (keyboardState.KeyIsDown(DIK_F1)) {
+	if (keyboardState.KeyWasPressed(DIK_F1)) {
 		showDeferredRendering();
 	}
-	else if (keyboardState.KeyIsDown(DIK_F2)) {
+	else if (keyboardState.KeyWasPressed(DIK_F2)) {
 		showRenderTargets();
 	}
 
-	if (keyboardState.KeyIsDown(DIK_R)) {
+	if (keyboardState.KeyWasPressed(DIK_R)) {
 		Singleton<ImageManager>::GetInstance()->ReloadAll();
 		Singleton<AudioSystem>::GetInstance()->ReloadAssets();
 	}
 
-	if (keyboardState.KeyIsDown(DIK_F3)) {
+	if (keyboardState.KeyWasPressed(DIK_F3) ) {
+		OutputDebugString(String::Format("F3: Open?: %d\n", Singleton<DebugConsole>::GetInstance()->IsOpen()));
 		//TODO: Find a way to let us close the debug console with out closing the entire program
 		if (!Singleton<DebugConsole>::GetInstance()->IsOpen()) {
 			verify(Singleton<DebugConsole>::GetInstance()->Open());
-			//::SetForegroundWindow(m_hWnd);
+			//SetFocus(m_hWnd);
 		}
 		else {
 			Singleton<DebugConsole>::GetInstance()->Close();
 		}
 	}
 
-	if (keyboardState.KeyIsDown(DIK_F4)) {
+	if (keyboardState.KeyWasPressed(DIK_F4)) {
 		//Create SWF Window here
 		//flashEngine.AttachTo(m_hWnd);
 		//flashEngine.PlayMovie("Data/Car-speakers-590x90.swf");
@@ -227,10 +224,6 @@ void GLApplication::Update()
 		m_PrevModels[0]->Rotate(m_DeltaTime, m_DeltaTime, 0);
 	}
 
-	/*if (m_PrevModels.size() >= 2) {
-		m_PrevModels[1]->addRotation(0, time, time);
-	}*/
-
 	//Just for debugging
 	/*DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
@@ -248,8 +241,6 @@ void GLApplication::Update()
 	glm::mat4 t = glm::eulerAngleXYZ(currAngles.x, currAngles.y, currAngles.z);
 	t[3] = glm::vec4((*iter)->Position(), 1.0f);
 	(*iter)->Transform(t);
-
-	//(*iter)->Position(glm::vec3(0.0f, 10.0f, 0.0f) + 3.0f * glm::vec3(std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)), 0.0f, 0.0f));
 
 	if (m_Models.size() >= 1) {
 		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
@@ -369,6 +360,7 @@ void GLApplication::Render()
 */
 void GLApplication::Release()
 {
+	//Shutdown the AudioSystem before destroying assets
 	Singleton<AudioSystem>::GetInstance()->Destroy();
 	ReleaseAssets();
 
@@ -477,9 +469,6 @@ void GLApplication::LoadAssets()
 
 	assert(doc["TestSound"].IsObject());
 	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
-
-	//Sound* musicSound = Singleton<SoundManager>::GetInstance()->Get(musicPath);
-	//Sound* fxSound = Singleton<SoundManager>::GetInstance()->Get(soundPath);
 
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);

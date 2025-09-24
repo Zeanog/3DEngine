@@ -5,11 +5,14 @@
 
 class KeyboardState {
 public:
-	static const Int32	NumKeys = 256;
+	static constexpr Int32	NumKeys = 256;
 
 protected:
-	Byte				m_CompressedData[NumKeys / 8];
-	Byte				m_PrevCompressedData[NumKeys / 8];
+	static constexpr UInt8	m_CompressedDataSize = NumKeys / 8;
+	Byte				m_CompressedData[m_CompressedDataSize];//Bit Array
+	
+	static constexpr UInt8	m_PrevCompressedDataSize = NumKeys / 8;
+	Byte				m_PrevCompressedData[m_PrevCompressedDataSize];//Bit Array
 
 protected:
 	Bool	IsKeyDown(Int32 byteIndex, Int32 bitIndex) const {
@@ -21,16 +24,7 @@ protected:
 	}
 
 	static Bool	ShouldNotify(const Byte* lhs, const Byte* rhs, UInt32 length) {
-		if (0 != memcmp(lhs, rhs, length)) {
-			return true;
-		}
-
-		Bool notify = false;
-		for (UInt32 ix = 0; ix < length; ++ix) {
-			notify |= (lhs[ix] != 0);
-		}
-
-		return notify;
+		return 0 != memcmp(lhs, rhs, length);
 	}
 
 	static void	Copy(Byte* dst, const Byte* src, UInt32 length) {
@@ -39,8 +33,8 @@ protected:
 
 public:
 	KeyboardState() {
-		memset(m_CompressedData, 0, STATIC_ARRAY_LENGTH(m_CompressedData));
-		memset(m_PrevCompressedData, 0, STATIC_ARRAY_LENGTH(m_PrevCompressedData));
+		memset(m_CompressedData, 0, m_CompressedDataSize);
+		memset(m_PrevCompressedData, 0, m_PrevCompressedDataSize);
 	}
 
 	Bool	KeyIsDown(UInt32 vk) const {
@@ -61,27 +55,30 @@ public:
 		return !IsKeyDown(byteIndex, bitIndex) && WasKeyDown(byteIndex, bitIndex);
 	}
 
-	Bool	Compress(const Byte* srcUncompressed, UInt32 numBytes) {
-		Copy(m_PrevCompressedData, m_CompressedData, STATIC_ARRAY_LENGTH(m_CompressedData));
-		memset(m_CompressedData, 0, STATIC_ARRAY_LENGTH(m_CompressedData));
+	Bool	Compress(const Byte* srcUncompressed, UInt16 numBytes) {
+		assert(m_CompressedDataSize == m_PrevCompressedDataSize);
 
-		UInt32 bitIndex = -1;
-		UInt32 byteIndex = -1;
-		for (UInt32 ix = 0; ix < numBytes; ++ix) {
-			bitIndex = ix % 8;
+		Copy(m_PrevCompressedData, m_CompressedData, m_CompressedDataSize);
+		memset(m_CompressedData, 0, m_CompressedDataSize);
+
+		Int8 bitIndex = -1;
+		Int8 byteIndex = -1;
+		for (UInt16 ix = 0; ix < numBytes; ++ix) {
+			bitIndex = (Int8)(ix % 8);
 			if (!bitIndex) {
 				++byteIndex;
 			}
 
-			bool keyDown = !!srcUncompressed[ix];
-			if (keyDown) {
-				int b = 3;
+			Bool keyDown = !!srcUncompressed[ix];
+			if (!keyDown) {
+				continue;
 			}
 
+			assert(byteIndex < m_CompressedDataSize);
 			m_CompressedData[byteIndex] |= (keyDown) << bitIndex;
 		}
 
-		return ShouldNotify(m_CompressedData, m_PrevCompressedData, STATIC_ARRAY_LENGTH(m_CompressedData));
+		return ShouldNotify(m_CompressedData, m_PrevCompressedData, m_CompressedDataSize);
 	}
 };
 

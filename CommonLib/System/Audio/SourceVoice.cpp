@@ -23,6 +23,7 @@ Bool SourceVoice::Submit(const Sound& sound) {
 
 Bool SourceVoice::Submit(const Sound* sound) {
 	assert(m_Voice);
+	assert(sound);
 	return SUCCEEDED(m_Voice->SubmitSourceBuffer(sound->Buffer()));
 }
 
