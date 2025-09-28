@@ -502,13 +502,12 @@ void GLApplication::LoadAssets()
 	auto& musicValue = doc["Music"];
 	StaticString musicPath = musicValue.FindMember("Path")->value.GetString();
 
-	Reflector<XAUDIO2FX_REVERB_PARAMETERS>	reflector;
 	assert(doc["TestSound"].IsObject());
 	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 	auto& reverbVal = doc["TestSound"].FindMember("Reverb")->value;
 	if (reverbVal.IsObject()) {
 		for (auto iter = reverbVal.MemberBegin(); iter != reverbVal.MemberEnd(); ++iter) {
-			reflector.Set(iter->name.GetString(), &reverbParams, iter->value);
+			Singleton<Reflector<XAUDIO2FX_REVERB_PARAMETERS>>::GetInstance()->Set(iter->name.GetString(), &reverbParams, iter->value);
 		}
 	}
 
