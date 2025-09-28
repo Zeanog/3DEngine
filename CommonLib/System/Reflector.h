@@ -10,7 +10,7 @@ class IValueParser {
 	CLASS_TYPEDEFS(IValueParser)
 
 public:
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) = 0;
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) = 0;
 };
 
 template<typename TValue>
@@ -26,12 +26,12 @@ public:
 	typedef float		TValue;
 
 public:
-	static TValue	Get(rapidjson::Value& value) {
+	static TValue	Get(const rapidjson::Value& value) {
 		assert(value.IsDouble());
 		return value.GetDouble();
 	}
 
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
 		assert(src.IsDouble());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
@@ -49,12 +49,12 @@ public:
 	typedef double	TValue;
 
 public:
-	static TValue	Get(rapidjson::Value& value) {
+	static TValue	Get(const rapidjson::Value& value) {
 		assert(value.IsDouble());
 		return value.GetDouble();
 	}
 
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
 		assert(src.IsDouble());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
@@ -72,12 +72,12 @@ public:
 	typedef Byte		TValue;
 
 public:
-	static TValue	Get(rapidjson::Value& value) {
+	static TValue	Get(const rapidjson::Value& value) {
 		assert(value.IsInt());
 		return (TValue)value.GetInt();
 	}
 
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
 		assert(src.IsInt());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
@@ -95,12 +95,12 @@ public:
 	typedef Int32	TValue;
 
 public:
-	static TValue	Get(rapidjson::Value& value) {
+	static TValue	Get(const rapidjson::Value& value) {
 		assert(value.IsInt());
 		return value.GetInt();
 	}
 
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
 		assert(src.IsInt());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
@@ -118,12 +118,12 @@ public:
 	typedef UInt32	TValue;
 
 public:
-	static TValue	Get(rapidjson::Value& value) {
+	static TValue	Get(const rapidjson::Value& value) {
 		assert(value.IsInt());
 		return (TValue)value.GetInt();
 	}
 
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
 		assert(src.IsInt());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
@@ -141,23 +141,17 @@ public:
 	typedef Int64	TValue;
 
 public:
-	static TValue	Get(rapidjson::Value& value) {
+	static TValue	Get(const rapidjson::Value& value) {
 		assert(value.IsInt64());
 		return value.GetInt64();
 	}
 
-	virtual void Copy(rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
 		assert(src.IsInt64());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
 	}
-};
-
-template<typename _TMemberList>
-class IReflector {
-public:
-	typedef	_TMemberList	TMemberList;
 };
 
 class AReflector {
@@ -185,8 +179,13 @@ public:
 		return true;
 	}
 
+	template<typename TObject, typename TMember>
+	Bool	Set(const StaticString& memberName, TObject& obj, const TMember& memberValue) {
+		return Set(memberName, &obj, memberValue);
+	}
+
 	template<typename TObject>
-	Bool	Set(const StaticString& memberName, TObject* obj, rapidjson::Value& value) {
+	Bool	Set(const StaticString& memberName, TObject* obj, const rapidjson::Value& value) {
 		if (!m_MemberInfoMap.Contains(memberName)) {
 			return false;
 		}
@@ -195,6 +194,11 @@ public:
 		void* memberAddr = (void*)((Byte*)obj + info.Offset);
 		info.Parser->Copy(value, memberAddr, info.Size);
 		return true;
+	}
+
+	template<typename TObject, typename TMember>
+	Bool	Set(const StaticString& memberName, TObject& obj, const rapidjson::Value& memberValue) {
+		return Set(memberName, &obj, memberValue);
 	}
 
 	template<typename TObject, typename TMember>
