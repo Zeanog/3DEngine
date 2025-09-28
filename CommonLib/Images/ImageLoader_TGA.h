@@ -133,7 +133,7 @@ struct Header {
 class ColorMap;
 
 class ImageLoader_TGA : public ImageLoader {
-	INHERITEDCLASS_TYPEDEFS(ImageLoader_TGA, ImageLoader);
+	INHERITEDCLASS_TYPEDEFS(ImageLoader_TGA, ImageLoader)
 
 public:
 
@@ -148,11 +148,11 @@ public:
 	virtual ~ImageLoader_TGA();
 
 	using TSuper::Load;
-	virtual Bool	Load(const Char* fileName);
+	virtual Bool	Load(const Char* fileName) override;
 
-	virtual Bool	IsValid() const;
+	virtual Bool	IsValid() const override;
 
-	virtual const Byte*		Data() const;
+	virtual const Byte*		Data() const override;
 
-	virtual void	Clear();
+	virtual void	Clear() override;
 };

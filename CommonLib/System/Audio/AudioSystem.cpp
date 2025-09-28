@@ -107,18 +107,18 @@ SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound* sn
 }
 
 #include "System\Audio\Loaders\SoundManager.h"
-SourceVoice* AudioSystem::Play(const StaticString& categoryName, const StaticString& filePath, Sound*& outSnd) {
-	outSnd = Singleton<SoundManager>::GetInstance()->Get(filePath);
-	if (!outSnd) {
-		return nullptr;
+Float32 AudioSystem::Play(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice) {
+	auto snd = Singleton<SoundManager>::GetInstance()->Get(filePath);
+	if (!snd) {
+		return 0.0f;
 	}
-	auto voice = GetSourceVoice(GetCategory(categoryName), outSnd);
+	outVoice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
-	verify(voice->Start());
-	return voice;
+	verify(outVoice->Start());
+	return snd->Duration();
 }
 
-void AudioSystem::StopAll() {
+void AudioSystem::StopAllVoices() {
 	FOREACH(iterVoiceFormatMap, m_CategoryToVoiceListMap) {
 		FOREACH(iterVoiceList, iterVoiceFormatMap->second) {
 			FOREACH(iterVoice, iterVoiceList->second) {

@@ -150,7 +150,7 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 	}
 
 	if (keyboardState.KeyWasPressed(DIK_F3) ) {
-		OutputDebugString(String::Format("F3: Open?: %d\n", Singleton<DebugConsole>::GetInstance()->IsOpen()));
+		//OutputDebugString(String::Format("F3: Open?: %d\n", Singleton<DebugConsole>::GetInstance()->IsOpen()));
 		//TODO: Find a way to let us close the debug console with out closing the entire program
 		if (!Singleton<DebugConsole>::GetInstance()->IsOpen()) {
 			verify(Singleton<DebugConsole>::GetInstance()->Open());
@@ -464,12 +464,6 @@ void GLApplication::LoadAssets()
 	model->Position(glm::vec3(-2, 2.5f, 0));
 	m_Models.push_back(model);
 
-	assert(doc["Music"].IsObject());
-	StaticString musicPath = doc["Music"].FindMember("Path")->value.GetString();
-
-	assert(doc["TestSound"].IsObject());
-	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
-
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
 
@@ -503,17 +497,36 @@ void GLApplication::LoadAssets()
 	reverbParams.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
 	reverbParams.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
 	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
+
+	Reflector<XAUDIO2FX_REVERB_PARAMETERS>	reflector;
+
+	float wetDry{};
+	reflector.Get("WetDryMix", &reverbParams, wetDry);
+
+	reflector.Set("WetDryMix", &reverbParams, 85.0f);
+	reflector.Get("WetDryMix", &reverbParams, wetDry);
+
 	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
 	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
 
-	Sound* musicSound{};
-	auto musicVoice = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, musicSound);
-	auto musicDuration = musicSound->Duration();
-	musicVoice->Volume(0.1f);
+	assert(doc["Music"].IsObject());
+	auto& musicValue = doc["Music"];
+	StaticString musicPath = musicValue.FindMember("Path")->value.GetString();
 
-	Sound* fxSound{};
-	auto fxVoice = Singleton<AudioSystem>::GetInstance()->Play("Fx", soundPath, fxSound);
-	auto fxDuration = fxSound->Duration();
+	assert(doc["TestSound"].IsObject());
+	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
+	auto& reverbVal = doc["TestSound"].FindMember("Reverb")->value;
+	if (reverbVal.IsObject()) {
+		for (auto iter = reverbVal.MemberBegin(); iter != reverbVal.MemberEnd(); ++iter) {
+			reflector.Set(iter->name.GetString(), &reverbParams, iter->value);
+		}
+	}
+
+	SourceVoice* selectedVoice{};
+	auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, selectedVoice);
+	selectedVoice->Volume(0.1f);
+
+	auto fxDuration = Singleton<AudioSystem>::GetInstance()->Play("Fx", soundPath, selectedVoice);
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));

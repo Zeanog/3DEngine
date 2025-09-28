@@ -69,9 +69,10 @@ public:
 
 	SourceVoice* Play(const StaticString& categoryName, const Sound& snd);
 	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
-	SourceVoice* Play(const StaticString& categoryName, const StaticString& filePath, Sound*& outSnd);
+	Float32		 Play(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
+	//Float32		 Submit(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
 
-	void StopAll();
+	void StopAllVoices();
 
 	template<typename... Effects>
 	Bool AddEffectDescriptors(const StaticString& categoryName, Effects... effects) {
@@ -92,6 +93,11 @@ public:
 		return GetCategory(categoryName)->EnableEffect(index);
 	}
 
+	/*template<typename... ReverbParameters>
+	Bool SetEffectParameters(const StaticString& categoryName, ReverbParameters... parameters) {
+		return GetCategory(categoryName)->SetEffectParameters(parameters...);
+	}*/
+
 	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
 		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
 	}
@@ -101,4 +107,45 @@ public:
 	}
 
 	void ReloadAssets();
+};
+
+#include "System\Reflector.h"
+#include <xaudio2fx.h>
+
+template<>
+class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : AReflector {
+	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
+
+public:
+	typedef XAUDIO2FX_REVERB_PARAMETERS	TReflected;
+
+public:
+	using TSuper::Get;
+	using TSuper::Set;
+
+	Reflector() {
+		ADD_MEMBERINFO(TReflected, WetDryMix);
+		ADD_MEMBERINFO(TReflected, ReflectionsDelay);
+		ADD_MEMBERINFO(TReflected, ReverbDelay);
+		ADD_MEMBERINFO(TReflected, RearDelay);
+		ADD_MEMBERINFO(TReflected, PositionLeft);
+		ADD_MEMBERINFO(TReflected, PositionRight);
+		ADD_MEMBERINFO(TReflected, PositionMatrixLeft);
+		ADD_MEMBERINFO(TReflected, PositionMatrixRight);
+		ADD_MEMBERINFO(TReflected, EarlyDiffusion);
+		ADD_MEMBERINFO(TReflected, LateDiffusion);
+		ADD_MEMBERINFO(TReflected, LowEQGain);
+		ADD_MEMBERINFO(TReflected, LowEQCutoff);
+		ADD_MEMBERINFO(TReflected, HighEQGain);
+		ADD_MEMBERINFO(TReflected, HighEQCutoff);
+		ADD_MEMBERINFO(TReflected, RoomFilterFreq);
+		ADD_MEMBERINFO(TReflected, RoomFilterMain);
+		ADD_MEMBERINFO(TReflected, RoomFilterHF);
+		ADD_MEMBERINFO(TReflected, Density);
+		ADD_MEMBERINFO(TReflected, ReflectionsGain);
+		ADD_MEMBERINFO(TReflected, ReverbGain);
+		ADD_MEMBERINFO(TReflected, DecayTime);
+		ADD_MEMBERINFO(TReflected, RoomSize);
+		ADD_MEMBERINFO(TReflected, DisableLateField);
+	}
 };
