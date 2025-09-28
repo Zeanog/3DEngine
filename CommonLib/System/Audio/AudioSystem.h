@@ -113,17 +113,9 @@ public:
 #include <xaudio2fx.h>
 
 template<>
-class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : AReflector {
+class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : public AReflector {
 	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
-
-public:
-	typedef XAUDIO2FX_REVERB_PARAMETERS	TReflected;
-
-public:
-	using TSuper::Get;
-	using TSuper::Set;
-
-	Reflector() {
+	SINGLETON_DECLARATIONS(TSelf) {
 		ADD_MEMBERINFO(TReflected, WetDryMix);
 		ADD_MEMBERINFO(TReflected, ReflectionsDelay);
 		ADD_MEMBERINFO(TReflected, ReverbDelay);
@@ -148,4 +140,7 @@ public:
 		ADD_MEMBERINFO(TReflected, RoomSize);
 		ADD_MEMBERINFO(TReflected, DisableLateField);
 	}
+
+public:
+	typedef XAUDIO2FX_REVERB_PARAMETERS	TReflected;
 };
