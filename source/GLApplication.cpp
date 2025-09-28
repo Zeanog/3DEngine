@@ -498,21 +498,11 @@ void GLApplication::LoadAssets()
 	reverbParams.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
 	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
 
-	Reflector<XAUDIO2FX_REVERB_PARAMETERS>	reflector;
-
-	float wetDry{};
-	reflector.Get("WetDryMix", &reverbParams, wetDry);
-
-	reflector.Set("WetDryMix", &reverbParams, 85.0f);
-	reflector.Get("WetDryMix", &reverbParams, wetDry);
-
-	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
-	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
-
 	assert(doc["Music"].IsObject());
 	auto& musicValue = doc["Music"];
 	StaticString musicPath = musicValue.FindMember("Path")->value.GetString();
 
+	Reflector<XAUDIO2FX_REVERB_PARAMETERS>	reflector;
 	assert(doc["TestSound"].IsObject());
 	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 	auto& reverbVal = doc["TestSound"].FindMember("Reverb")->value;
@@ -521,6 +511,9 @@ void GLApplication::LoadAssets()
 			reflector.Set(iter->name.GetString(), &reverbParams, iter->value);
 		}
 	}
+
+	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
+	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
 
 	SourceVoice* selectedVoice{};
 	auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, selectedVoice);
