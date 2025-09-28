@@ -20,13 +20,13 @@ public:
 	virtual ~ImageLoader_RAW();
 
 	using TSuper::Load;
-	virtual Bool	Load( const Char* fileName );
+	virtual Bool	Load( const Char* fileName ) override;
 
-	virtual Bool	IsValid() const;
+	virtual Bool	IsValid() const override;
 
-	virtual const Byte*		Data() const;
+	virtual const Byte*		Data() const override;
 
-	virtual void	Clear() {
+	virtual void	Clear() override {
 		m_ColorMap.clear();
 	}
 };

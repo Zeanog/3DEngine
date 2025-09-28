@@ -220,10 +220,6 @@ protected:
 				dest[1] = src[1];
 				dest[2] = src[0];
 				dest[3] = src[3];
-				/*for (int ix = 0; ix < 4; ++ix) {
-					dest[ix] = src[ix];
-				}*/
-				
 				break;
 			}
 
@@ -277,7 +273,7 @@ Bool ImageLoader_TGA::Load( const Char* fileName ) {
 
 Bool ImageLoader_TGA::IsValid() const {
 	UInt32 expectedSize = ImageHeight() * ImageWidth() * m_BytesPerPixel;
-	return expectedSize == m_ColorMap->GetImage().size();
+	return m_ColorMap != nullptr && expectedSize == m_ColorMap->GetImage().size();
 }
 
 const Byte* ImageLoader_TGA::Data() const {

@@ -276,6 +276,9 @@
     <ClInclude Include="System\LinkedList.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\Reflector.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
