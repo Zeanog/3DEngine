@@ -57,6 +57,7 @@
     <ClInclude Include="System\Audio\Loaders\SoundManager.h" />
     <ClInclude Include="System\Audio\MasteringVoice.h" />
     <ClInclude Include="System\Audio\AudioSystem.h" />
+    <ClInclude Include="System\Audio\ReverbParameters.h" />
     <ClInclude Include="System\Audio\Sound.h" />
     <ClInclude Include="System\Audio\SourceVoice.h" />
     <ClInclude Include="System\Audio\SourceVoiceCallbacks.h" />
