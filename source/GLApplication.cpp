@@ -375,7 +375,7 @@ void GLApplication::Release()
 #include "Rendering/ModelLoaders/MeshManager.h"
 #include <System/Audio/SourceVoice.h>
 #include <System/Audio/Sound.h>
-#include <xaudio2fx.h>
+#include "System\Audio\ReverbParameters.h"
 
 #include "System/JsonSerializer.h"
 
@@ -472,31 +472,9 @@ void GLApplication::LoadAssets()
 	verify( Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors("Fx", pReverbEffect) );
 	pReverbEffect->Release();
 
-	XAUDIO2FX_REVERB_PARAMETERS reverbParams = {0};
-	// Start with default constants (macros) or adjust them
-	reverbParams.WetDryMix = 90.0f;//XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
-	reverbParams.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
-	reverbParams.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
-	reverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
-	reverbParams.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-	reverbParams.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-	reverbParams.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	reverbParams.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	reverbParams.EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
-	reverbParams.LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
-	reverbParams.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-	reverbParams.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
-	reverbParams.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-	reverbParams.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
-	reverbParams.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
-	reverbParams.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
-	reverbParams.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
-	reverbParams.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
-	reverbParams.ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
-	reverbParams.ReverbGain = XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
-	reverbParams.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
-	reverbParams.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
-	reverbParams.DisableLateField = FALSE;  // enable late reverb tail
+	ReverbParameters	reverbParams;
+	reverbParams.Init();
+	reverbParams.WetDryMix = 92.0f;
 
 	assert(doc["Music"].IsObject());
 	auto& musicValue = doc["Music"];
@@ -505,11 +483,7 @@ void GLApplication::LoadAssets()
 	assert(doc["TestSound"].IsObject());
 	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 	auto& reverbVal = doc["TestSound"].FindMember("Reverb")->value;
-	if (reverbVal.IsObject()) {
-		for (auto iter = reverbVal.MemberBegin(); iter != reverbVal.MemberEnd(); ++iter) {
-			Singleton<Reflector<XAUDIO2FX_REVERB_PARAMETERS>>::GetInstance()->Set(iter->name.GetString(), &reverbParams, iter->value);
-		}
-	}
+	verify( reverbParams.UpdateFrom(reverbVal) );
 
 	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
 	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);

@@ -19,7 +19,7 @@ class ValueParser;
 template<>
 class ValueParser<float> : public IValueParser {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
-	SINGLETON_DECLARATIONS(ValueParser<float>) {
+	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
@@ -42,7 +42,7 @@ public:
 template<>
 class ValueParser<double> : public IValueParser {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
-	SINGLETON_DECLARATIONS(ValueParser<double>) {
+	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
@@ -65,7 +65,7 @@ public:
 template<>
 class ValueParser<Byte> : public IValueParser {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
-	SINGLETON_DECLARATIONS(ValueParser<Byte>) {
+	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
@@ -88,7 +88,7 @@ public:
 template<>
 class ValueParser<Int32> : public IValueParser {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
-	SINGLETON_DECLARATIONS(ValueParser<Int32>) {
+	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
@@ -111,7 +111,7 @@ public:
 template<>
 class ValueParser<UInt32> : public IValueParser {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
-	SINGLETON_DECLARATIONS(ValueParser<UInt32>) {
+	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
@@ -134,7 +134,7 @@ public:
 template<>
 class ValueParser<Int64> : public IValueParser {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
-	SINGLETON_DECLARATIONS(ValueParser<Int64>) {
+	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
@@ -158,6 +158,7 @@ class AReflector {
 	CLASS_TYPEDEFS( AReflector )
 
 protected:
+	//TODO: Think of ways to handle compound members like pointers, lists, custom data structures
 	struct MemberInfo {
 		UInt64		Offset;
 		UInt64		Size;
@@ -165,6 +166,9 @@ protected:
 	};
 
 	Map<StaticString, MemberInfo>			m_MemberInfoMap;
+
+protected:
+	AReflector() {}//Disallow instantiation as this is only a partial class
 
 public:
 	template<typename TObject, typename TMember>
@@ -213,27 +217,12 @@ public:
 
 		return true;
 	}
-
-	/*template<typename TObject>
-	Bool	Get(const StaticString& memberName, TObject& obj, void*& outValue) {
-		if (!m_MemberOffsets.Contains(memberName)) {
-			return false;
-		}
-
-		UInt64 offset = m_MemberOffsets[memberName];
-		void* memberAddr = (void*)((&obj) + offset);
-
-		auto size = m_MemberSizes[memberName];
-		memcpy_s(outValue , size, memberAddr, size);
-
-		return true;
-	}*/
 };
 
 #include <cstddef>
 
 #define ADD_MEMBERINFO( type, member )	\
-m_MemberInfoMap.Add(#member, MemberInfo{ (UInt64)offsetof(type, member), sizeof(type::member), Singleton<ValueParser<decltype(type::member)>>::GetInstance() } );	\
+m_MemberInfoMap.Add(#member, MemberInfo{ (UInt64)offsetof(type, member), sizeof(type::member), Singleton<ValueParser<decltype(type::member)>>::GetInstance() } );
 
 template<typename TClass>
 class Reflector;
