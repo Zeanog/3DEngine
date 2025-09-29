@@ -108,39 +108,3 @@ public:
 
 	void ReloadAssets();
 };
-
-#include "System\Reflector.h"
-#include <xaudio2fx.h>
-
-template<>
-class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : public AReflector {
-	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
-	SINGLETON_DECLARATIONS(TSelf) {
-		ADD_MEMBERINFO(TReflected, WetDryMix);
-		ADD_MEMBERINFO(TReflected, ReflectionsDelay);
-		ADD_MEMBERINFO(TReflected, ReverbDelay);
-		ADD_MEMBERINFO(TReflected, RearDelay);
-		ADD_MEMBERINFO(TReflected, PositionLeft);
-		ADD_MEMBERINFO(TReflected, PositionRight);
-		ADD_MEMBERINFO(TReflected, PositionMatrixLeft);
-		ADD_MEMBERINFO(TReflected, PositionMatrixRight);
-		ADD_MEMBERINFO(TReflected, EarlyDiffusion);
-		ADD_MEMBERINFO(TReflected, LateDiffusion);
-		ADD_MEMBERINFO(TReflected, LowEQGain);
-		ADD_MEMBERINFO(TReflected, LowEQCutoff);
-		ADD_MEMBERINFO(TReflected, HighEQGain);
-		ADD_MEMBERINFO(TReflected, HighEQCutoff);
-		ADD_MEMBERINFO(TReflected, RoomFilterFreq);
-		ADD_MEMBERINFO(TReflected, RoomFilterMain);
-		ADD_MEMBERINFO(TReflected, RoomFilterHF);
-		ADD_MEMBERINFO(TReflected, Density);
-		ADD_MEMBERINFO(TReflected, ReflectionsGain);
-		ADD_MEMBERINFO(TReflected, ReverbGain);
-		ADD_MEMBERINFO(TReflected, DecayTime);
-		ADD_MEMBERINFO(TReflected, RoomSize);
-		ADD_MEMBERINFO(TReflected, DisableLateField);
-	}
-
-public:
-	typedef XAUDIO2FX_REVERB_PARAMETERS	TReflected;
-};
