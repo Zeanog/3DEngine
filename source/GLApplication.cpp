@@ -467,27 +467,30 @@ void GLApplication::LoadAssets()
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
 
-	IUnknown* pReverbEffect = nullptr;
-	verify(SUCCEEDED(XAudio2CreateReverb(&pReverbEffect)));
-	verify( Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors("Fx", pReverbEffect) );
-	pReverbEffect->Release();
-
-	ReverbParameters	reverbParams;
-	reverbParams.Init();
-	reverbParams.WetDryMix = 92.0f;
-
 	assert(doc["Music"].IsObject());
 	auto& musicValue = doc["Music"];
 	StaticString musicPath = musicValue.FindMember("Path")->value.GetString();
 
 	assert(doc["TestSound"].IsObject());
 	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
-	auto& reverbVal = doc["TestSound"].FindMember("Reverb")->value;
-	verify( reverbParams.UpdateFrom(reverbVal) );
+	
+	////////////////////////////////
+	rapidjson::Document	reverbDoc;
+	verify(rapidjson::LoadFrom("Data/TestReverb.json", reverbDoc));
+	verify(reverbDoc.IsArray());
+	
+	verify(Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors("Fx", reverbDoc.Capacity()));
 
-	verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", 0, &reverbParams, sizeof(decltype(reverbParams))));
-	Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", 0);
-
+	ReverbParameters	reverbParams;
+	std::size_t			index = 0;
+	for (auto iter = reverbDoc.Begin(), endIter = reverbDoc.End(); iter != endIter; ++iter, ++index) {
+		reverbParams.SetToDefault();
+		verify(reverbParams.UpdateFrom(*iter));
+		verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", index, reverbParams));
+		Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", index);
+	}
+	////////////////////////////////
+	
 	SourceVoice* selectedVoice{};
 	auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, selectedVoice);
 	selectedVoice->Volume(0.1f);

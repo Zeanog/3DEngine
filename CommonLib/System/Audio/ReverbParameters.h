@@ -9,29 +9,29 @@ template<>
 class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : public AReflector {
 	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
 	SINGLETON_DECLARATIONS(TSelf) {
-		ADD_MEMBERINFO(TReflected, WetDryMix);
-		ADD_MEMBERINFO(TReflected, ReflectionsDelay);
-		ADD_MEMBERINFO(TReflected, ReverbDelay);
-		ADD_MEMBERINFO(TReflected, RearDelay);
-		ADD_MEMBERINFO(TReflected, PositionLeft);
-		ADD_MEMBERINFO(TReflected, PositionRight);
-		ADD_MEMBERINFO(TReflected, PositionMatrixLeft);
-		ADD_MEMBERINFO(TReflected, PositionMatrixRight);
-		ADD_MEMBERINFO(TReflected, EarlyDiffusion);
-		ADD_MEMBERINFO(TReflected, LateDiffusion);
-		ADD_MEMBERINFO(TReflected, LowEQGain);
-		ADD_MEMBERINFO(TReflected, LowEQCutoff);
-		ADD_MEMBERINFO(TReflected, HighEQGain);
-		ADD_MEMBERINFO(TReflected, HighEQCutoff);
-		ADD_MEMBERINFO(TReflected, RoomFilterFreq);
-		ADD_MEMBERINFO(TReflected, RoomFilterMain);
-		ADD_MEMBERINFO(TReflected, RoomFilterHF);
-		ADD_MEMBERINFO(TReflected, Density);
-		ADD_MEMBERINFO(TReflected, ReflectionsGain);
-		ADD_MEMBERINFO(TReflected, ReverbGain);
-		ADD_MEMBERINFO(TReflected, DecayTime);
-		ADD_MEMBERINFO(TReflected, RoomSize);
-		ADD_MEMBERINFO(TReflected, DisableLateField);
+		REGISTER_MEMBER(TReflected, WetDryMix);
+		REGISTER_MEMBER(TReflected, ReflectionsDelay);
+		REGISTER_MEMBER(TReflected, ReverbDelay);
+		REGISTER_MEMBER(TReflected, RearDelay);
+		REGISTER_MEMBER(TReflected, PositionLeft);
+		REGISTER_MEMBER(TReflected, PositionRight);
+		REGISTER_MEMBER(TReflected, PositionMatrixLeft);
+		REGISTER_MEMBER(TReflected, PositionMatrixRight);
+		REGISTER_MEMBER(TReflected, EarlyDiffusion);
+		REGISTER_MEMBER(TReflected, LateDiffusion);
+		REGISTER_MEMBER(TReflected, LowEQGain);
+		REGISTER_MEMBER(TReflected, LowEQCutoff);
+		REGISTER_MEMBER(TReflected, HighEQGain);
+		REGISTER_MEMBER(TReflected, HighEQCutoff);
+		REGISTER_MEMBER(TReflected, RoomFilterFreq);
+		REGISTER_MEMBER(TReflected, RoomFilterMain);
+		REGISTER_MEMBER(TReflected, RoomFilterHF);
+		REGISTER_MEMBER(TReflected, Density);
+		REGISTER_MEMBER(TReflected, ReflectionsGain);
+		REGISTER_MEMBER(TReflected, ReverbGain);
+		REGISTER_MEMBER(TReflected, DecayTime);
+		REGISTER_MEMBER(TReflected, RoomSize);
+		REGISTER_MEMBER(TReflected, DisableLateField);
 	}
 
 public:
@@ -44,7 +44,7 @@ class ReverbParameters : public XAUDIO2FX_REVERB_PARAMETERS {
 	INHERITEDCLASS_TYPEDEFS(ReverbParameters, XAUDIO2FX_REVERB_PARAMETERS)
 
 public:
-	void	Init() {
+	void	SetToDefault() {
 		WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
 		ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
 		ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
@@ -75,8 +75,9 @@ public:
 			return false;
 		}
 
-		for (auto iter = reverbVal.MemberBegin(); iter != reverbVal.MemberEnd(); ++iter) {
-			Singleton<Reflector<TSuper>>::GetInstance()->Set(iter->name.GetString(), this, iter->value);
+		for (auto iter = reverbVal.MemberBegin(), endIter = reverbVal.MemberEnd(); iter != endIter; ++iter) {
+			auto memberName = iter->name.GetString();
+			verify( Singleton<Reflector<TSuper>>::GetInstance()->Set(memberName, this, iter->value) );
 		}
 		return true;
 	}

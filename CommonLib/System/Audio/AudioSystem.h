@@ -70,7 +70,7 @@ public:
 	SourceVoice* Play(const StaticString& categoryName, const Sound& snd);
 	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
 	Float32		 Play(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
-	//Float32		 Submit(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
+	Float32		 Submit(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
 
 	void StopAllVoices();
 
@@ -89,14 +89,13 @@ public:
 		return category->SetEffectDescriptors(descriptors, NumDescriptors);
 	}
 
+	Bool AddEffectDescriptors(const StaticString& categoryName, UInt32 numDescriptors);
+
 	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index) {
 		return GetCategory(categoryName)->EnableEffect(index);
 	}
 
-	/*template<typename... ReverbParameters>
-	Bool SetEffectParameters(const StaticString& categoryName, ReverbParameters... parameters) {
-		return GetCategory(categoryName)->SetEffectParameters(parameters...);
-	}*/
+	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const class ReverbParameters& params);
 
 	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
 		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
