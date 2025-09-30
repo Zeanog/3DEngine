@@ -32,7 +32,6 @@ public:
 	}
 
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(src.IsDouble());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
@@ -55,7 +54,6 @@ public:
 	}
 
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(src.IsDouble());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
@@ -78,7 +76,6 @@ public:
 	}
 
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(src.IsInt());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
@@ -101,7 +98,6 @@ public:
 	}
 
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(src.IsInt());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
@@ -124,7 +120,6 @@ public:
 	}
 
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(src.IsInt());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
@@ -147,7 +142,6 @@ public:
 	}
 
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(src.IsInt64());
 		assert(sizeof(TValue) == size);
 		TValue val = Get(src);
 		memcpy_s(dest, size, &val, size);
