@@ -89,6 +89,8 @@ public:
 	Bool ReadContents(StackString& outContents) {
 		assert(IsOpen());
 
+		errno = 0;
+
 		UInt32 numElementsRead = fread_s((void*)outContents.CStr(), outContents.Length(), 1, outContents.Length(), m_File);
 		assert(numElementsRead <= outContents.Allocated());
 

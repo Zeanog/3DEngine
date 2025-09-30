@@ -92,6 +92,31 @@ UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 	return val;
 }
 
+#include "xaudio2fx.h"
+Bool AudioSystem::AddEffectDescriptors(const StaticString& categoryName, UInt32 numDescriptors) {
+	XAUDIO2_EFFECT_DESCRIPTOR* effectDescriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, numDescriptors);
+
+	auto category = GetCategory(categoryName);
+	for (UInt32 ix = 0; ix < numDescriptors; ++ix) {
+		IUnknown* pReverbEffect{};
+		verify(SUCCEEDED(XAudio2CreateReverb(&pReverbEffect)));
+		effectDescriptors[ix] = { pReverbEffect, true, category->NumChannels() };
+	}
+
+	verify(category->SetEffectDescriptors(effectDescriptors, numDescriptors));
+
+	for (UInt32 ix = 0; ix < numDescriptors; ++ix) {
+		effectDescriptors[ix].pEffect->Release();
+	}
+
+	return true;
+}
+
+#include "ReverbParameters.h"
+Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const ReverbParameters& params) {
+	return GetCategory(categoryName)->SetEffectParameters(index, &params, sizeof(decltype(params)), 0U);
+}
+
 SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound& snd) {
 	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
@@ -115,6 +140,16 @@ Float32 AudioSystem::Play(const StaticString& categoryName, const StaticString& 
 	outVoice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(outVoice->Start());
+	return snd->Duration();
+}
+
+Float32 AudioSystem::Submit(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice) {
+	auto snd = Singleton<SoundManager>::GetInstance()->Get(filePath);
+	if (!snd) {
+		return 0.0f;
+	}
+	outVoice = GetSourceVoice(GetCategory(categoryName), snd);
+	//voice->Volume(1.0f);//TODO: Set volume back to full
 	return snd->Duration();
 }
 
@@ -188,10 +223,9 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 }
 
 Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice) {
-	assert(m_CategoryToVoiceListMap.Contains(voiceCategory));
-
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
+	assert(m_CategoryToVoiceListMap.Contains(voiceCategory));
 	auto& categoryVoiceMap = m_CategoryToVoiceListMap[voiceCategory];
 	auto hash = GenerateHash(voice->Format());
 
@@ -220,13 +254,20 @@ void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
+	assert(m_VoiceToCategoryMap.Contains(voice));
+	auto category = m_VoiceToCategoryMap[voice];
+
+	assert(m_CategoryToVoiceListMap.Contains(category));
+	auto& voiceListMap = m_CategoryToVoiceListMap[category];
+
 	assert(context);
 	Sound* snd = (Sound*)context;
-	auto category = m_VoiceToCategoryMap[voice];
-	auto& voiceListMap = m_CategoryToVoiceListMap[category];
-	auto& voiceList = voiceListMap[GenerateHash(snd->Format().Format)];
 
-	//assert(!voice->IsPlaying());
+	auto hash = GenerateHash(snd->Format().Format);
+	assert(voiceListMap.Contains(hash));
+	auto& voiceList = voiceListMap[hash];
+
+	assert(!voice->IsPlaying());
 
 	//Place the voice to the back of the list so we can find open voices quickly
 	voiceList.Remove(voice);

@@ -189,14 +189,14 @@ public:
 	}
 
 	template<typename TObject>
-	Bool	Set(const StaticString& memberName, TObject* obj, const rapidjson::Value& value) {
+	Bool	Set(const StaticString& memberName, TObject* obj, const rapidjson::Value& memberValue) {
 		if (!m_MemberInfoMap.Contains(memberName)) {
 			return false;
 		}
 
 		auto& info = m_MemberInfoMap[memberName];
 		void* memberAddr = (void*)((Byte*)obj + info.Offset);
-		info.Parser->Copy(value, memberAddr, info.Size);
+		info.Parser->Copy(memberValue, memberAddr, info.Size);
 		return true;
 	}
 
@@ -221,7 +221,7 @@ public:
 
 #include <cstddef>
 
-#define ADD_MEMBERINFO( type, member )	\
+#define REGISTER_MEMBER( type, member )	\
 m_MemberInfoMap.Add(#member, MemberInfo{ (UInt64)offsetof(type, member), sizeof(type::member), Singleton<ValueParser<decltype(type::member)>>::GetInstance() } );
 
 template<typename TClass>

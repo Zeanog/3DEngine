@@ -6,10 +6,6 @@
 		"Path": "Data/sample-1.ogg"
 	},
 	"TestSound": {
-		"Path": "Data/baseball_hit.wav",
-		"Reverb": {
-			"WetDryMix": 81.0,
-			"ReflectionsDelay": 0
-		}
+		"Path": "Data/baseball_hit.wav"
 	}
 }
