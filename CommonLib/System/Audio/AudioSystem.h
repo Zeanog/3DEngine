@@ -95,7 +95,11 @@ public:
 		return GetCategory(categoryName)->EnableEffect(index);
 	}
 
-	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const class ReverbParameters& params);
+	template<typename TParameters>
+	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params) {
+		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), 0U);
+	}
+	//virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const class EchoParameters& params);
 
 	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
 		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);

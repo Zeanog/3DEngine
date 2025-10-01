@@ -112,11 +112,6 @@ Bool AudioSystem::AddEffectDescriptors(const StaticString& categoryName, UInt32 
 	return true;
 }
 
-#include "ReverbParameters.h"
-Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const ReverbParameters& params) {
-	return GetCategory(categoryName)->SetEffectParameters(index, &params, sizeof(decltype(params)), 0U);
-}
-
 SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound& snd) {
 	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full

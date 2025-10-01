@@ -487,7 +487,7 @@ void GLApplication::LoadAssets()
 		reverbParams.SetToDefault();
 		verify(reverbParams.UpdateFrom(*iter));
 		verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", index, reverbParams));
-		Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", index);
+		verify(Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", index));
 	}
 	////////////////////////////////
 	

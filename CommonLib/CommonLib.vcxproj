@@ -49,8 +49,11 @@
     <ClInclude Include="Shaders\ShaderProgram_GLSL.h" />
     <ClInclude Include="Shaders\Shader_GLSL.h" />
     <ClInclude Include="System\AssetManager.h" />
+    <ClInclude Include="System\Audio\AParameters.h" />
     <ClInclude Include="System\Audio\ASourceVoice.h" />
     <ClInclude Include="System\Audio\AVoice.h" />
+    <ClInclude Include="System\Audio\EchoParameters.h" />
+    <ClInclude Include="System\Audio\EQParameters.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_OggVorbis.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h" />

@@ -282,6 +282,15 @@
     <ClInclude Include="System\Audio\ReverbParameters.h">
       <Filter>System\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="System\Audio\EchoParameters.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\AParameters.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\EQParameters.h">
+      <Filter>System\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
