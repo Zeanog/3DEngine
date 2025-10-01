@@ -205,6 +205,9 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 
 	UInt64 hash = GenerateHash(format);
 	auto& voiceList = categoryMap[hash];
+	if (voiceList.Length() <= 0) {
+		return false;
+	}
 	
 	FOREACH_CONST_R(iter, voiceList) {
 		auto v = *iter;
