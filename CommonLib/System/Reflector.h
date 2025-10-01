@@ -13,138 +13,117 @@ public:
 	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) = 0;
 };
 
+template<typename _TValue>
+class AValueParser : public IValueParser {
+public:
+	typedef _TValue		TValue;
+
+public:
+	virtual TValue	Get(const rapidjson::Value& value) = 0;
+
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
+		assert(sizeof(TValue) == size);
+		TValue val = Get(src);
+		memcpy_s(dest, size, &val, size);
+	}
+};
+
 template<typename TValue>
 class ValueParser;
 
 template<>
-class ValueParser<float> : public IValueParser {
-	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
+class ValueParser<float> : public AValueParser<float> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
-	typedef float		TValue;
+	typedef TSuper::TValue		TValue;
 
 public:
-	static TValue	Get(const rapidjson::Value& value) {
+	virtual TValue	Get(const rapidjson::Value& value) override {
 		assert(value.IsDouble());
 		return value.GetDouble();
-	}
-
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
-		memcpy_s(dest, size, &val, size);
 	}
 };
 
 template<>
-class ValueParser<double> : public IValueParser {
-	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
+class ValueParser<double> : public AValueParser<double> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
-	typedef double	TValue;
+	typedef TSuper::TValue	TValue;
 
 public:
-	static TValue	Get(const rapidjson::Value& value) {
+	virtual TValue	Get(const rapidjson::Value& value) override {
 		assert(value.IsDouble());
 		return value.GetDouble();
-	}
-
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
-		memcpy_s(dest, size, &val, size);
 	}
 };
 
 template<>
-class ValueParser<Byte> : public IValueParser {
-	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
+class ValueParser<Byte> : public AValueParser<Byte> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
-	typedef Byte		TValue;
+	typedef TSuper::TValue		TValue;
 
 public:
-	static TValue	Get(const rapidjson::Value& value) {
+	virtual TValue	Get(const rapidjson::Value& value) override {
 		assert(value.IsInt());
 		return (TValue)value.GetInt();
 	}
-
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
-		memcpy_s(dest, size, &val, size);
-	}
 };
 
 template<>
-class ValueParser<Int32> : public IValueParser {
-	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
+class ValueParser<Int32> : public AValueParser<Int32> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
-	typedef Int32	TValue;
+	typedef TSuper::TValue	TValue;
 
 public:
-	static TValue	Get(const rapidjson::Value& value) {
+	virtual TValue	Get(const rapidjson::Value& value) override {
 		assert(value.IsInt());
 		return value.GetInt();
 	}
-
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
-		memcpy_s(dest, size, &val, size);
-	}
 };
 
 template<>
-class ValueParser<UInt32> : public IValueParser {
-	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
+class ValueParser<UInt32> : public AValueParser<UInt32> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
-	typedef UInt32	TValue;
+	typedef TSuper::TValue	TValue;
 
 public:
-	static TValue	Get(const rapidjson::Value& value) {
+	virtual TValue	Get(const rapidjson::Value& value) override {
 		assert(value.IsInt());
 		return (TValue)value.GetInt();
 	}
-
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
-		memcpy_s(dest, size, &val, size);
-	}
 };
 
 template<>
-class ValueParser<Int64> : public IValueParser {
-	INHERITEDCLASS_TYPEDEFS(ValueParser, IValueParser)
+class ValueParser<Int64> : public AValueParser<Int64> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
 
 public:
-	typedef Int64	TValue;
+	typedef TSuper::TValue	TValue;
 
 public:
-	static TValue	Get(const rapidjson::Value& value) {
+	virtual TValue	Get(const rapidjson::Value& value) override {
 		assert(value.IsInt64());
 		return value.GetInt64();
-	}
-
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
-		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
-		memcpy_s(dest, size, &val, size);
 	}
 };
 
@@ -194,7 +173,7 @@ public:
 		return true;
 	}
 
-	template<typename TObject, typename TMember>
+	template<typename TObject>
 	Bool	Set(const StaticString& memberName, TObject& obj, const rapidjson::Value& memberValue) {
 		return Set(memberName, &obj, memberValue);
 	}

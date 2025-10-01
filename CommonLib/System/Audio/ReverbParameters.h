@@ -1,7 +1,6 @@
 #pragma once
 
-#include "System\Typedefs.h"
-#include "System/Reflector.h"
+#include "AParameters.h"
 
 #include <xaudio2fx.h>
 
@@ -40,14 +39,14 @@ public:
 
 /////////////////////////////////////////////
 
-class ReverbParameters : public XAUDIO2FX_REVERB_PARAMETERS {
-	INHERITEDCLASS_TYPEDEFS(ReverbParameters, XAUDIO2FX_REVERB_PARAMETERS)
+class ReverbParameters : public AParameters<XAUDIO2FX_REVERB_PARAMETERS> {
+	INHERITEDCLASS_TYPEDEFS(ReverbParameters, AParameters)
 
 public:
-	void	SetToDefault() {
-		WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;       // how much reverb vs dry
-		ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY; // delay for first reflections
-		ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;      // delay before the reverb tail
+	virtual void	SetToDefault() override {
+		WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
+		ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
+		ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
 		RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
 		PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
 		PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
@@ -68,17 +67,5 @@ public:
 		DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
 		RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
 		DisableLateField = FALSE;  // enable late reverb tail
-	}
-
-	Bool	UpdateFrom(const rapidjson::Value& reverbVal) {
-		if (!reverbVal.IsObject()) {
-			return false;
-		}
-
-		for (auto iter = reverbVal.MemberBegin(), endIter = reverbVal.MemberEnd(); iter != endIter; ++iter) {
-			auto memberName = iter->name.GetString();
-			verify( Singleton<Reflector<TSuper>>::GetInstance()->Set(memberName, this, iter->value) );
-		}
-		return true;
 	}
 };
