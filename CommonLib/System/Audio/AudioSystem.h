@@ -99,7 +99,11 @@ public:
 	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params) {
 		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), 0U);
 	}
-	//virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const class EchoParameters& params);
+
+	template<typename TParameters>
+	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params, UInt32 operationSet) {
+		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), operationSet);
+	}
 
 	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
 		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
