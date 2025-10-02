@@ -28,8 +28,8 @@ public:
 
 /////////////////////////////////////////////
 
-class EchoParameters : public AParameters<FXEQ_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(EchoParameters, AParameters)
+class EQParameters : public AParameters<FXEQ_PARAMETERS> {
+	INHERITEDCLASS_TYPEDEFS(EQParameters, AParameters)
 
 public:
 	virtual void	SetToDefault() override {
