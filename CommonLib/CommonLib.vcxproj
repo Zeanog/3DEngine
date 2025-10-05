@@ -55,8 +55,11 @@
     <ClInclude Include="System\Audio\EchoParameters.h" />
     <ClInclude Include="System\Audio\EQParameters.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader.h" />
+    <ClInclude Include="System\Audio\Loaders\AudioLoader_MP3.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_OggVorbis.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h" />
+    <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3.h" />
+    <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3_ex.h" />
     <ClInclude Include="System\Audio\Loaders\SoundManager.h" />
     <ClInclude Include="System\Audio\MasteringVoice.h" />
     <ClInclude Include="System\Audio\AudioSystem.h" />
@@ -96,7 +99,6 @@
     <ClInclude Include="System\StaticString.h" />
     <ClInclude Include="System\String.h" />
     <ClInclude Include="System\Typedefs.h" />
-    <ClInclude Include="System\TypeSerializer.h" />
     <ClInclude Include="System\Win32\Error.h" />
     <ClInclude Include="System\Win32\Window.h" />
     <ClInclude Include="TinyXML\tinyxml2.h" />
@@ -132,6 +134,7 @@
     <ClCompile Include="Shaders\ShaderProgramManager.cpp" />
     <ClCompile Include="Shaders\ShaderProgram_GLSL.cpp" />
     <ClCompile Include="Shaders\Shader_GLSL.cpp" />
+    <ClCompile Include="System\Audio\Loaders\AudioLoader_MP3.cpp" />
     <ClCompile Include="System\Audio\Loaders\AudioLoader_OggVorbis.cpp" />
     <ClCompile Include="System\Audio\Loaders\AudioLoader_RIFF.cpp" />
     <ClCompile Include="System\Audio\Loaders\SoundManager.cpp" />
@@ -144,6 +147,7 @@
     <ClCompile Include="System\Color.cpp" />
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
+    <ClCompile Include="System\File.cpp" />
     <ClCompile Include="System\JsonSerializer.cpp" />
     <ClCompile Include="System\StaticString.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />

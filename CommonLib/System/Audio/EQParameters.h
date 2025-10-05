@@ -7,7 +7,7 @@
 template<>
 class Reflector<FXEQ_PARAMETERS> : public AReflector {
 	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
-		SINGLETON_DECLARATIONS(TSelf) {
+	SINGLETON_DECLARATIONS(TSelf) {
 		REGISTER_MEMBER(TReflected, FrequencyCenter0);
 		REGISTER_MEMBER(TReflected, Gain0);
 		REGISTER_MEMBER(TReflected, Bandwidth0);

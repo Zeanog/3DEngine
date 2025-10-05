@@ -2,11 +2,12 @@
 
 #include "System/AssetManager.h"
 #include "AudioLoader.h"
-#include "../Sound.h"
+#include "System/Audio/Sound.h"
 #include "System/Singleton.h"
 
 class SoundManager {
-	SINGLETON_DECLARATIONS(SoundManager);
+	CLASS_TYPEDEFS(SoundManager)
+	SINGLETON_DECLARATIONS(TSelf);
 
 public:
 	typedef AssetManager<Sound>	TContainer;

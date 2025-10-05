@@ -1,16 +1,116 @@
 #pragma once
 
 #include "Map.h"
+#include "List.h"
 #include "StaticString.h"
 #include "System\Singleton.h"
 
 #include "rapidjson\document.h"
 
+template<>
+class ContainerIterator<rapidjson::Value> {
+public:
+	typedef typename rapidjson::Value	TContainer;
+
+	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
+	typedef typename TUndecorated::ValueIterator	Iterator;
+	typedef typename TUndecorated::ConstValueIterator	ConstIterator;
+
+	typedef typename TUndecorated::ValueIterator	ReverseIterator;
+	typedef typename TUndecorated::ConstValueIterator ConstReverseIterator;
+
+	static Iterator	Begin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstIterator	Begin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static Iterator	End(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstIterator	End(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ReverseIterator	ReverseEnd(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+};
+
+template<>
+class ContainerIterator<rapidjson::Document> {
+public:
+	typedef typename rapidjson::Document	TContainer;
+
+	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
+	typedef typename TUndecorated::ValueIterator	Iterator;
+	typedef typename TUndecorated::ConstValueIterator	ConstIterator;
+
+	typedef typename TUndecorated::ValueIterator	ReverseIterator;
+	typedef typename TUndecorated::ConstValueIterator ConstReverseIterator;
+
+	static Iterator	Begin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstIterator	Begin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static Iterator	End(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstIterator	End(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ReverseIterator	ReverseEnd(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+};
+
+#define FOREACH_MEMBER( iterName, jsonValue )	\
+for (auto iterName = jsonValue.MemberBegin(), iterName##End = jsonValue.MemberEnd(); iterName != iterName##End; ++iterName)
+
 class IValueParser {
 	CLASS_TYPEDEFS(IValueParser)
 
 public:
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) = 0;
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) const = 0;
 };
 
 template<typename _TValue>
@@ -19,17 +119,81 @@ public:
 	typedef _TValue		TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) = 0;
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const = 0;
 
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) const override {
 		assert(sizeof(TValue) == size);
-		TValue val = Get(src);
+		TValue val{};
+		Get(src, val);
 		memcpy_s(dest, size, &val, size);
+		//TODO: Known Issue - If this is an object that contains a pointer(aka List, etc...) this may cause some memory issues.
 	}
 };
 
 template<typename TValue>
 class ValueParser;
+
+//TODO: TEST!!!!!
+template<typename _TElemValue>
+class ValueParser<List<_TElemValue>> : public AValueParser<List<_TElemValue>> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+	SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue		TValue;//This is actually List<_TValue>
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsArray());
+		
+		auto parser = Singleton<ValueParser<_TElemValue>>::GetInstance();
+		FOREACH( iter, value ) {
+			_TValue elem{};
+			parser->Get(*iter, elem);
+			outValue.Add(elem);
+		}
+	}
+
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
+		assert(dest);
+		//assert(sizeof(TValue) == size);
+		//TODO: Possibly use size
+		TValue& list = *(TValue*)dest;
+		Get(src, list);
+	}
+};
+
+template<typename _TMapValue>
+class ValueParser<Map<StaticString, _TMapValue>> : public AValueParser<Map<StaticString, _TMapValue>> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+	SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue		TValue;//This is actually Map<_TKey, _TValue>
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsObject());
+
+		auto parser = Singleton<ValueParser<_TMapValue>>::GetInstance();
+		FOREACH_MEMBER(iter, value) {
+			_TValue elem{};
+			parser->Get(iter->value, elem);
+			outValue.Add(iter->name.GetString(), elem);
+		}
+	}
+
+	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
+		assert(dest);
+		//assert(sizeof(TValue) == size);
+		//TODO: Possibly use size
+		TValue& list = *(TValue*)dest;
+		Get(src, list);
+	}
+};
+//TODO: TEST!!!!!
 
 template<>
 class ValueParser<float> : public AValueParser<float> {
@@ -41,9 +205,9 @@ public:
 	typedef TSuper::TValue		TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) override {
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsDouble());
-		return value.GetDouble();
+		outValue = value.GetDouble();
 	}
 };
 
@@ -57,9 +221,9 @@ public:
 	typedef TSuper::TValue	TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) override {
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsDouble());
-		return value.GetDouble();
+		outValue = value.GetDouble();
 	}
 };
 
@@ -73,9 +237,9 @@ public:
 	typedef TSuper::TValue		TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) override {
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsInt());
-		return (TValue)value.GetInt();
+		outValue = (TValue)value.GetInt();
 	}
 };
 
@@ -89,9 +253,9 @@ public:
 	typedef TSuper::TValue	TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) override {
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsInt());
-		return value.GetInt();
+		outValue = value.GetInt();
 	}
 };
 
@@ -105,9 +269,9 @@ public:
 	typedef TSuper::TValue	TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) override {
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsInt());
-		return (TValue)value.GetInt();
+		outValue = (TValue)value.GetInt();
 	}
 };
 
@@ -121,24 +285,22 @@ public:
 	typedef TSuper::TValue	TValue;
 
 public:
-	virtual TValue	Get(const rapidjson::Value& value) override {
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsInt64());
-		return value.GetInt64();
+		outValue = value.GetInt64();
 	}
 };
 
 class AReflector {
-	CLASS_TYPEDEFS( AReflector )
+	CLASS_TYPEDEFS(AReflector)
 
 protected:
-	//TODO: Think of ways to handle compound members like pointers, lists, custom data structures
 	struct MemberInfo {
-		UInt64		Offset;
-		UInt64		Size;
-		IValueParser* Parser;
+		UInt64				Offset;
+		UInt64				Size;
+		const IValueParser* Parser;
 	};
-
-	Map<StaticString, MemberInfo>			m_MemberInfoMap;
+	Map<StaticString, MemberInfo>	m_MemberInfoMap;
 
 protected:
 	AReflector() {}//Disallow instantiation as this is only a partial class

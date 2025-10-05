@@ -82,16 +82,16 @@ public:
 };
 
 #define FOREACH( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::Iterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
+	for( auto iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
 #define FOREACH_CONST( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::ConstIterator iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
+	for( auto iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
 #define FOREACH_R( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::ReverseIterator iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
+	for( auto iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
 #define FOREACH_CONST_R( iterName, stlContainer )	\
-	for( typename ContainerIterator<decltype(stlContainer)>::ConstReverseIterator iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
+	for( auto iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
 
@@ -155,12 +155,12 @@ void Release(_TData*& ptr) {
 virtual typename Param<type>::Type		name() const = 0;	\
 virtual void			name(typename Param<type>::Type val) = 0;
 
-#define DECLARE_GETSET( name )			\
-Param<decltype(m_##name)>::Type		name() const {					\
-	return m_##name;								\
+#define DECLARE_GETSET( propName )			\
+Param<decltype(m_##propName)>::Type		propName() const {					\
+	return m_##propName;								\
 }												\
-void			name(Param<decltype(m_##name)>::Type val) {			\
-	m_##name = val;								\
+void			propName(Param<decltype(m_##propName)>::Type val) {			\
+	m_##propName = val;								\
 }
 
 #define ABSTRACT_GETSET_EX( type, propName )								\

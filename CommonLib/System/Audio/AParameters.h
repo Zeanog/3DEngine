@@ -16,10 +16,11 @@ public:
 
 	virtual Bool	UpdateFrom(const rapidjson::Value& reverbVal) {
 		if (!reverbVal.IsObject()) {
+			assert(0);
 			return false;
 		}
 
-		for (auto iter = reverbVal.MemberBegin(), endIter = reverbVal.MemberEnd(); iter != endIter; ++iter) {
+		FOREACH_MEMBER(iter, reverbVal) {
 			auto memberName = iter->name.GetString();
 			verify(Singleton<Reflector<TParameters>>::GetInstance()->Set(memberName, this, iter->value));
 		}

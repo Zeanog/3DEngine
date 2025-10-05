@@ -12,14 +12,12 @@ protected:
 	std::unique_ptr<BYTE>		m_Data;
 
 	XAUDIO2_BUFFER				m_Buffer{};
-	WAVEFORMATEXTENSIBLE		m_Format{};
-	Float32						m_Duration{};
+
+	DEFINE_MEMBER_EX(WAVEFORMATEXTENSIBLE, Format)
+	DEFINE_MEMBER_EX(Float32, Duration)
 
 public:
 	~Sound();
-
-	DECLARE_GETSET(Format)
-	DECLARE_GETSET(Duration)
 
 	void		SetContext(void* cxt) {
 		m_Buffer.pContext = cxt;

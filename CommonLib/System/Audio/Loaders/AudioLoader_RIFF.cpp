@@ -79,7 +79,7 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	File	file;
 
 	m_AudioDataSize = 0;
-	m_AudioData.reset(nullptr);
+	m_AudioData.reset(nullptr);//Delete any existing data
 
 	if (!file.Open(fileName, "rb")) {
 		return false;
@@ -109,13 +109,12 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	verify(FindChunk(file, FourCC::DATA, dwChunkSize, dwChunkPosition));
 	file.Seek(dwChunkPosition, SEEK_SET);
 
-	BYTE* data = new BYTE[dwChunkSize];
-	if (!file.Read(data, dwChunkSize)) {
-		DeletePtr(data);
+	m_AudioData.reset(new Byte[dwChunkSize]);
+	if (!file.Read(m_AudioData.get(), dwChunkSize)) {
+		m_AudioData.reset(nullptr);
 		return false;
 	}
 	
-	m_AudioData.reset(data);//Take ownership of the data
 	m_AudioDataSize = dwChunkSize;
 	
 	return true;
