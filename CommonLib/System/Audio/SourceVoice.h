@@ -38,7 +38,7 @@ public:
 	virtual Bool	Start(UInt32 operationSet);
 
 	virtual Bool	Stop() {
-		return Stop(0);
+		return Stop(0U);
 	}
 
 	virtual Bool	Stop( UInt32 operationSet ) {
@@ -66,7 +66,7 @@ public:
 		return state.BuffersQueued > 0;
 	}
 
-	virtual Sound* CurrentPlayingSound() const {
+	virtual const Sound* PlayingSound() const {
 		assert(m_Voice);
 		XAUDIO2_VOICE_STATE state;
 		m_Voice->GetState(&state);
@@ -74,7 +74,7 @@ public:
 			return nullptr;
 		}
 		//This is assuming we set a sounds context to itself
-		return (Sound*)state.pCurrentBufferContext;
+		return (const Sound*)state.pCurrentBufferContext;
 	}
 
 public:

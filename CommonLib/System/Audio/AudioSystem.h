@@ -30,13 +30,13 @@ protected:
 
 	List<AVoice*>	m_Voices{};
 
-	Map<SubmixVoice*, Map<UInt64, LinkedList<SourceVoice*>>>	m_CategoryToVoiceListMap{};
-	Map<SourceVoice*, SubmixVoice*>								m_VoiceToCategoryMap{};
+	Map<SubmixVoice*, TFormatToVoiceList>	m_CategoryToVoiceListMap{};
+	Map<SourceVoice*, SubmixVoice*>			m_VoiceToCategoryMap{};
 
-	Map<StaticString, SubmixVoice*>								m_CategoryNameToVoiceMap{};
-	Map<SubmixVoice*, StaticString>								m_VoiceToCategoryNameMap{};
+	Map<StaticString, SubmixVoice*>			m_CategoryNameToVoiceMap{};
+	Map<SubmixVoice*, StaticString>			m_VoiceToCategoryNameMap{};
 
-	static std::mutex							m_Mutex;
+	static std::mutex						m_Mutex;
 
 protected:
 	MasteringVoice* CreateMasteringVoice();
@@ -57,6 +57,7 @@ protected:
 	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const Sound& sound);
 
 	SubmixVoice* CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
+
 	Bool		CommitChanges(UInt32 operationSet) {
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
 	}
@@ -95,6 +96,10 @@ public:
 		return GetCategory(categoryName)->EnableEffect(index);
 	}
 
+	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
+		return GetCategory(categoryName)->EnableEffect(index, operationSet);
+	}
+
 	template<typename TParameters>
 	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params) {
 		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), 0U);
@@ -103,6 +108,14 @@ public:
 	template<typename TParameters>
 	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params, UInt32 operationSet) {
 		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), operationSet);
+	}
+
+	template<typename TParameters>
+	Bool GetEffectParameters(const StaticString& categoryName, UInt32 index, TParameters& params) {
+		UInt32 outSize{};
+		auto result = GetCategory(categoryName)->GetEffectParameters(index, &params, outSize);
+		assert(params.SizeOf() == outSize);
+		return result;
 	}
 
 	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {

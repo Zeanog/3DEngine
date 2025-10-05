@@ -2,9 +2,6 @@
 #include <vorbis\vorbisfile.h>
 #include <xaudio2.h>
 
-
-#define WAVE_FORMAT_VORBIS1   0x674f // 'Og'
-
 Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     m_AudioDataSize = 0;
     m_AudioData.reset(nullptr);//Clear the pointer;
@@ -16,7 +13,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     }
 
     vorbis_info* vi = ov_info(&oggFile, -1);
-    m_Format.Format.wFormatTag = 1; // 1 for WAVE_FORMAT_PCM
+    m_Format.Format.wFormatTag = WAVE_FORMAT_PCM;
     m_Format.Format.nChannels = vi->channels;
     m_Format.Format.nSamplesPerSec = vi->rate;
     m_Format.Format.wBitsPerSample = 16; // stb_vorbis decodes to 16-bit PCM
@@ -31,27 +28,26 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     long total_sections = ov_streams(&oggFile);
     ogg_int64_t total_samples = ov_pcm_total(&oggFile, -1);
     
-    m_AudioDataSize = total_samples * (m_Format.Format.wBitsPerSample / 8.0f) * vi->channels;
-    BYTE* buffer = new BYTE[m_AudioDataSize];
+    m_AudioDataSize = total_samples * (m_Format.Format.wBitsPerSample / 8) * m_Format.Format.nChannels;
+    m_AudioData.reset(new Byte[m_AudioDataSize]);
 
     UInt32 bytes_read_total = 0;
     int current_section = 0;
 
     while (bytes_read_total < m_AudioDataSize) {
-        auto bytes_read = ov_read(&oggFile, (char*)buffer + bytes_read_total, m_AudioDataSize - bytes_read_total, 0, 2, 1, &current_section);
+        auto bytes_read = ov_read(&oggFile, (char*)m_AudioData.get() + bytes_read_total, m_AudioDataSize - bytes_read_total, 0, 2, 1, &current_section);
 
         if(bytes_read == 0) {
             break; // End of file
         }
         else if (bytes_read < 0) {
-            DeletePtr(buffer);
+            m_AudioData.reset(nullptr);
             ov_clear(&oggFile);
             return false;
         }
         bytes_read_total += bytes_read;
     }
 
-    m_AudioData.reset(buffer);//Make sure we are in charge of the data in case we exit early
     ov_clear(&oggFile);
 
     return true;

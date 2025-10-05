@@ -483,7 +483,7 @@ void GLApplication::LoadAssets()
 
 	ReverbParameters	reverbParams;
 	std::size_t			index = 0;
-	for (auto iter = reverbDoc.Begin(), endIter = reverbDoc.End(); iter != endIter; ++iter, ++index) {
+	FOREACH( iter, reverbDoc ) {
 		reverbParams.SetToDefault();
 		verify(reverbParams.UpdateFrom(*iter));
 		verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", index, reverbParams));

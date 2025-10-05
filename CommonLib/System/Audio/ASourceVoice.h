@@ -103,10 +103,13 @@ public:
 		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
 	}
 
-	Bool EnableEffect(UInt32 index) {
+	virtual Bool GetEffectParameters(UInt32 index, void* outParameterData, UInt32& outParameterDataByteSize) {
 		assert(m_Voice);
-		auto result = m_Voice->EnableEffect(index);
-		return SUCCEEDED(result);
+		return SUCCEEDED(m_Voice->GetEffectParameters(index, outParameterData, outParameterDataByteSize));
+	}
+
+	Bool EnableEffect(UInt32 index) {
+		return EnableEffect(index, 0U);
 	}
 
 	Bool EnableEffect(UInt32 index, UInt32 operationSet) {
@@ -116,9 +119,7 @@ public:
 	}
 
 	Bool DisableEffect(UInt32 index) {
-		assert(m_Voice);
-		auto result = m_Voice->DisableEffect(index);
-		return SUCCEEDED(result);
+		return DisableEffect(index, 0U);
 	}
 
 	Bool DisableEffect(UInt32 index, UInt32 operationSet) {

@@ -1,10 +1,14 @@
 #pragma once
 
-#include "../System/StaticString.h"
+#include "System/StaticString.h"
+#include "StackString.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "StackString.h"
+
+template< typename TData >
+class List;
 
 class File {
 public:
@@ -74,6 +78,8 @@ public:
 		assert( !ReportedError() );
 		return false;
 	}
+
+	Bool ReadContents( List<Byte>& outContents);
 
 	Bool ReadContents(String& outContents) {
 		assert(IsOpen());

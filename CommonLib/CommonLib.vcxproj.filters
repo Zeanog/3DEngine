@@ -46,6 +46,9 @@
     <Filter Include="System\Audio\Loaders">
       <UniqueIdentifier>{386288d9-8b71-435f-a0de-280beccf65c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\Audio\Loaders\MiniMP3">
+      <UniqueIdentifier>{c71b1788-ad1d-4024-ad78-d2de7519d264}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\AssetManager.h">
@@ -113,9 +116,6 @@
     </ClInclude>
     <ClInclude Include="Rendering\RenderDef.h">
       <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="System\TypeSerializer.h">
-      <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\IJsonSerializable.h">
       <Filter>System</Filter>
@@ -291,6 +291,15 @@
     <ClInclude Include="System\Audio\EQParameters.h">
       <Filter>System\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\AudioLoader_MP3.h">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3.h">
+      <Filter>System\Audio\Loaders\MiniMP3</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3_ex.h">
+      <Filter>System\Audio\Loaders\MiniMP3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
@@ -420,6 +429,12 @@
       <Filter>System\Audio</Filter>
     </ClCompile>
     <ClCompile Include="System\JsonSerializer.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\Loaders\AudioLoader_MP3.cpp">
+      <Filter>System\Audio\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="System\File.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,14 +1,15 @@
 #pragma once
 
-#include "..\..\Typedefs.h"
-#include "..\..\String.h"
-#include "..\..\StaticString.h"
+#include "System\Typedefs.h"
+#include "System\String.h"
+#include "System\StaticString.h"
+
 #include <xaudio2.h>
 #include <memory>
 
 class AudioLoader {
 protected:
-	std::unique_ptr<BYTE>	m_AudioData;
+	std::unique_ptr<Byte>	m_AudioData;
 	UInt32					m_AudioDataSize;
 
 	WAVEFORMATEXTENSIBLE	m_Format{};
@@ -34,7 +35,7 @@ public:
 
 	virtual void	Clear() {
 		m_AudioDataSize = 0;
-		assert(!m_AudioData.get());
+		assert(!m_AudioData.get());//TODO: Possibly just destroy if the data is valid
 	}
 
 	virtual const WAVEFORMATEXTENSIBLE& Format() const {
