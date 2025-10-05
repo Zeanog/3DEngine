@@ -101,7 +101,7 @@ public:
 		 return !strcpy_s(dst, size, src);
 	}
 
-	static const Char*	Format( const char* format, ... ) {
+	static const Char* Format(const char* format, va_list& args) {
 		static const int NumBuffers = 5;
 		static const int MaxBufferSize = 256;
 		static int currentIndex = 0;
@@ -110,15 +110,15 @@ public:
 		Char* currentBuffer = buffers[currentIndex];
 
 		currentIndex = (currentIndex + 1) % NumBuffers;
+		vsprintf_s(currentBuffer, MaxBufferSize, format, args);
+		return currentBuffer;
+	}
 
+	static const Char*	Format( const char* format, ... ) {
 		va_list args;
 		va_start(args, format);
-
-		vsprintf_s(currentBuffer, MaxBufferSize, format, args);
-
+		auto str = Format(format, args);
 		va_end(args);
-
-		return currentBuffer;
 	}
 };
 

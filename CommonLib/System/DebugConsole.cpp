@@ -43,14 +43,19 @@ void DebugConsole::DetachIO() {
 	m_hOutputFile = nullptr;
 }
 
-Bool	DebugConsole::Write(const Char* msg) {
-	OutputDebugString(msg);
-	if (IsOpen()) {
-		printf_s(msg);
-	}
-	return true;
-}
+Bool	DebugConsole::Write(const Char* format, ...) {
+	va_list args;
+	__try {
+		va_start(args, format);
 
-Bool	DebugConsole::Write(const Char* format, const Char* msg) {
-	return Write(String::Format(format, msg));
+		auto msg = String::Format(format, args);
+		OutputDebugString(msg);
+		if (IsOpen()) {
+			printf_s(msg);
+		}
+	}
+	__finally {
+		va_end(args);
+		return true;
+	}
 }

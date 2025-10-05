@@ -8,14 +8,14 @@
 
 Bool AudioLoader_MP3::Load(const Char* fileName) {
     m_AudioDataSize = 0;
-    m_AudioData.reset(nullptr);//Clear the pointer;
+    m_AudioData.reset(nullptr);//Delete any existing data
 
     File    file;
     if (!file.Open(fileName, "rb")) {
         return false;
     }
 
-    List<Byte> fileData;//TODO: Would be nice to use the DataStructureLibrary
+    List<Byte> fileData;//TODO: Would be nice to use the DataStructureLibrary to avoid the allocation for each file
     verify(file.ReadContents(fileData));
 
     mp3dec_ex_t dec;
