@@ -26,8 +26,6 @@ const Neo::Image* ImageManager::Get(const StaticString& path) {
 		return image;
 	}
 
-	Singleton<DebugConsole>::GetInstance()->Write("Loading %s...\n", path.CStr());
-
 	image = new Neo::Image;
 	if (!Load(path, image)) {
 		DeletePtr(image);
@@ -42,4 +40,29 @@ void ImageManager::ReloadAll() {
 	FOREACH(iter, m_Images) {
 		Load(iter->first, iter->second);
 	}
+}
+
+Bool ImageManager::Load(const StaticString& path, Neo::Image* image) {
+	assert(image);
+
+	THandlerContainer::iterator iter = m_Loaders.find(StaticString(FilePath::GetExtension(path)));
+	if (iter == m_Loaders.end()) {
+		return false;
+	}
+
+	Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
+
+	ImageLoader* loader = iter->second;
+	if (!loader->Load(path)) {
+		Singleton<DebugConsole>::GetInstance()->Write("Failed to load '%s'!\n", path.CStr());
+		return false;
+	}
+
+	if (!image->UploadData(*loader)) {
+		Singleton<DebugConsole>::GetInstance()->Write("Failed to upload '%s'!\n", path.CStr());
+		return false;
+	}
+
+	loader->Clear();
+	return true;
 }

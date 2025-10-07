@@ -347,6 +347,7 @@ public:
 		}
 
 		auto& info = m_MemberInfoMap[memberName];
+		assert(sizeof(TMember) == info.Size);
 		TMember* memberAddr = (TMember*)((Byte*)obj + info.Offset);
 		outMemberValue = *memberAddr;
 

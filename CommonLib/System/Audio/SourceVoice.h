@@ -38,7 +38,7 @@ public:
 	virtual Bool	Start(UInt32 operationSet);
 
 	virtual Bool	Stop() {
-		return Stop(0U);
+		return Stop(XAUDIO2_COMMIT_NOW);
 	}
 
 	virtual Bool	Stop( UInt32 operationSet ) {

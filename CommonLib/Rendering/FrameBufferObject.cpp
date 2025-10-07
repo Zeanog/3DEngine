@@ -76,7 +76,7 @@ void FrameBufferObject::UnsetAsTarget(){
 const RenderTarget* FrameBufferObject::LinkTargetTo(const StaticString& key, const ShaderProgram_GLSL& program, GLenum textureUnitIndex) const {
 	const RenderTarget* rt = (*this)[key];
 	rt->LinkTo(textureUnitIndex);
-	verify(program.LinkUniform(key, (int)textureUnitIndex));
+	verify(program.LinkUniform(key.CStr(), (int)textureUnitIndex));
 	return rt;
 }
 

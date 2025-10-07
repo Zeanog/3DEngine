@@ -108,6 +108,13 @@ public:
 		return SUCCEEDED(m_Voice->GetEffectParameters(index, outParameterData, outParameterDataByteSize));
 	}
 
+	Bool			IsEffectEnabled(UInt32 index) {
+		assert(m_Voice);
+		BOOL	enabled{};
+		m_Voice->GetEffectState(index, &enabled);
+		return (Bool)enabled;
+	}
+
 	Bool EnableEffect(UInt32 index) {
 		return EnableEffect(index, 0U);
 	}

@@ -82,7 +82,7 @@ public:
 protected:
 	static glm::mat4	m_CachedProjectionMatrix;
 
-	glm::vec3			m_Direction;
+	glm::vec3			m_Direction{};
 
 public:
 	Light_Directional();
@@ -101,15 +101,15 @@ public:
 };
 
 class Light_Point : public ALight {
-	INHERITEDCLASS_TYPEDEFS( Light_Point, ALight );
+	INHERITEDCLASS_TYPEDEFS( Light_Point, ALight )
 
 public:
 
 protected:
-	glm::vec3	m_Origin;
-	float		m_ConstantAttenuation;
-	float		m_LinearAttenuation;
-	float		m_QuadraticAttenuation;
+	glm::vec3	m_Origin{};
+	float		m_ConstantAttenuation{};
+	float		m_LinearAttenuation{};
+	float		m_QuadraticAttenuation{};
 
 protected:
 	virtual void		InitShadowMap() override {
@@ -147,9 +147,9 @@ public:
 	static void RenderShadows(const Functor<void>& perLightRenderHandler, const ICamera& camera);
 
 protected:
-	glm::mat4	m_ProjectionMatrix;
+	glm::mat4	m_ProjectionMatrix{};
 
-	glm::mat4	m_Transform;
+	glm::mat4	m_Transform{};
 
 	Float32		m_ConstantAttenuation = 0.0f;
 	Float32		m_LinearAttenuation = 0.0f;

@@ -87,7 +87,7 @@ glm::mat4 Light_Directional::Transform() const {
 }
 
 const RenderTarget* Light_Directional::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	verify(program.LinkUniform(StaticString("vLightDir"), m_Direction * glm::inverse(camera.Rotation())));
+	verify(program.LinkUniform("vLightDir", m_Direction * glm::inverse(camera.Rotation())));
 	if(!CastsShadows()) {
 		return NULL;
 	}
@@ -159,10 +159,10 @@ Light_Point::~Light_Point() {
 }
 
 const RenderTarget* Light_Point::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	verify(program.LinkUniform(StaticString("vLightPos"), m_Origin * glm::inverse(camera.Rotation())));
-	verify(program.LinkUniform(StaticString("fConstantAttenuation"), m_ConstantAttenuation));
-	verify(program.LinkUniform(StaticString("fLinearAttenuation"), m_LinearAttenuation));
-	verify(program.LinkUniform(StaticString("fQuadraticAttenuation"), m_QuadraticAttenuation));
+	verify(program.LinkUniform("vLightPos", m_Origin * glm::inverse(camera.Rotation())));
+	verify(program.LinkUniform("fConstantAttenuation", m_ConstantAttenuation));
+	verify(program.LinkUniform("fLinearAttenuation", m_LinearAttenuation));
+	verify(program.LinkUniform("fQuadraticAttenuation", m_QuadraticAttenuation));
 
 	if (!CastsShadows()) {
 		return NULL;
@@ -244,17 +244,17 @@ Light_Spot::~Light_Spot() {
 }
 
 const RenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	verify(program.LinkUniform(StaticString("fConstantAttenuation"), m_ConstantAttenuation));
-	verify(program.LinkUniform(StaticString("fLinearAttenuation"), m_LinearAttenuation));
-	verify(program.LinkUniform(StaticString("fQuadraticAttenuation"), m_QuadraticAttenuation));
-	verify(program.LinkUniform(StaticString("fExponent"), m_Exponent));
-	verify(program.LinkUniform(StaticString("fLightCosCutoff"), m_CosCutoff));
+	verify(program.LinkUniform("fConstantAttenuation", m_ConstantAttenuation));
+	verify(program.LinkUniform("fLinearAttenuation", m_LinearAttenuation));
+	verify(program.LinkUniform("fQuadraticAttenuation", m_QuadraticAttenuation));
+	verify(program.LinkUniform("fExponent", m_Exponent));
+	verify(program.LinkUniform("fLightCosCutoff", m_CosCutoff));
 
 	glm::vec3 offset(Position() + camera.Position());
 	offset = offset * glm::inverse(camera.Rotation());
-	verify(program.LinkUniform(StaticString("vLightPos"), offset));
-	verify(program.LinkUniform(StaticString("vLightDirection"), Direction() * glm::inverse(camera.Rotation())));
-	verify(program.LinkUniform(StaticString("vEyePos"), -camera.Position()));
+	verify(program.LinkUniform("vLightPos", offset));
+	verify(program.LinkUniform("vLightDirection", Direction() * glm::inverse(camera.Rotation())));
+	verify(program.LinkUniform("vEyePos", -camera.Position()));
 	
 	if (!CastsShadows()) {
 		return NULL;

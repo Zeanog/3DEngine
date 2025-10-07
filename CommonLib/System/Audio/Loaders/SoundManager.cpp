@@ -20,8 +20,6 @@ Sound* SoundManager::Get(const StaticString& path) {
 		return asset;
 	}
 
-	Singleton<DebugConsole>::GetInstance()->Write("Loading %s...\n", path.CStr());
-
 	asset = new Sound();
 	if (!Load(path, asset)) {
 		DeletePtr(asset);
@@ -36,4 +34,29 @@ void SoundManager::ReloadAll() {
 	FOREACH(iter, m_Assets) {
 		Load(iter->first, iter->second);
 	}
+}
+
+Bool SoundManager::Load(const StaticString& path, Sound* asset) {
+	assert(asset);
+
+	THandlerContainer::iterator iter = m_Loaders.find(StaticString(FilePath::GetExtension(path)));
+	if (iter == m_Loaders.end()) {
+		return false;
+	}
+
+	Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
+
+	AudioLoader* loader = iter->second;
+	if (!loader->Load(path)) {
+		Singleton<DebugConsole>::GetInstance()->Write("Failed to load '%s'!\n", path.CStr());
+		return false;
+	}
+
+	if (!asset->UploadData(*loader)) {
+		Singleton<DebugConsole>::GetInstance()->Write("Failed to upload '%s'!\n", path.CStr());
+		return false;
+	}
+
+	loader->Clear();
+	return true;
 }

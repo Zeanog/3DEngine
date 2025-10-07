@@ -36,24 +36,5 @@ public:
 	void	ReloadAll();
 
 protected:
-	Bool	Load( const StaticString& fp, Neo::Image* image ) {
-		assert( image );
-
-		THandlerContainer::iterator iter = m_Loaders.find( StaticString(FilePath::GetExtension(fp)) );
-		if( iter == m_Loaders.end() ) {
-			return false;
-		}
-
-		ImageLoader* loader = iter->second;
-		if( !loader->Load(fp) ) {
-			return false;
-		}
-
-		if( !image->UploadData(*loader) ) {
-			return false;
-		}
-
-		loader->Clear();
-		return true;
-	}
+	Bool	Load(const StaticString& fp, Neo::Image* image);
 };
