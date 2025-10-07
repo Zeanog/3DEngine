@@ -14,8 +14,8 @@ class ShaderProgram_GLSL {
 public:
 	
 protected:
-	const Shader_Vertex_GLSL*		m_pVertexShader; // Vertex shader handle
-	const Shader_Fragment_GLSL*		m_pFragmentShader; // Fragment shader handle
+	const Shader_Vertex_GLSL*		m_pVertexShader{}; // Vertex shader handle
+	const Shader_Fragment_GLSL*		m_pFragmentShader{}; // Fragment shader handle
 	GLhandleARB						m_Handle = -1; // Shader handle
 
 public:

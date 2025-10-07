@@ -39,13 +39,15 @@ protected:
 	static std::mutex						m_Mutex;
 
 protected:
-	MasteringVoice* CreateMasteringVoice();
+	MasteringVoice*		CreateMasteringVoice();
 
 	static UINT64		GenerateHash(const WAVEFORMATEX& format);
 	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
 
 	Bool				FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
 	Bool				AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
+
+	void				OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT result);
 	void				OnBufferStartHandler(SourceVoice* voice, void* context);
 	void				OnBufferEndHandler(SourceVoice* voice, void* context);
 
@@ -68,10 +70,10 @@ public:
 
 	Bool		AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
 
-	SourceVoice* Play(const StaticString& categoryName, const Sound& snd);
-	SourceVoice* Play(const StaticString& categoryName, const Sound* snd);
-	Float32		 Play(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
-	Float32		 Submit(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice);
+	SourceVoice* Play(const Sound& snd, const StaticString& categoryName);
+	SourceVoice* Play(const Sound* snd, const StaticString& categoryName);
+	Float32		 Play(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice);
+	Float32		 Submit(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice);
 
 	void StopAllVoices();
 

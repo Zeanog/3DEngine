@@ -13,7 +13,7 @@ protected:
 
 	XAUDIO2_BUFFER				m_Buffer{};
 
-	DEFINE_MEMBER_EX(WAVEFORMATEXTENSIBLE, Format)
+	DEFINE_MEMBER_EX(WAVEFORMATEXTENSIBLE, Format)//TODO: Possibly cache the Hash value for this format
 	DEFINE_MEMBER_EX(Float32, Duration)
 
 public:

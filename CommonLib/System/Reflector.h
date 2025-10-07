@@ -56,7 +56,103 @@ public:
 };
 
 template<>
+class ContainerIterator<rapidjson::Value&> {
+public:
+	typedef typename rapidjson::Value	TContainer;
+
+	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
+	typedef typename TUndecorated::ValueIterator	Iterator;
+	typedef typename TUndecorated::ConstValueIterator	ConstIterator;
+
+	typedef typename TUndecorated::ValueIterator	ReverseIterator;
+	typedef typename TUndecorated::ConstValueIterator ConstReverseIterator;
+
+	static Iterator	Begin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstIterator	Begin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static Iterator	End(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstIterator	End(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ReverseIterator	ReverseEnd(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+};
+
+template<>
 class ContainerIterator<rapidjson::Document> {
+public:
+	typedef typename rapidjson::Document	TContainer;
+
+	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
+	typedef typename TUndecorated::ValueIterator	Iterator;
+	typedef typename TUndecorated::ConstValueIterator	ConstIterator;
+
+	typedef typename TUndecorated::ValueIterator	ReverseIterator;
+	typedef typename TUndecorated::ConstValueIterator ConstReverseIterator;
+
+	static Iterator	Begin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstIterator	Begin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static Iterator	End(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstIterator	End(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ReverseIterator	ReverseEnd(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+};
+
+template<>
+class ContainerIterator<rapidjson::Document&> {
 public:
 	typedef typename rapidjson::Document	TContainer;
 
