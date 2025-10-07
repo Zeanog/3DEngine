@@ -9,7 +9,7 @@ class AudioLoader;
 
 class Sound {
 protected:
-	std::unique_ptr<BYTE>		m_Data;
+	std::unique_ptr<Byte>		m_Data;
 
 	XAUDIO2_BUFFER				m_Buffer{};
 

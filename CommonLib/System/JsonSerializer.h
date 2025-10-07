@@ -3,7 +3,10 @@
 #include "Typedefs.h"
 #include "rapidjson\document.h"
 
+class StaticString;
+
 namespace rapidjson {
+	Bool	LoadFrom(const StaticString& filePath, rapidjson::Document& outDoc);
 	Bool	LoadFrom(const Char* filePath, rapidjson::Document& outDoc);
 };
 

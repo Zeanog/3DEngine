@@ -92,12 +92,24 @@ public:
 
 	Bool AddEffectDescriptors(const StaticString& categoryName, UInt32 numDescriptors);
 
+	Bool			IsEffectEnabled(const StaticString& categoryName, UInt32 index) {
+		return GetCategory(categoryName)->IsEffectEnabled(index);
+	}
+
 	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index) {
 		return GetCategory(categoryName)->EnableEffect(index);
 	}
 
 	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
 		return GetCategory(categoryName)->EnableEffect(index, operationSet);
+	}
+
+	virtual Bool	DisableEffect(const StaticString& categoryName, UInt32 index) {
+		return GetCategory(categoryName)->DisableEffect(index);
+	}
+
+	virtual Bool	DisableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
+		return GetCategory(categoryName)->DisableEffect(index, operationSet);
 	}
 
 	template<typename TParameters>
@@ -127,4 +139,36 @@ public:
 	}
 
 	void ReloadAssets();
+
+	template<typename TEffect>
+	UInt32	LoadEffects(const StaticString& path, const StaticString& catgegoryName) {
+		rapidjson::Document	doc;
+		if (!rapidjson::LoadFrom(path, doc)) {
+			assert(0);
+			return 0;
+		}
+
+		if (!doc.IsArray()) {
+			assert(0);
+			return 0;
+		}
+
+		verify(Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors(catgegoryName, doc.Capacity()));
+
+		TEffect	params;
+		std::size_t			index = 0;
+		FOREACH(iter, doc) {
+			params.SetToDefault();
+			if (!params.UpdateFrom(*iter)) {
+				assert(0);
+				return false;
+			}
+
+			verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters(catgegoryName, index, params));
+			verify(Singleton<AudioSystem>::GetInstance()->EnableEffect(catgegoryName, index));
+			++index;
+		}
+
+		return index;//Return number of effects loaded
+	}
 };

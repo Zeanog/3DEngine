@@ -26,22 +26,22 @@ public:
 
 	Bool	Create(const StaticString& vsPath, const StaticString& fsPath, const Char* header);
 
-	Bool	LinkUniform(const StaticString& name, Float32 val) const;
-	Bool	LinkUniform( const StaticString& name, const Float32* mat ) const;
-	Bool	LinkUniform( const StaticString& name, const glm::mat3& mat ) const;
-	Bool	LinkUniform( const StaticString& name, const glm::mat4& mat ) const;
-	Bool	LinkUniform(const StaticString& name, const glm::vec3& vec) const;
-	Bool	LinkUniform(const StaticString& name, const glm::vec4& vec) const;
-	Bool	LinkUniform( const StaticString& name, Int32 val ) const;
+	Bool	LinkUniform(const Char* name, Float32 val) const;
+	Bool	LinkUniform( const Char* name, const Float32* mat ) const;
+	Bool	LinkUniform( const Char* name, const glm::mat3& mat ) const;
+	Bool	LinkUniform( const Char* name, const glm::mat4& mat ) const;
+	Bool	LinkUniform(const Char* name, const glm::vec3& vec) const;
+	Bool	LinkUniform(const Char* name, const glm::vec4& vec) const;
+	Bool	LinkUniform( const Char* name, Int32 val ) const;
 
 	template< class TMetaContainer >
-	Bool	LinkUniform( const StaticString& name, const Float32* vec, UInt32 size ) const;
+	Bool	LinkUniform( const Char* name, const Float32* vec, UInt32 size ) const;
 
 	template<>
-	Bool	LinkUniform<Float32>( const StaticString& name, const Float32* list, UInt32 count ) const {
+	Bool	LinkUniform<Float32>( const Char* name, const Float32* list, UInt32 count ) const {
 		assert( m_Handle );
 
-		Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
+		Int32 loc = glGetUniformLocation( m_Handle, name );
 		glUniform1fv( loc, count, list );
 		Int32 errorCode = glGetError();
 		if( errorCode ) {

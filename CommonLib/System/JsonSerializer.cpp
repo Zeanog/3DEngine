@@ -1,9 +1,14 @@
 #include "JsonSerializer.h"
 
 #include "StackString.h"
+#include "StaticString.h"
 #include "File.h"
 
 namespace rapidjson {
+	Bool	LoadFrom(const StaticString& filePath, rapidjson::Document& outDoc) {
+		return LoadFrom(filePath.CStr(), outDoc);
+	}
+
 	Bool	LoadFrom(const Char* filePath, rapidjson::Document& outDoc) {
 		File file;
 		if (!file.Open(filePath, "r")) {

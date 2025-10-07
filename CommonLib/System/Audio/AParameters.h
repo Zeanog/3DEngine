@@ -14,13 +14,13 @@ public:
 		return sizeof(TSuper);
 	}
 
-	virtual Bool	UpdateFrom(const rapidjson::Value& reverbVal) {
-		if (!reverbVal.IsObject()) {
+	virtual Bool	UpdateFrom(const rapidjson::Value& value) {
+		if (!value.IsObject()) {
 			assert(0);
 			return false;
 		}
 
-		FOREACH_MEMBER(iter, reverbVal) {
+		FOREACH_MEMBER(iter, value) {
 			auto memberName = iter->name.GetString();
 			verify(Singleton<Reflector<TParameters>>::GetInstance()->Set(memberName, this, iter->value));
 		}

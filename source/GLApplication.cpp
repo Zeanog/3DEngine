@@ -162,9 +162,12 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 	}
 
 	if (keyboardState.KeyWasPressed(DIK_F4)) {
-		//Create SWF Window here
-		//flashEngine.AttachTo(m_hWnd);
-		//flashEngine.PlayMovie("Data/Car-speakers-590x90.swf");
+		if (!Singleton<AudioSystem>::GetInstance()->IsEffectEnabled("Music", 0)) {
+			Singleton<AudioSystem>::GetInstance()->EnableEffect("Music", 0);
+		}
+		else {
+			Singleton<AudioSystem>::GetInstance()->DisableEffect("Music", 0);
+		}
 	}
 }
 
@@ -467,38 +470,22 @@ void GLApplication::LoadAssets()
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
 
+	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects<ReverbParameters>("Data/TestReverb.json", "Music");
+
 	assert(doc["Music"].IsObject());
 	auto& musicValue = doc["Music"];
 	StaticString musicPath = musicValue.FindMember("Path")->value.GetString();
 
-	assert(doc["TestSound"].IsObject());
-	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
-	
-	////////////////////////////////
-	rapidjson::Document	reverbDoc;
-	verify(rapidjson::LoadFrom("Data/TestReverb.json", reverbDoc));
-	verify(reverbDoc.IsArray());
-	
-	verify(Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors("Fx", reverbDoc.Capacity()));
-
-	ReverbParameters	reverbParams;
-	std::size_t			index = 0;
-	FOREACH( iter, reverbDoc ) {
-		reverbParams.SetToDefault();
-		verify(reverbParams.UpdateFrom(*iter));
-		verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters("Fx", index, reverbParams));
-		verify(Singleton<AudioSystem>::GetInstance()->EnableEffect("Fx", index));
-	}
-	////////////////////////////////
-	
 	SourceVoice* selectedVoice{};
 	auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, selectedVoice);
-	selectedVoice->Volume(0.1f);
+	//selectedVoice->Volume(0.1f);
+
+	assert(doc["TestSound"].IsObject());
+	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
 
 	auto fxDuration = Singleton<AudioSystem>::GetInstance()->Play("Fx", soundPath, selectedVoice);
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
-	//m_Camera.Rotation(glm::eulerAngleXYZ(0.0f, MathUtils::Deg2Radians(90.0f), 0.0f));
 }
 
 #include "Shaders/ShaderProgramManager.h"

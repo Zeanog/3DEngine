@@ -37,10 +37,10 @@ Bool	ShaderProgram_GLSL::Create(const StaticString& vsPath, const StaticString& 
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, Float32 val) const {
+Bool ShaderProgram_GLSL::LinkUniform(const Char* name, Float32 val) const {
 	assert(m_Handle);
 
-	Int32 loc = glGetUniformLocation(m_Handle, name.CStr());
+	Int32 loc = glGetUniformLocation(m_Handle, name);
 	glUniform1f(loc, val);
 	Int32 errorCode = glGetError();
 	if (errorCode) {
@@ -50,10 +50,10 @@ Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, Float32 val) cons
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const Float32* mat ) const {
+Bool ShaderProgram_GLSL::LinkUniform( const Char* name, const Float32* mat ) const {
 	assert( m_Handle );
 
-	Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
+	Int32 loc = glGetUniformLocation( m_Handle, name );
 	glUniformMatrix4fvARB( loc, 1, false, mat );
 	Int32 errorCode = glGetError();
 	if( errorCode ) {
@@ -63,10 +63,10 @@ Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const Float32* m
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const glm::mat3& mat ) const {
+Bool ShaderProgram_GLSL::LinkUniform( const Char* name, const glm::mat3& mat ) const {
 	assert( m_Handle );
 
-	Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
+	Int32 loc = glGetUniformLocation( m_Handle, name );
 	glUniformMatrix3fvARB( loc, 1, false, glm::value_ptr(mat));
 	Int32 errorCode = glGetError();
 	if( errorCode ) {
@@ -76,10 +76,10 @@ Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const glm::mat3&
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const glm::mat4& mat ) const {
+Bool ShaderProgram_GLSL::LinkUniform( const Char* name, const glm::mat4& mat ) const {
 	assert( m_Handle );
 
-	Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
+	Int32 loc = glGetUniformLocation( m_Handle, name );
 	glUniformMatrix4fvARB( loc, 1, false, glm::value_ptr(mat));
 	Int32 errorCode = glGetError();
 	if( errorCode ) {
@@ -89,10 +89,10 @@ Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, const glm::mat4&
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, const glm::vec3& vec) const {
+Bool ShaderProgram_GLSL::LinkUniform(const Char* name, const glm::vec3& vec) const {
 	assert(m_Handle);
 
-	Int32 loc = glGetUniformLocation(m_Handle, name.CStr());
+	Int32 loc = glGetUniformLocation(m_Handle, name);
 	glUniform3f(loc, vec[0], vec[1], vec[2]);
 	Int32 errorCode = glGetError();
 	if (errorCode) {
@@ -102,10 +102,10 @@ Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, const glm::vec3& 
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, const glm::vec4& vec) const {
+Bool ShaderProgram_GLSL::LinkUniform(const Char* name, const glm::vec4& vec) const {
 	assert(m_Handle);
 
-	Int32 loc = glGetUniformLocation(m_Handle, name.CStr());
+	Int32 loc = glGetUniformLocation(m_Handle, name);
 	glUniform4f(loc, vec[0], vec[1], vec[2], vec[3]);
 	Int32 errorCode = glGetError();
 	if (errorCode) {
@@ -115,10 +115,10 @@ Bool ShaderProgram_GLSL::LinkUniform(const StaticString& name, const glm::vec4& 
 	return true;
 }
 
-Bool ShaderProgram_GLSL::LinkUniform( const StaticString& name, Int32 val ) const {
+Bool ShaderProgram_GLSL::LinkUniform( const Char* name, Int32 val ) const {
 	assert( m_Handle );
 
-	Int32 loc = glGetUniformLocation( m_Handle, name.CStr() );
+	Int32 loc = glGetUniformLocation( m_Handle, name );
 	Int32 errorCode = glGetError();
 	if (errorCode) {
 		const Char* errorMsg = glErrorString(errorCode);
