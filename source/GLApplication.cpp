@@ -380,6 +380,7 @@ void GLApplication::Release()
 #include <System/Audio/Sound.h>
 #include "System\Audio\ReverbParameters.h"
 
+#include "System/Reflector.h"
 #include "System/JsonSerializer.h"
 
 /**
@@ -472,18 +473,19 @@ void GLApplication::LoadAssets()
 
 	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects<ReverbParameters>("Data/TestReverb.json", "Music");
 
-	assert(doc["Music"].IsObject());
-	auto& musicValue = doc["Music"];
-	StaticString musicPath = musicValue.FindMember("Path")->value.GetString();
-
 	SourceVoice* selectedVoice{};
-	auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play("Music", musicPath, selectedVoice);
-	//selectedVoice->Volume(0.1f);
+
+	auto& musicValue = doc["Music"];
+	FOREACH(iter, musicValue) {
+		StaticString musicPath( iter->GetString() );
+		auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play(musicPath, "Music", selectedVoice);
+		//selectedVoice->Volume(0.1f);
+	}
 
 	assert(doc["TestSound"].IsObject());
-	StaticString soundPath = doc["TestSound"].FindMember("Path")->value.GetString();
+	StaticString soundPath( doc["TestSound"].FindMember("Path")->value.GetString() );
 
-	auto fxDuration = Singleton<AudioSystem>::GetInstance()->Play("Fx", soundPath, selectedVoice);
+	auto fxDuration = Singleton<AudioSystem>::GetInstance()->Play(soundPath, "Fx", selectedVoice);
 
 	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
 }

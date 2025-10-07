@@ -112,14 +112,14 @@ Bool AudioSystem::AddEffectDescriptors(const StaticString& categoryName, UInt32 
 	return true;
 }
 
-SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound& snd) {
+SourceVoice* AudioSystem::Play(const Sound& snd, const StaticString& categoryName) {
 	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
 	return voice;
 }
 
-SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound* snd) {
+SourceVoice* AudioSystem::Play(const Sound* snd, const StaticString& categoryName) {
 	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(voice->Start());
@@ -127,7 +127,7 @@ SourceVoice* AudioSystem::Play(const StaticString& categoryName, const Sound* sn
 }
 
 #include "System\Audio\Loaders\SoundManager.h"
-Float32 AudioSystem::Play(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice) {
+Float32 AudioSystem::Play(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice) {
 	auto snd = Singleton<SoundManager>::GetInstance()->Get(filePath);
 	if (!snd) {
 		return 0.0f;
@@ -138,7 +138,7 @@ Float32 AudioSystem::Play(const StaticString& categoryName, const StaticString& 
 	return snd->Duration();
 }
 
-Float32 AudioSystem::Submit(const StaticString& categoryName, const StaticString& filePath, SourceVoice*& outVoice) {
+Float32 AudioSystem::Submit(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice) {
 	auto snd = Singleton<SoundManager>::GetInstance()->Get(filePath);
 	if (!snd) {
 		return 0.0f;
@@ -161,7 +161,7 @@ void AudioSystem::StopAllVoices() {
 
 MasteringVoice* AudioSystem::CreateMasteringVoice() {
 	MasteringVoice* newVoice = new MasteringVoice();
-	newVoice->Init(m_Audio2);
+	verify(newVoice->Init(m_Audio2));
 	return newVoice;
 }
 
@@ -204,6 +204,10 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 	}
 
 	UInt64 hash = GenerateHash(format);
+	if (!categoryMap.Contains(hash)) {
+		return false;
+	}
+
 	auto& voiceList = categoryMap[hash];
 	if (voiceList.Length() <= 0) {
 		return false;
@@ -236,10 +240,20 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 	m_Voices.Add(voice);
 	m_VoiceToCategoryMap.Add(voice, voiceCategory);
 
+	voice->OnVoiceError.AddListener(this, &AudioSystem::OnVoiceErrorHandler);
 	voice->OnBufferStart.AddListener(this, &AudioSystem::OnBufferStartHandler);
 	voice->OnBufferEnd.AddListener(this, &AudioSystem::OnBufferEndHandler);
 
 	return voice->SetOutputTo(voiceCategory);
+}
+
+void AudioSystem::OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT result) {
+	std::lock_guard<std::mutex> guard(m_Mutex);
+
+	assert(context);
+	Sound* snd = (Sound*)context;
+
+	assert(0);
 }
 
 void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {

@@ -2,9 +2,10 @@
 	"Model": {
 		"Path": "Data/Cicada.fbx"
 	},
-	"Music": {
-		"Path": "Data/Sample-1.ogg"
-	},
+	"Music": [
+		"Data/that-s-the-way-it-is-music-travel-love-ft-bugoy-drilon.mp3",
+		"Data/5.1SurroundSoundTest.mp3"
+	],
 	"TestSound": {
 		"Path": "Data/baseball_hit.wav"
 	}

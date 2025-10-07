@@ -1,9 +1,11 @@
 #include "AudioLoader_MP3.h"
 #include "System/File.h"
 #include "System/List.h"
+#include "System/DataStructureLibrary.h"
 
 #define MINIMP3_IMPLEMENTATION
-#include <System/Audio/Loaders/MiniMP3/minimp3_ex.h>
+#include "System/Audio/Loaders/MiniMP3/minimp3_ex.h"
+
 #include <xaudio2.h>
 
 Bool AudioLoader_MP3::Load(const Char* fileName) {
@@ -15,12 +17,15 @@ Bool AudioLoader_MP3::Load(const Char* fileName) {
         return false;
     }
 
-    List<Byte> fileData;//TODO: Would be nice to use the DataStructureLibrary to avoid the allocation for each file
-    verify(file.ReadContents(fileData));
+    //I am hoping to avoid an allocation for each file load
+    List<Byte>* fileData = Singleton<DataStructureLibrary<List<Byte>>>::GetInstance()->CheckOut();
+    //fileData->Clear();
+    verify(file.ReadContents(*fileData));
 
     mp3dec_ex_t dec;
-    Byte* data = &fileData[0];
-    int error = mp3dec_ex_open_buf(&dec, data, fileData.Length(), MP3D_SEEK_TO_SAMPLE);
+    const Byte* data = &(*fileData)[0];
+    int error = mp3dec_ex_open_buf(&dec, data, fileData->Length(), MP3D_SEEK_TO_SAMPLE);
+    Singleton<DataStructureLibrary<List<Byte>>>::GetInstance()->Return(fileData);
     if (error) {
         return false;
     }
