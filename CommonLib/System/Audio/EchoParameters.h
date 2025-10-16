@@ -2,6 +2,7 @@
 
 #include "AParameters.h"
 
+#include <guiddef.h>
 #include <xapofx.h>
 
 template<>
@@ -19,13 +20,16 @@ public:
 
 /////////////////////////////////////////////
 
-class EchoParameters : public AParameters<FXECHO_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(EchoParameters, AParameters)
+struct EchoParameters : public AParameters<FXECHO_PARAMETERS> {
+	INHERITEDCLASS_TYPEDEFS(EchoParameters, AParameters<FXECHO_PARAMETERS>)
 
 public:
-	virtual void	SetToDefault() override {
-		WetDryMix = FXECHO_DEFAULT_WETDRYMIX;
-		Feedback = FXECHO_DEFAULT_FEEDBACK;
-		Delay = FXECHO_DEFAULT_DELAY;
+	static constexpr void	SetToDefault(FXECHO_PARAMETERS& params) {
+		params.WetDryMix = FXECHO_DEFAULT_WETDRYMIX;
+		params.Feedback = FXECHO_DEFAULT_FEEDBACK;
+		params.Delay = FXECHO_DEFAULT_DELAY;
 	}
+
+	static IUnknown* InstantiateFX();
+	static Bool UpdateParams(const StaticString& categoryName, UInt32 index, const rapidjson::Value& value);
 };

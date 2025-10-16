@@ -2,6 +2,7 @@
 
 #include "AParameters.h"
 
+#include <guiddef.h>
 #include <xaudio2fx.h>
 
 template<>
@@ -39,33 +40,36 @@ public:
 
 /////////////////////////////////////////////
 
-class ReverbParameters : public AParameters<XAUDIO2FX_REVERB_PARAMETERS> {
+struct ReverbParameters : public AParameters<XAUDIO2FX_REVERB_PARAMETERS> {
 	INHERITEDCLASS_TYPEDEFS(ReverbParameters, AParameters)
 
 public:
-	virtual void	SetToDefault() override {
-		WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
-		ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
-		ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
-		RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
-		PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-		PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-		PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-		PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-		EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
-		LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
-		LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-		LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
-		HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-		HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
-		RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
-		RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
-		RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
-		Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
-		ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
-		ReverbGain = XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
-		DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
-		RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
-		DisableLateField = FALSE;  // enable late reverb tail
+	static constexpr void	SetToDefault(XAUDIO2FX_REVERB_PARAMETERS& params) {
+		params.WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
+		params.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
+		params.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
+		params.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
+		params.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
+		params.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
+		params.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+		params.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+		params.EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
+		params.LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
+		params.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
+		params.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
+		params.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
+		params.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
+		params.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
+		params.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
+		params.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
+		params.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
+		params.ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
+		params.ReverbGain = XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
+		params.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
+		params.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
+		params.DisableLateField = FALSE;  // enable late reverb tail
 	}
+
+	static IUnknown* InstantiateFX();
+	static Bool UpdateParams(const StaticString& categoryName, UInt32 index, const rapidjson::Value& value);
 };

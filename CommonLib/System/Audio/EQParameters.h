@@ -2,6 +2,7 @@
 
 #include "AParameters.h"
 
+#include <guiddef.h>
 #include <xapofx.h>
 
 template<>
@@ -28,22 +29,25 @@ public:
 
 /////////////////////////////////////////////
 
-class EQParameters : public AParameters<FXEQ_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(EQParameters, AParameters)
+struct EQParameters : public AParameters<FXEQ_PARAMETERS> {
+	INHERITEDCLASS_TYPEDEFS(EQParameters, AParameters<FXEQ_PARAMETERS>)
 
 public:
-	virtual void	SetToDefault() override {
-		FrequencyCenter0 = FXEQ_DEFAULT_FREQUENCY_CENTER_0;
-		Gain0 = FXEQ_DEFAULT_GAIN;
-		Bandwidth0 = FXEQ_DEFAULT_BANDWIDTH;
-		FrequencyCenter1 = FXEQ_DEFAULT_FREQUENCY_CENTER_1;
-		Gain1 = FXEQ_DEFAULT_GAIN;
-		Bandwidth1 = FXEQ_DEFAULT_BANDWIDTH;
-		FrequencyCenter2 = FXEQ_DEFAULT_FREQUENCY_CENTER_2;
-		Gain2 = FXEQ_DEFAULT_GAIN;
-		Bandwidth2 = FXEQ_DEFAULT_BANDWIDTH;
-		FrequencyCenter3 = FXEQ_DEFAULT_FREQUENCY_CENTER_3;
-		Gain3 = FXEQ_DEFAULT_GAIN;
-		Bandwidth3 = FXEQ_DEFAULT_BANDWIDTH;
+	static constexpr void	SetToDefault(FXEQ_PARAMETERS& params) {
+		params.FrequencyCenter0 = FXEQ_DEFAULT_FREQUENCY_CENTER_0;
+		params.Gain0 = FXEQ_DEFAULT_GAIN;
+		params.Bandwidth0 = FXEQ_DEFAULT_BANDWIDTH;
+		params.FrequencyCenter1 = FXEQ_DEFAULT_FREQUENCY_CENTER_1;
+		params.Gain1 = FXEQ_DEFAULT_GAIN;
+		params.Bandwidth1 = FXEQ_DEFAULT_BANDWIDTH;
+		params.FrequencyCenter2 = FXEQ_DEFAULT_FREQUENCY_CENTER_2;
+		params.Gain2 = FXEQ_DEFAULT_GAIN;
+		params.Bandwidth2 = FXEQ_DEFAULT_BANDWIDTH;
+		params.FrequencyCenter3 = FXEQ_DEFAULT_FREQUENCY_CENTER_3;
+		params.Gain3 = FXEQ_DEFAULT_GAIN;
+		params.Bandwidth3 = FXEQ_DEFAULT_BANDWIDTH;
 	}
+
+	static IUnknown* InstantiateFX();
+	static Bool UpdateParams(const StaticString& categoryName, UInt32 index, const rapidjson::Value& value);
 };

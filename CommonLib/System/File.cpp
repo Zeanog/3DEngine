@@ -4,6 +4,8 @@
 Bool File::ReadContents(List<Byte>& outContents) {
 	assert(IsOpen());
 
+	errno = 0;//Reset the error num
+
 	outContents.EnsureSize(Length());
 	UInt32 numElementsRead = fread_s((void*)&outContents[0], outContents.Length(), 1, outContents.Length(), m_File);
 	outContents.Resize(numElementsRead);//I have seen it load extra stuff to the end when loading JSON.  We need to resize to correct lenth

@@ -471,7 +471,7 @@ void GLApplication::LoadAssets()
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
 
-	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects<ReverbParameters>("Data/TestReverb.json", "Music");
+	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects("Data/TestReverb.json", "Music");
 
 	SourceVoice* selectedVoice{};
 

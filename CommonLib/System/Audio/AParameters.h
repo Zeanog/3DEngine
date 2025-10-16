@@ -4,17 +4,11 @@
 #include "System/Reflector.h"
 
 template<typename TParameters>
-class AParameters : public TParameters  {
-	INHERITEDCLASS_TYPEDEFS( AParameters, TParameters )
+struct AParameters {
+	CLASS_TYPEDEFS(AParameters)
 
 public:
-	virtual void	SetToDefault() = 0;
-
-	constexpr UInt64	Sizeof() const {
-		return sizeof(TSuper);
-	}
-
-	virtual Bool	UpdateFrom(const rapidjson::Value& value) {
+	static Bool	UpdateFrom(TParameters* params, const rapidjson::Value& value) {
 		if (!value.IsObject()) {
 			assert(0);
 			return false;
@@ -22,7 +16,7 @@ public:
 
 		FOREACH_MEMBER(iter, value) {
 			auto memberName = iter->name.GetString();
-			verify(Singleton<Reflector<TParameters>>::GetInstance()->Set(memberName, this, iter->value));
+			verify(Singleton<Reflector<TParameters>>::GetInstance()->Set(memberName, params, iter->value));
 		}
 		return true;
 	}

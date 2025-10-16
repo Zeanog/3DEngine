@@ -3,6 +3,8 @@
 #include "AVoice.h"
 #include <xaudio2.h>
 
+#include "System/Win32/Error.h"
+
 template<typename TVoiceInterface>
 class ASourceVoice : public AVoice {
 	INHERITEDCLASS_TYPEDEFS(ASourceVoice, AVoice)
@@ -40,7 +42,7 @@ public:
 
 	virtual Bool Volume(Float32 newVolume) const {
 		assert(m_Voice);
-		return SUCCEEDED(m_Voice->SetVolume(newVolume));
+		return SUCCEEDED(m_Voice->SetVolume(newVolume, XAUDIO2_COMMIT_NOW));
 	}
 
 	virtual Bool			Volume(Float32 newVolume, UInt32 operationSet) const {
@@ -70,6 +72,7 @@ public:
 	virtual Bool SetEffectChain(const XAUDIO2_EFFECT_CHAIN& chain) {
 		assert(m_Voice);
 		auto result = m_Voice->SetEffectChain(&chain);
+		assert(SUCCEEDED(result));
 		return SUCCEEDED(result);
 	}
 
@@ -94,13 +97,18 @@ public:
 	}
 
 	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		assert(m_Voice);
-		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U));
+		return SetEffectParameters(index, parameterData, parameterDataByteSize, XAUDIO2_COMMIT_NOW);
 	}
 
 	virtual Bool SetEffectParameters(UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
 		assert(m_Voice);
-		return SUCCEEDED(m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet));
+		const Char* msg{};
+
+		auto result = m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
+		if (FAILED(result)) {
+			msg = GetErrorMessage(result);
+		}
+		return SUCCEEDED(result);
 	}
 
 	virtual Bool GetEffectParameters(UInt32 index, void* outParameterData, UInt32& outParameterDataByteSize) {
@@ -116,7 +124,7 @@ public:
 	}
 
 	Bool EnableEffect(UInt32 index) {
-		return EnableEffect(index, 0U);
+		return EnableEffect(index, XAUDIO2_COMMIT_NOW);
 	}
 
 	Bool EnableEffect(UInt32 index, UInt32 operationSet) {
@@ -126,7 +134,7 @@ public:
 	}
 
 	Bool DisableEffect(UInt32 index) {
-		return DisableEffect(index, 0U);
+		return DisableEffect(index, XAUDIO2_COMMIT_NOW);
 	}
 
 	Bool DisableEffect(UInt32 index, UInt32 operationSet) {
