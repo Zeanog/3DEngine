@@ -4,6 +4,10 @@
 #include "MasteringVoice.h"
 #include "SourceVoice.h"
 #include "SubmixVoice.h"
+#include "EchoParameters.h"
+#include "ReverbParameters.h"
+#include "EQParameters.h"
+#include "System/DataStructureLibrary.h"
 
 #include <cstdint>
 #include <limits>
@@ -17,6 +21,10 @@ Bool AudioSystem::Init() {
 	}
 
 	m_MasteringVoice = CreateMasteringVoice();
+
+	m_FxNameToInfoMap.Add("Reverb", { ReverbParameters::InstantiateFX, ReverbParameters::UpdateParams });
+	m_FxNameToInfoMap.Add("Echo", { EchoParameters::InstantiateFX, EchoParameters::UpdateParams });
+	m_FxNameToInfoMap.Add("EQ", { EQParameters::InstantiateFX, EQParameters::UpdateParams });
 	return true;
 }
 
@@ -92,26 +100,6 @@ UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 	return val;
 }
 
-#include "xaudio2fx.h"
-Bool AudioSystem::AddEffectDescriptors(const StaticString& categoryName, UInt32 numDescriptors) {
-	XAUDIO2_EFFECT_DESCRIPTOR* effectDescriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, numDescriptors);
-
-	auto category = GetCategory(categoryName);
-	for (UInt32 ix = 0; ix < numDescriptors; ++ix) {
-		IUnknown* pReverbEffect{};
-		verify(SUCCEEDED(XAudio2CreateReverb(&pReverbEffect)));
-		effectDescriptors[ix] = { pReverbEffect, true, category->NumChannels() };
-	}
-
-	verify(category->SetEffectDescriptors(effectDescriptors, numDescriptors));
-
-	for (UInt32 ix = 0; ix < numDescriptors; ++ix) {
-		effectDescriptors[ix].pEffect->Release();
-	}
-
-	return true;
-}
-
 SourceVoice* AudioSystem::Play(const Sound& snd, const StaticString& categoryName) {
 	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
@@ -157,6 +145,66 @@ void AudioSystem::StopAllVoices() {
 			}
 		}
 	}
+}
+
+Bool AudioSystem::SetEffectDescriptors(const StaticString& categoryName, const Char** fxNames, UInt32 numFx) {
+	__try {
+		auto descriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, numFx);
+		XAUDIO2_EFFECT_CHAIN chain{ numFx, descriptors };
+		IUnknown* pEffect{};
+		auto category = GetCategory(categoryName);
+
+		for (UInt32 ix = 0; ix < numFx; ++ix) {
+			auto name = fxNames[ix];
+			auto info = &m_FxNameToInfoMap[name];
+			pEffect = info->CreateFX();
+			assert(pEffect);
+			descriptors[ix] = { pEffect, false, category->NumChannels() };
+			pEffect = nullptr;
+		}
+
+		Bool result = category->SetEffectChain(&chain);
+		assert(result);
+		verify(CommitChanges(XAUDIO2_COMMIT_NOW));
+
+		for (UInt32 ix = 0; ix < numFx; ++ix) {
+			assert(descriptors[ix].pEffect);
+			verify(descriptors[ix].pEffect->Release() > 0);
+		}
+
+		return result;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+}
+
+Bool AudioSystem::IsEffectEnabled(const StaticString& categoryName, UInt32 index) {
+	return GetCategory(categoryName)->IsEffectEnabled(index);
+}
+
+Bool AudioSystem::EnableEffect(const StaticString& categoryName, UInt32 index) {
+	return GetCategory(categoryName)->EnableEffect(index);
+}
+
+Bool AudioSystem::EnableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
+	return GetCategory(categoryName)->EnableEffect(index, operationSet);
+}
+
+Bool AudioSystem::DisableEffect(const StaticString& categoryName, UInt32 index) {
+	return GetCategory(categoryName)->DisableEffect(index);
+}
+
+Bool AudioSystem::DisableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
+	return GetCategory(categoryName)->DisableEffect(index, operationSet);
+}
+
+Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
+	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
+}
+
+Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
+	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
 }
 
 MasteringVoice* AudioSystem::CreateMasteringVoice() {
@@ -212,7 +260,7 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 	if (voiceList.Length() <= 0) {
 		return false;
 	}
-	
+
 	FOREACH_CONST_R(iter, voiceList) {
 		auto v = *iter;
 		if (!v->IsPlaying()) {
@@ -286,6 +334,14 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	voiceList.Add(voice);
 };
 
+//Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
+//	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
+//}
+//
+//Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
+//	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
+//}
+
 //#include "System/DataStructureLibrary.h"
 
 void AudioSystem::ReloadAssets() {
@@ -312,4 +368,49 @@ void AudioSystem::ReloadAssets() {
 	//}
 
 	//Singleton<DataStructureLibrary<List<SourceVoice*>>>::GetInstance()->Return(playingVoices);
+}
+
+UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& catgegoryName) {
+	try {
+		rapidjson::Document	doc;
+		if (!rapidjson::LoadFrom(path, doc)) {
+			assert(0);
+			return 0;
+		}
+
+		if (!doc.IsArray()) {
+			assert(0);
+			return 0;
+		}
+
+		Byte	index = 0;
+		auto	numFx = doc.Size();
+		auto	fxNames = STACK_ALLOC(const Char*, numFx);
+
+		FOREACH(fxIter, doc) {
+			auto&& memberIter = fxIter->FindMember("Type");
+			assert(index < numFx);
+			fxNames[index++] = memberIter->value.GetString();
+		}
+		assert(numFx == index);
+
+		verify(SetEffectDescriptors(catgegoryName, fxNames, (UInt32)numFx));
+
+		index = 0;
+		FOREACH(fxIter, doc) {
+			auto&& paramsIter = fxIter->FindMember("Params");
+			assert(index < numFx);
+			auto fxInfo = &m_FxNameToInfoMap[fxNames[index]];
+			assert(fxInfo);
+			fxInfo->Update(catgegoryName, index, paramsIter->value);
+			++index;
+		}
+
+		//verify(CommitChanges(XAUDIO2_COMMIT_NOW));
+
+		return index;//Return number of effects loaded
+	}
+	catch (...) {
+		return 0;
+	}
 }

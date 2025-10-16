@@ -437,6 +437,15 @@
     <ClCompile Include="System\File.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="System\Audio\ReverbParameters.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\EQParameters.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Audio\EchoParameters.cpp">
+      <Filter>System\Audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

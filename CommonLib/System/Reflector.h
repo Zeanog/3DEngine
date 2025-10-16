@@ -206,7 +206,7 @@ class IValueParser {
 	CLASS_TYPEDEFS(IValueParser)
 
 public:
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) const = 0;
+	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) const = 0;
 };
 
 template<typename _TValue>
@@ -217,11 +217,11 @@ public:
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const = 0;
 
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) const override {
+	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) const override {
 		assert(sizeof(TValue) == size);
 		TValue val{};
 		Get(src, val);
-		memcpy_s(dest, size, &val, size);
+		(*(TValue*)dest) = val;
 		//TODO: Known Issue - If this is an object that contains a pointer(aka List, etc...) this may cause some memory issues.
 	}
 };
@@ -251,7 +251,7 @@ public:
 		}
 	}
 
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) override {
 		assert(dest);
 		//assert(sizeof(TValue) == size);
 		//TODO: Possibly use size
@@ -281,7 +281,7 @@ public:
 		}
 	}
 
-	virtual void Copy(const rapidjson::Value& src, void* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) override {
 		assert(dest);
 		//assert(sizeof(TValue) == size);
 		//TODO: Possibly use size
@@ -426,7 +426,9 @@ public:
 		}
 
 		auto& info = m_MemberInfoMap[memberName];
-		void* memberAddr = (void*)((Byte*)obj + info.Offset);
+		Byte* objPtr = (Byte*)obj;
+		auto memberAddr = objPtr + info.Offset;
+		assert(info.Offset == (memberAddr - objPtr));
 		info.Parser->Copy(memberValue, memberAddr, info.Size);
 		return true;
 	}

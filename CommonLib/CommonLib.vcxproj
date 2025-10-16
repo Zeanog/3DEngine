@@ -134,12 +134,15 @@
     <ClCompile Include="Shaders\ShaderProgramManager.cpp" />
     <ClCompile Include="Shaders\ShaderProgram_GLSL.cpp" />
     <ClCompile Include="Shaders\Shader_GLSL.cpp" />
+    <ClCompile Include="System\Audio\EchoParameters.cpp" />
+    <ClCompile Include="System\Audio\EQParameters.cpp" />
     <ClCompile Include="System\Audio\Loaders\AudioLoader_MP3.cpp" />
     <ClCompile Include="System\Audio\Loaders\AudioLoader_OggVorbis.cpp" />
     <ClCompile Include="System\Audio\Loaders\AudioLoader_RIFF.cpp" />
     <ClCompile Include="System\Audio\Loaders\SoundManager.cpp" />
     <ClCompile Include="System\Audio\MasteringVoice.cpp" />
     <ClCompile Include="System\Audio\AudioSystem.cpp" />
+    <ClCompile Include="System\Audio\ReverbParameters.cpp" />
     <ClCompile Include="System\Audio\Sound.cpp" />
     <ClCompile Include="System\Audio\SourceVoice.cpp" />
     <ClCompile Include="System\Audio\SourceVoiceCallbacks.cpp" />

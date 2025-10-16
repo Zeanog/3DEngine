@@ -5,14 +5,15 @@
 #include "System\List.h"
 #include "System\LinkedList.h"
 #include "System\Map.h"
-#include "SubmixVoice.h"
 
 #include <mutex>
 #include <xaudio2.h>
 
+
 class AVoice;
 class MasteringVoice;
 class SourceVoice;
+class SubmixVoice;
 class Sound;
 
 class AudioSystem {
@@ -35,6 +36,12 @@ protected:
 
 	Map<StaticString, SubmixVoice*>			m_CategoryNameToVoiceMap{};
 	Map<SubmixVoice*, StaticString>			m_VoiceToCategoryNameMap{};
+
+	struct FXInfo {
+		Functor<IUnknown*>	CreateFX;
+		Functor<Bool, TYPELIST_3(const StaticString&, UInt32, const rapidjson::Value&)>	Update;
+	};
+	Map<StaticString, FXInfo>				m_FxNameToInfoMap;
 
 	static std::mutex						m_Mutex;
 
@@ -77,52 +84,57 @@ public:
 
 	void StopAllVoices();
 
-	template<typename... Effects>
-	Bool AddEffectDescriptors(const StaticString& categoryName, Effects... effects) {
-		static constexpr UINT32 NumDescriptors = sizeof...(Effects);
-		XAUDIO2_EFFECT_DESCRIPTOR descriptors[NumDescriptors];
+	Bool SetEffectDescriptors(const StaticString& categoryName, const Char** fxNames, UInt32 numFx);
+
+	/*Bool SetEffectDescriptors(const StaticString& categoryName, const List<const Char*>& fxNames) {
+		XAUDIO2_EFFECT_DESCRIPTOR* descriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, fxNames.Length());
+
+		auto category = GetCategory(categoryName);
+
+		IUnknown* pEffect{};
+		for (UInt32 ix = 0; ix < fxNames.Length(); ++ix) {
+			auto& info = m_FxNameToInfoMap[fxNames[ix]];
+			verify(SUCCEEDED(CreateFX(info.Guid, &pEffect)));
+			descriptors[ix] = { pEffect, true, category->NumChannels() };
+		}
+
+		return category->SetEffectDescriptors(descriptors, fxNames.Length());
+	}*/
+
+	/*template<typename... FXGUIDS>
+	Bool SetEffectDescriptors(const StaticString& categoryName, const FXGUIDS&... fxGuids) {
+		static constexpr UINT32 NumDescriptors = sizeof...(FXGUIDS);
+		XAUDIO2_EFFECT_DESCRIPTOR effectDescriptors[NumDescriptors];
+		IUnknown* pEffect{};
 
 		auto category = GetCategory(categoryName);
 
 		std::size_t i = 0;
-		std::initializer_list<int>{
-			(descriptors[i++] = { effects, true, category->NumChannels() }, 0)...
+		std::initializer_list<int>{(
+				verify(SUCCEEDED(CreateFX(fxGuids, &pEffect))),
+				effectDescriptors[i++] = {pEffect, true, category->NumChannels()}
+			, 0)...
 		};
 
-		return category->SetEffectDescriptors(descriptors, NumDescriptors);
-	}
+		verify(category->SetEffectDescriptors(effectDescriptors, NumDescriptors));
 
-	Bool AddEffectDescriptors(const StaticString& categoryName, UInt32 numDescriptors);
+		i = 0;
+		std::initializer_list<int>{
+			(fxGuids, effectDescriptors[i++].pEffect->Release(), 0)...
+		};
 
-	Bool			IsEffectEnabled(const StaticString& categoryName, UInt32 index) {
-		return GetCategory(categoryName)->IsEffectEnabled(index);
-	}
+		return true;
+	}*/
 
-	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index) {
-		return GetCategory(categoryName)->EnableEffect(index);
-	}
+	Bool			IsEffectEnabled(const StaticString& categoryName, UInt32 index);
 
-	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
-		return GetCategory(categoryName)->EnableEffect(index, operationSet);
-	}
+	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index);
 
-	virtual Bool	DisableEffect(const StaticString& categoryName, UInt32 index) {
-		return GetCategory(categoryName)->DisableEffect(index);
-	}
+	virtual Bool	EnableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet);
 
-	virtual Bool	DisableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
-		return GetCategory(categoryName)->DisableEffect(index, operationSet);
-	}
+	virtual Bool	DisableEffect(const StaticString& categoryName, UInt32 index);
 
-	template<typename TParameters>
-	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params) {
-		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), 0U);
-	}
-
-	template<typename TParameters>
-	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const TParameters& params, UInt32 operationSet) {
-		return GetCategory(categoryName)->SetEffectParameters(index, &params, params.Sizeof(), operationSet);
-	}
+	virtual Bool	DisableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet);
 
 	template<typename TParameters>
 	Bool GetEffectParameters(const StaticString& categoryName, UInt32 index, TParameters& params) {
@@ -132,45 +144,11 @@ public:
 		return result;
 	}
 
-	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
-	}
+	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize);
 
-	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-		return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
-	}
+	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet);
 
 	void ReloadAssets();
 
-	template<typename TEffect>
-	UInt32	LoadEffects(const StaticString& path, const StaticString& catgegoryName) {
-		rapidjson::Document	doc;
-		if (!rapidjson::LoadFrom(path, doc)) {
-			assert(0);
-			return 0;
-		}
-
-		if (!doc.IsArray()) {
-			assert(0);
-			return 0;
-		}
-
-		verify(Singleton<AudioSystem>::GetInstance()->AddEffectDescriptors(catgegoryName, doc.Capacity()));
-
-		TEffect	params;
-		std::size_t			index = 0;
-		FOREACH(iter, doc) {
-			params.SetToDefault();
-			if (!params.UpdateFrom(*iter)) {
-				assert(0);
-				return false;
-			}
-
-			verify(Singleton<AudioSystem>::GetInstance()->SetEffectParameters(catgegoryName, index, params));
-			verify(Singleton<AudioSystem>::GetInstance()->EnableEffect(catgegoryName, index));
-			++index;
-		}
-
-		return index;//Return number of effects loaded
-	}
+	UInt32	LoadEffects(const StaticString& path, const StaticString& catgegoryName);
 };
