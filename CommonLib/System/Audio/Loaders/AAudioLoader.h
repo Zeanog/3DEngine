@@ -7,12 +7,15 @@
 #include <xaudio2.h>
 #include <memory>
 
-class AudioLoader {
+class AAudioLoader {
 protected:
 	std::unique_ptr<Byte>	m_AudioData;
-	UInt32					m_AudioDataSize;
+	UInt32					m_AudioDataSize{};
 
 	WAVEFORMATEXTENSIBLE	m_Format{};
+
+protected:
+	AAudioLoader() {}
 
 public:
 	virtual Bool	Load(const Char* fileName) = 0;

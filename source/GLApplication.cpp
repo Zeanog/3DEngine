@@ -1,7 +1,7 @@
 #include <windows.h>
 #include "GLApplication.h"
 #include "Model/SphereModel.h"
-#include "Model/CubeModel.h"
+//#include "Model/CubeModel.h"
 #include "Model/PlaneModel.h"
 
 #include "System/Typedefs.h"
@@ -13,14 +13,11 @@
 
 #include "System/Input/InputSystem.h"
 #include "System/Audio/AudioSystem.h"
-#include "System\Audio\SubmixVoice.h"
-#include "System/Configuration.h"
+//#include "System\Audio\SubmixVoice.h"
+//#include "System/Configuration.h"
 #include "Math/MathUtils.h"
 #include "Lighting/LightPool.h"
 #include "System/Win32/Window.h"
-
-Int64		xMousePrev = 0;
-Int64		yMousePrev = 0;
 
 CComModule	_module;
 
@@ -190,18 +187,6 @@ void GLApplication::SetSize(int w, int h)
 	glLoadIdentity();
 }
 
-bool		lButtonState = false;
-void GLApplication::StartRotateCamera(Int64 x, Int64 y) {
-	xMousePrev = x;
-	yMousePrev = y;
-
-	lButtonState = true;
-}
-
-void GLApplication::StopRotateCamera(Int64 x, Int64 y) {
-	lButtonState = false;
-}
-
 void GLApplication::RotateCamera(Int64 deltaX, Int64 deltaY) {
 	m_Camera.Rotate(deltaY * m_DeltaTime * 1.0f, deltaX * m_DeltaTime * 1.0f, 0.0f);
 }
@@ -223,7 +208,7 @@ void GLApplication::Update()
 
 	m_Camera.Update(m_DeltaTime);
 
-	if (m_PrevModels.size() >= 1) {
+	if (m_PrevModels.Length() >= 1) {
 		m_PrevModels[0]->Rotate(m_DeltaTime, m_DeltaTime, 0);
 	}
 
@@ -245,19 +230,19 @@ void GLApplication::Update()
 	t[3] = glm::vec4((*iter)->Position(), 1.0f);
 	(*iter)->Transform(t);
 
-	if (m_Models.size() >= 1) {
+	if (m_Models.Length() >= 1) {
 		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
 	}
 
-	if (m_Models.size() >= 2) {
+	if (m_Models.Length() >= 2) {
 		m_Models[1]->Rotation(glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[1]->Rotation());
 	}
 
-	for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
+	for (UInt32 i = 0; i < m_PrevModels.Length(); ++i) {
 		m_Bounds += m_PrevModels[i]->GetBounds();
 	}
 	
-	for (UInt32 i = 0; i < m_Models.size(); ++i) {
+	for (UInt32 i = 0; i < m_Models.Length(); ++i) {
 		m_Bounds += m_Models[i]->GetBounds();
 	}
 }
@@ -265,11 +250,11 @@ void GLApplication::Update()
 #define CAST_SHADOWS 1
 
 void GLApplication::RenderModels(const ShaderProgram_GLSL& program) {
-	for (UInt32 i = 0; i < m_PrevModels.size(); ++i) {
+	for (UInt32 i = 0; i < m_PrevModels.Length(); ++i) {
 		m_PrevModels[i]->render(program);
 	}
 
-	for (UInt32 i = 0; i < m_Models.size(); ++i) {
+	for (UInt32 i = 0; i < m_Models.Length(); ++i) {
 		m_Models[i]->Render(program);
 	}
 }
@@ -376,11 +361,8 @@ void GLApplication::Release()
 }
 
 #include "Rendering/ModelLoaders/MeshManager.h"
-#include <System/Audio/SourceVoice.h>
-#include <System/Audio/Sound.h>
-#include "System\Audio\ReverbParameters.h"
-
-#include "System/Reflector.h"
+#include "System/Audio/SourceVoice.h"
+#include "System/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
 #include "System/JsonSerializer.h"
 
 /**
@@ -411,7 +393,7 @@ void GLApplication::LoadAssets()
 	IModel* m = NULL;
 
 	m = new SphereModel(1, 64);
-	m_PrevModels.push_back(m);
+	m_PrevModels.Add(m);
 	m->LoadImage(StaticString("data/125881.tga"));
 	m->Position(2, 2.5f, 0);
 
@@ -422,12 +404,12 @@ void GLApplication::LoadAssets()
 	m->setRotation( 0.0f, 0.0f, 0.0f );*/
 
 	m = new PlaneModel(5);
-	m_PrevModels.push_back(m);
+	m_PrevModels.Add(m);
 	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(0, 0, 0);
 
 	m = new PlaneModel(5);
-	m_PrevModels.push_back(m);
+	m_PrevModels.Add(m);
 	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(7, 2.5, 0);
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
@@ -454,7 +436,7 @@ void GLApplication::LoadAssets()
 #if CAST_SHADOWS
 	spotLight->CastsShadows(true);
 #endif
-	m_Lights.push_back(spotLight);
+	m_Lights.Add(spotLight);
 
 	Model* model = NULL;
 
@@ -466,12 +448,12 @@ void GLApplication::LoadAssets()
 	StaticString modelPath = docVal.FindMember("Path")->value.GetString();
 	model = new Model(modelPath.CStr());
 	model->Position(glm::vec3(-2, 2.5f, 0));
-	m_Models.push_back(model);
+	m_Models.Add(model);
 
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
 	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
 
-	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects("Data/TestReverb.json", "Music");
+	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects("Data/TestReverb.json", "Fx");
 
 	SourceVoice* selectedVoice{};
 

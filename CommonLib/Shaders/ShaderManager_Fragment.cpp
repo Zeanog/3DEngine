@@ -7,8 +7,8 @@ ShaderManager_Fragment::~ShaderManager_Fragment() {
 }
 
 const ShaderManager_Fragment::TAsset*	ShaderManager_Fragment::Get(const StaticString& path, const Char* header) {
-	TAsset* asset = m_Container.Find(path);
-	if (asset) {
+	TAsset* asset{};
+	if (m_Container.Find(path, asset)) {
 		return asset;
 	}
 

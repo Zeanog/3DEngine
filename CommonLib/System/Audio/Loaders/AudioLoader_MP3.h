@@ -1,8 +1,8 @@
 #pragma once
 
-#include "AudioLoader.h"
+#include "AAudioLoader.h"
 
-class AudioLoader_MP3 : public AudioLoader {
+class AudioLoader_MP3 : public AAudioLoader {
 protected:
 	typedef int16_t	TData;
 

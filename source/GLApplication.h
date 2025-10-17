@@ -42,10 +42,7 @@ public:
 	void	Render();
 	void	Release();
 
-	void    StartRotateCamera(Int64 x, Int64 y);
-	void    StopRotateCamera(Int64 x, Int64 y);
 	void    RotateCamera(Int64 x, Int64 y);
-
 	void	TranslateCamera(Float32 x, Float32 y, Float32 z);
 
 	void	showDeferredRendering(){ m_state = 0; }
@@ -64,16 +61,16 @@ protected:
 	CameraInterpolator				m_Camera;
 
 	// Fields
-	std::vector<IModel*> m_PrevModels{};
-	Neo::Bounds			m_Bounds{};
-	std::vector<Model*> m_Models{};
+	List<IModel*> m_PrevModels{};
+	Neo::Bounds	m_Bounds{};
+	List<Model*> m_Models{};
 
 	Functor<void>		OnRenderShadows;
 
 	DeferredRendering* m_deferredRendering{};
 	FrameBufferObject* m_multipleRenderTarget{};
 
-	std::vector<ALight*>	m_Lights{};
+	List<ALight*>	m_Lights{};
 	ShaderProgram_GLSL 	m_RenderModelProgram;
 
 	ShaderProgram_GLSL 	m_LightingProgram_Directional;

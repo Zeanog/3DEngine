@@ -38,8 +38,8 @@ protected:
 	Map<SubmixVoice*, StaticString>			m_VoiceToCategoryNameMap{};
 
 	struct FXInfo {
-		Functor<IUnknown*>	CreateFX;
-		Functor<Bool, TYPELIST_3(const StaticString&, UInt32, const rapidjson::Value&)>	Update;
+		Functor<IUnknown*>															CreateFX;
+		Functor<Bool, TYPELIST_3(SubmixVoice*, UInt32, const rapidjson::Value&)>	Update;
 	};
 	Map<StaticString, FXInfo>				m_FxNameToInfoMap;
 
@@ -75,7 +75,7 @@ public:
 	virtual Bool	Init();
 	virtual void	Destroy();
 
-	Bool		AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
+	SubmixVoice*		AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
 
 	SourceVoice* Play(const Sound& snd, const StaticString& categoryName);
 	SourceVoice* Play(const Sound* snd, const StaticString& categoryName);
@@ -85,6 +85,7 @@ public:
 	void StopAllVoices();
 
 	Bool SetEffectDescriptors(const StaticString& categoryName, const Char** fxNames, UInt32 numFx);
+	Bool SetEffectDescriptors(SubmixVoice* category, const Char** fxNames, UInt32 numFx);
 
 	/*Bool SetEffectDescriptors(const StaticString& categoryName, const List<const Char*>& fxNames) {
 		XAUDIO2_EFFECT_DESCRIPTOR* descriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, fxNames.Length());
@@ -138,17 +139,23 @@ public:
 
 	template<typename TParameters>
 	Bool GetEffectParameters(const StaticString& categoryName, UInt32 index, TParameters& params) {
+		return GetEffectParameters(GetCategory(categoryName), index, params);
+	}
+
+	template<typename TParameters>
+	Bool GetEffectParameters(SubmixVoice* category, UInt32 index, TParameters& params) {
 		UInt32 outSize{};
-		auto result = GetCategory(categoryName)->GetEffectParameters(index, &params, outSize);
+		assert(category);
+		auto result = category->GetEffectParameters(index, &params, outSize);
 		assert(params.SizeOf() == outSize);
 		return result;
 	}
 
-	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize);
-
-	virtual Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet);
+	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize);
+	Bool SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet);
 
 	void ReloadAssets();
 
-	UInt32	LoadEffects(const StaticString& path, const StaticString& catgegoryName);
+	UInt32	LoadEffects(const StaticString& path, const StaticString& categoryName);
+	UInt32	LoadEffects(const StaticString& path, SubmixVoice* category);
 };

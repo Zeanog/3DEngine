@@ -16,7 +16,11 @@ public:
 
 	Bool			GetValue(const StaticString& key, const Char*& outValue) const {
 		try {
-			outValue = m_KeyValues.Find(key).CStr();
+			StaticString value;
+			if (!m_KeyValues.Find(key, value)) {
+				return false;
+			}
+			outValue = value.CStr();
 			return true;
 		}
 		catch (...) {

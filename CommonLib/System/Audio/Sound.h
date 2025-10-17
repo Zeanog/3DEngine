@@ -5,7 +5,7 @@
 #include <memory>
 
 class SourceVoice;
-class AudioLoader;
+class AAudioLoader;
 
 class Sound {
 protected:
@@ -27,5 +27,5 @@ public:
 		return &m_Buffer;
 	}
 
-	Bool	UploadData(AudioLoader& loader);
+	Bool	UploadData(AAudioLoader& loader);
 };

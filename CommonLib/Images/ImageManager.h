@@ -9,12 +9,12 @@ class ImageManager {
 
 public:
 	typedef AssetManager<Neo::Image>	TContainer;
-	typedef std::map<StaticString, ImageLoader*>	THandlerContainer;
+	typedef Map<StaticString, ImageLoader*>	THandlerContainer;
 
 protected:
 	TContainer			m_Images;
 
-	THandlerContainer	m_Loaders;
+	THandlerContainer	m_Loaders{};
 
 public:
 	~ImageManager();

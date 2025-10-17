@@ -10,7 +10,7 @@ class MeshManager {
 
 public:
 	typedef AssetManager<Neo::Mesh>	TContainer;
-	typedef std::map<StaticString, AMeshLoader*>	THandlerContainer;
+	typedef Map<StaticString, AMeshLoader*>	THandlerContainer;
 
 protected:
 	TContainer			m_Assets;
@@ -40,13 +40,8 @@ protected:
 	Bool	LoadModel(const StaticString& fp, Neo::Mesh* asset) {
 		assert(asset);
 
-		THandlerContainer::iterator iter = m_Loaders.find(StaticString(FilePath::GetExtension(fp)));
-		if (iter == m_Loaders.end()) {
-			return false;
-		}
-
-		AMeshLoader* loader = iter->second;
-		if( !loader->Load(fp) ) {
+		AMeshLoader* loader{};
+		if(!m_Loaders.Find(StaticString(FilePath::GetExtension(fp)), loader) || !loader->Load(fp) ) {
 			return false;
 		}
 

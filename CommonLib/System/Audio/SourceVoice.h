@@ -1,10 +1,9 @@
 #pragma once
 
-#include "..\Typedefs.h"
+#include "System\Typedefs.h"
 #include "ASourceVoice.h"
 #include "SourceVoiceCallbacks.h"
 #include "System\Functors\MultiFunctor.h"
-#include <array>
 
 class Sound;
 

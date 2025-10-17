@@ -63,13 +63,13 @@ public:
 	}
 
 	template< typename TFunction >
-	void RemoveListener(TFunction func) {
+	void RemoveListener(TFunction func) {//TODO: Untested
 		FunctionHandler<Functor<void, _TList>, TFunction>	handler(func);
 		m_Listeners.Remove(handler);
 	}
 
 	template< class TObject, typename TMemberFunction >
-	void RemoveListener(TObject* obj, TMemberFunction func) {
+	void RemoveListener(TObject* obj, TMemberFunction func) {//TODO: Untested
 		MemberFunctionHandler<Functor<void, _TList>, _TList, TObject, TMemberFunction>	handler(obj, func);
 		m_Listeners.Remove(handler);
 	}

@@ -128,17 +128,28 @@ void DeleteArray( _TData*& ptr ) {
 	ptr = NULL;
 }
 
-template< class _TData >
-void DeleteContents( _TData& stlContainer ) {
-	FOREACH( iter, stlContainer ) {     
-		DeletePtr( *iter );             
+template< class _TContainer >
+class DeleteContentsHelper {
+public:
+	typedef _TContainer	TContainer;
+
+public:
+	static void Delete(TContainer& container ) {
+		FOREACH(iter, container) {
+			DeletePtr(*iter);
+		}
 	}
+};
+
+template< class _TContainer >
+void DeleteContents(_TContainer& stlContainer ) {
+	DeleteContentsHelper<_TContainer>::Delete(stlContainer);
 }
 
 template< typename _TData >
 void Destroy( _TData& stlContainer ) {
 	DeleteContents( stlContainer );
-	stlContainer.clear();
+	stlContainer.Clear();
 }
 
 template< typename _TData >
@@ -182,4 +193,4 @@ public:												\
 DEFINE_GETSET_EX( propName, m_##propName )					\
 private:
 
-#define DEFINE_GETSET( name )	DEFINE_GETSET_EX(decltype(m_##name), name, m_##name)
+#define DEFINE_GETSET( name )	DEFINE_GETSET_EX(name, m_##name)

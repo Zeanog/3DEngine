@@ -22,6 +22,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     m_Format.Format.cbSize = sizeof(m_Format) - sizeof(m_Format.Format);
 
     m_Format.Samples.wValidBitsPerSample = m_Format.Format.wBitsPerSample;
+    //TODO: Handle more channel configurations
     m_Format.dwChannelMask = (m_Format.Format.nChannels == 1) ? SPEAKER_FRONT_CENTER : (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT);
     m_Format.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 
