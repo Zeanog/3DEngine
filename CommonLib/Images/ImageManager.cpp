@@ -21,8 +21,8 @@ const Neo::Image* ImageManager::Get(const StaticString& path) {
 		return NULL;
 	}
 
-	Neo::Image* image = m_Images.Find(path);
-	if (image) {
+	Neo::Image* image{};
+	if (m_Images.Find(path, image)) {
 		return image;
 	}
 
@@ -45,15 +45,10 @@ void ImageManager::ReloadAll() {
 Bool ImageManager::Load(const StaticString& path, Neo::Image* image) {
 	assert(image);
 
-	THandlerContainer::iterator iter = m_Loaders.find(StaticString(FilePath::GetExtension(path)));
-	if (iter == m_Loaders.end()) {
-		return false;
-	}
-
 	Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
 
-	ImageLoader* loader = iter->second;
-	if (!loader->Load(path)) {
+	ImageLoader* loader{};
+	if (!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader) || !loader->Load(path)) {
 		Singleton<DebugConsole>::GetInstance()->Write("Failed to load '%s'!\n", path.CStr());
 		return false;
 	}

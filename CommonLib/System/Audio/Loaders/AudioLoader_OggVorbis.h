@@ -1,8 +1,8 @@
 #pragma once
 
-#include "AudioLoader.h"
+#include "AAudioLoader.h"
 
-class AudioLoader_OggVorbis : public AudioLoader {
+class AudioLoader_OggVorbis : public AAudioLoader {
 public:
 	virtual Bool	Load(const Char* fileName);
 };

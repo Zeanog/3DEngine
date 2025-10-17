@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Images\ImageLoader.h"
-#include <vector>
+#include "System/List.h"
 
 class ImageLoader_PNG : public ImageLoader {
 public:
 
 protected:
-	std::vector<Byte>	m_Data;
+	List<Byte>	m_Data;
 
 public:
 	virtual Bool	Load(const Char* fileName) override;

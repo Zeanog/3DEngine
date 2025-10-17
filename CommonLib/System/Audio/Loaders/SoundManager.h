@@ -1,9 +1,10 @@
 #pragma once
 
 #include "System/AssetManager.h"
-#include "AudioLoader.h"
 #include "System/Audio/Sound.h"
 #include "System/Singleton.h"
+
+class AAudioLoader;
 
 class SoundManager {
 	CLASS_TYPEDEFS(SoundManager)
@@ -11,7 +12,7 @@ class SoundManager {
 
 public:
 	typedef AssetManager<Sound>	TContainer;
-	typedef std::map<StaticString, AudioLoader*>	THandlerContainer;
+	typedef Map<StaticString, AAudioLoader*>	THandlerContainer;
 
 protected:
 	TContainer			m_Assets;

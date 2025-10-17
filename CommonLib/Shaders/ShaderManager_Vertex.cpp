@@ -7,8 +7,8 @@ ShaderManager_Vertex::~ShaderManager_Vertex() {
 }
 
 const ShaderManager_Vertex::TAsset*	ShaderManager_Vertex::Get(const StaticString& path, const Char* header) {
-	TAsset* asset = m_Container.Find(path);
-	if (asset) {
+	TAsset* asset{};
+	if (m_Container.Find(path, asset)) {
 		return asset;
 	}
 

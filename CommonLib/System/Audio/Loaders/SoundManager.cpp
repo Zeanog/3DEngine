@@ -15,8 +15,8 @@ SoundManager::~SoundManager() {
 }
 
 Sound* SoundManager::Get(const StaticString& path) {
-	Sound* asset = m_Assets.Find(path);
-	if (asset) {
+	Sound* asset{};
+	if (m_Assets.Find(path, asset)) {
 		return asset;
 	}
 
@@ -39,17 +39,13 @@ void SoundManager::ReloadAll() {
 Bool SoundManager::Load(const StaticString& path, Sound* asset) {
 	assert(asset);
 
-	THandlerContainer::iterator iter = m_Loaders.find(StaticString(FilePath::GetExtension(path)));
-	if (iter == m_Loaders.end()) {
-		return false;
-	}
-
 	Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
 
-	AudioLoader* loader = iter->second;
-	if (!loader->Load(path)) {
+	AAudioLoader* loader{};
+	if (!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader) || !loader->Load(path)) {
 		Singleton<DebugConsole>::GetInstance()->Write("Failed to load '%s'!\n", path.CStr());
 		return false;
+
 	}
 
 	if (!asset->UploadData(*loader)) {

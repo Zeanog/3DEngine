@@ -3,9 +3,12 @@
 #include "System\Typedefs.h"
 #include "System/Reflector.h"
 
-template<typename TParameters>
+template<typename _TParameters>
 struct AParameters {
 	CLASS_TYPEDEFS(AParameters)
+
+public:
+	typedef _TParameters	TParameters;
 
 public:
 	static Bool	UpdateFrom(TParameters* params, const rapidjson::Value& value) {

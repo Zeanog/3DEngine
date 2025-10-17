@@ -249,7 +249,7 @@
     <ClInclude Include="System\Audio\SourceVoice.h">
       <Filter>System\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="System\Audio\Loaders\AudioLoader.h">
+    <ClInclude Include="System\Audio\Loaders\AAudioLoader.h">
       <Filter>System\Audio\Loaders</Filter>
     </ClInclude>
     <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h">

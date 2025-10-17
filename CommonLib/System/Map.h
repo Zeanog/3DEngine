@@ -5,13 +5,6 @@
 #include <map>
 
 template< typename _TKey, typename _TValue >
-void DeleteContents( std::map<_TKey, _TValue*>& stlContainer ) {
-	for( typename std::map<_TKey, _TValue*>::iterator iter = stlContainer.begin(); iter != stlContainer.end(); iter++ ) {   
-		DeletePtr( iter->second );             
-	}
-}
-
-template< typename _TKey, typename _TValue >
 class AMap {
 	CLASS_TYPEDEFS(AMap)
 
@@ -20,15 +13,15 @@ public:
 	typedef _TValue	TValue;
 	typedef std::map<TKey, TValue>	TContainer;
 
-	typedef typename TContainer::iterator	TIterator;
+	typedef typename TContainer::iterator		TIterator;
 	typedef typename TContainer::const_iterator	TConstIterator;
-	typedef typename TContainer::reverse_iterator	TReverseIterator;
-	typedef typename TContainer::const_reverse_iterator	TConstReverseIterator;
+	typedef typename TContainer::iterator		TReverseIterator;
+	typedef typename TContainer::const_iterator	TConstReverseIterator;
 
-	typedef typename TContainer::iterator				iterator;
-	typedef typename TContainer::const_iterator			const_iterator;
-	typedef typename TContainer::reverse_iterator		reverse_iterator;
-	typedef typename TContainer::const_reverse_iterator	const_reverse_iterator;
+	typedef typename TContainer::iterator		iterator;
+	typedef typename TContainer::const_iterator	const_iterator;
+	typedef typename TContainer::iterator		reverse_iterator;
+	typedef typename TContainer::const_iterator	const_reverse_iterator;
 
 protected:
 	typename TContainer	m_Data;
@@ -64,25 +57,7 @@ public:
 
 	TConstIterator	end() const {
 		return m_Data.cend();
-	}
-
-	//
-	TReverseIterator	rbegin() {
-		return m_Data.rbegin();
-	}
-
-	TReverseIterator	rend() {
-		return m_Data.rend();
-	}
-
-	TConstReverseIterator	crbegin() {
-		return m_Data.crbegin();
-	}
-
-	TConstReverseIterator	crend() {
-		return m_Data.crend();
-	}
-	// 
+	} 
 
 	TValue&	operator[](typename Param<TKey>::Type key) {
 		return m_Data[key];
@@ -93,7 +68,7 @@ public:
 		return iter->second;
 	}
 
-	UInt32	Length() const {
+	UInt32	Size() const {
 		return m_Data.size();
 	}
 
@@ -130,22 +105,24 @@ public:
 		return m_Data.cend() != m_Data.find(key);
 	}
 
-	TValue&	Find(typename Param<TKey>::Type key) {
-		return m_Data.at(key);
-	}
-
-	const TValue&	Find(typename Param<TKey>::Type key) const {
-		return m_Data.at(key);
-	}
-
-	void	EnsureSize(UInt32 size) {
-		if (size > Length()) {
-			m_Data.reserve(size);
+	/*Bool	Find(typename Param<TKey>::Type key, TValue& outValue) {
+		auto&& iter = m_Data.find(key);
+		if( iter == m_Data.end() ) {
+			return false;
 		}
-	}
+		
+		outValue = iter->second;
+		return true;
+	}*/
 
-	void	Resize(UInt32 size) {
-		m_Data.resize(size);
+	Bool	Find(typename Param<TKey>::Type key, TValue& outValue) const {
+		auto&& iter = m_Data.find(key);
+		if (iter == m_Data.end()) {
+			return false;
+		}
+
+		outValue = iter->second;
+		return true;
 	}
 
 	void	Clear() {
@@ -163,13 +140,36 @@ public:
 	//}
 };
 
+//template< typename _TKey, typename _TValue >
+//void DeleteContents(std::unordered_map<_TKey, _TValue*>& stlContainer) {
+//	for (typename std::unordered_map<_TKey, _TValue*>::iterator iter = stlContainer.begin(); iter != stlContainer.end(); iter++) {
+//		DeletePtr(iter->second);
+//	}
+//}
+
 template< typename _TKey, typename _TValue >
 class Map : public AMap<_TKey, _TValue> {
-	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue) )
+	INHERITEDCLASS_TYPEDEFS(Map, AMap)
 
 protected:
 
 public:
+};
+
+template< typename _TKey, typename _TValue >
+class DeleteContentsHelper<Map<_TKey, _TValue*>> {
+public:
+	typedef Map<_TKey, _TValue*>	TContainer;
+
+public:
+	static void Delete(TContainer& container) {
+		if (container.Size() <= 0) {
+			return;
+		}
+		FOREACH(iter, container) {
+			DeletePtr(iter->second);
+		}
+	}
 };
 
 //template< typename _TKey, typename _TValue >
@@ -238,56 +238,3 @@ public:
 		return container.crend();
 	}
 };
-
-//#include "JsonSerializer.h"
-//
-//template<typename TKey, typename TElem>
-//class JsonSerializer<Map<TKey, TElem>> {
-//public:
-//	static Map<TKey, TElem>	ReadFrom(const rapidjson::Value& root) {
-//		Map<TKey, TElem> outVal;
-//
-//		ReadFrom( root, outVal );
-//
-//		return outVal;
-//	}
-//
-//	static Bool	ReadFrom(const rapidjson::Value& root, Map<TKey, TElem>& outVal) {
-//		assert(root.IsObject());
-//
-//		for (auto iter = root.MemberBegin(); iter != root.MemberEnd(); ++iter) {
-//			rapidjson::Value elemVal = (iter->value);
-//			typename TElem elem = JsonSerializer<typename TElem>::ReadFrom(elemVal);
-//			outVal.Add(iter->name.GetString(), elem);
-//		}
-//
-//		return true;
-//	}
-//};
-
-//template<typename TElem>
-//class JsonSerializer<Map<StaticString, TElem*>> {
-//public:
-//	static Map<StaticString, TElem*>	ReadFrom(const rapidjson::Value& root) {
-//		Map<StaticString, TElem*> outVal;
-//
-//		ReadFrom(root, outVal);
-//
-//		return outVal;
-//	}
-//
-//	static Bool	ReadFrom(const rapidjson::Value& root, Map<StaticString, TElem*>& outVal) {
-//		assert(root.IsObject());
-//
-//		DeleteContents(outVal);
-//		outVal.Clear();
-//
-//		for (auto iter = root.MemberBegin(); iter != root.MemberEnd(); ++iter) {
-//			rapidjson::Value elemVal = (iter->value);
-//			typename TElem elem = JsonSerializer<typename TElem>::ReadFrom(elemVal);
-//			outVal.Add(iter->name.GetString(), elem);
-//		}
-//
-//		return true;
-//	}
-//};

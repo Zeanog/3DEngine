@@ -18,8 +18,8 @@ Neo::Mesh* MeshManager::Get(const StaticString& path) {
 	//	++fullPathLength;
 	//	String::StrCpy(fullPath.CStr() + fullPathLength, fullPath.Length(), relativePath.CStr());
 
-	Neo::Mesh* asset = m_Assets.Find(path);
-	if (asset) {
+	Neo::Mesh* asset{};
+	if (m_Assets.Find(path, asset)) {
 		return asset;
 	}
 

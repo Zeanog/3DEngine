@@ -9,7 +9,8 @@ ShaderProgramManager::~ShaderProgramManager() {
 }
 
 const ShaderProgramManager::TAsset*	ShaderProgramManager::Get(const StaticString& name) {
-	TAsset* asset = m_Container.Find(name);
+	TAsset* asset{};
+	m_Container.Find(name, asset);
 	/*if (asset) {
 		return asset;
 	}

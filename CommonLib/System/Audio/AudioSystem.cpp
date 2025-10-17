@@ -65,28 +65,6 @@ UINT64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
 	return val;
 }
 
-SubmixVoice* AudioSystem::GetCategory(const StaticString& name) const {
-	assert(m_CategoryNameToVoiceMap.Contains(name));
-	return m_CategoryNameToVoiceMap[name];
-}
-
-const StaticString& AudioSystem::GetCategoryName(SubmixVoice* categoryVoice) const {
-	assert(m_VoiceToCategoryNameMap.Contains(categoryVoice));
-	return m_VoiceToCategoryNameMap[categoryVoice];
-}
-
-Bool AudioSystem::AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate) {
-	assert(!m_CategoryNameToVoiceMap.Contains(name));
-
-	auto voice = CreateSubmixVoice(numChannels, sampleRate);
-	m_CategoryNameToVoiceMap.Add(name, voice);
-	m_VoiceToCategoryNameMap.Add(voice, name);
-
-	m_CategoryToVoiceListMap.Add(voice, TFormatToVoiceList());
-
-	return true;
-}
-
 UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 	static constexpr Byte numChannelShift = 56;
 	static constexpr Byte samplesPerSecShift = 32;
@@ -98,6 +76,28 @@ UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 	assert(((val >> samplesPerSecShift) & eightBitMask) == sampleRate);
 
 	return val;
+}
+
+SubmixVoice* AudioSystem::GetCategory(const StaticString& name) const {
+	assert(m_CategoryNameToVoiceMap.Contains(name));
+	return m_CategoryNameToVoiceMap[name];
+}
+
+const StaticString& AudioSystem::GetCategoryName(SubmixVoice* categoryVoice) const {
+	assert(m_VoiceToCategoryNameMap.Contains(categoryVoice));
+	return m_VoiceToCategoryNameMap[categoryVoice];
+}
+
+SubmixVoice* AudioSystem::AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate) {
+	assert(!m_CategoryNameToVoiceMap.Contains(name));
+
+	auto voice = CreateSubmixVoice(numChannels, sampleRate);
+	m_CategoryNameToVoiceMap.Add(name, voice);
+	m_VoiceToCategoryNameMap.Add(voice, name);
+
+	m_CategoryToVoiceListMap.Add(voice, TFormatToVoiceList());
+
+	return voice;
 }
 
 SourceVoice* AudioSystem::Play(const Sound& snd, const StaticString& categoryName) {
@@ -148,24 +148,22 @@ void AudioSystem::StopAllVoices() {
 }
 
 Bool AudioSystem::SetEffectDescriptors(const StaticString& categoryName, const Char** fxNames, UInt32 numFx) {
+	return SetEffectDescriptors(GetCategory(categoryName), fxNames, numFx);
+}
+
+Bool AudioSystem::SetEffectDescriptors(SubmixVoice* category, const Char** fxNames, UInt32 numFx) {
 	__try {
 		auto descriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, numFx);
 		XAUDIO2_EFFECT_CHAIN chain{ numFx, descriptors };
-		IUnknown* pEffect{};
-		auto category = GetCategory(categoryName);
 
 		for (UInt32 ix = 0; ix < numFx; ++ix) {
 			auto name = fxNames[ix];
 			auto info = &m_FxNameToInfoMap[name];
-			pEffect = info->CreateFX();
-			assert(pEffect);
-			descriptors[ix] = { pEffect, false, category->NumChannels() };
-			pEffect = nullptr;
+			descriptors[ix] = { info->CreateFX(), false, category->NumChannels() };
 		}
 
 		Bool result = category->SetEffectChain(&chain);
 		assert(result);
-		verify(CommitChanges(XAUDIO2_COMMIT_NOW));
 
 		for (UInt32 ix = 0; ix < numFx; ++ix) {
 			assert(descriptors[ix].pEffect);
@@ -247,11 +245,11 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
 	auto& categoryMap = m_CategoryToVoiceListMap[voiceCategory];
-	if (categoryMap.Length() <= 0) {
+	if (categoryMap.Size() <= 0) {
 		return false;
 	}
 
-	UInt64 hash = GenerateHash(format);
+	UInt64 hash = GenerateHash(format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
 	if (!categoryMap.Contains(hash)) {
 		return false;
 	}
@@ -277,7 +275,7 @@ Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice)
 
 	assert(m_CategoryToVoiceListMap.Contains(voiceCategory));
 	auto& categoryVoiceMap = m_CategoryToVoiceListMap[voiceCategory];
-	auto hash = GenerateHash(voice->Format());
+	auto hash = GenerateHash(voice->Format());//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
 
 	if (!categoryVoiceMap.Contains(hash)) {
 		categoryVoiceMap.Add(hash, TVoiceList());
@@ -323,7 +321,7 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	assert(context);
 	Sound* snd = (Sound*)context;
 
-	auto hash = GenerateHash(snd->Format().Format);
+	auto hash = GenerateHash(snd->Format().Format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
 	assert(voiceListMap.Contains(hash));
 	auto& voiceList = voiceListMap[hash];
 
@@ -333,14 +331,6 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	voiceList.Remove(voice);
 	voiceList.Add(voice);
 };
-
-//Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-//	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
-//}
-//
-//Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-//	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
-//}
 
 //#include "System/DataStructureLibrary.h"
 
@@ -370,7 +360,11 @@ void AudioSystem::ReloadAssets() {
 	//Singleton<DataStructureLibrary<List<SourceVoice*>>>::GetInstance()->Return(playingVoices);
 }
 
-UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& catgegoryName) {
+UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& categoryName) {
+	return LoadEffects(path, GetCategory(categoryName));
+}
+
+UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category) {
 	try {
 		rapidjson::Document	doc;
 		if (!rapidjson::LoadFrom(path, doc)) {
@@ -394,7 +388,7 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& ca
 		}
 		assert(numFx == index);
 
-		verify(SetEffectDescriptors(catgegoryName, fxNames, (UInt32)numFx));
+		verify(SetEffectDescriptors(category, fxNames, (UInt32)numFx));
 
 		index = 0;
 		FOREACH(fxIter, doc) {
@@ -402,7 +396,7 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& ca
 			assert(index < numFx);
 			auto fxInfo = &m_FxNameToInfoMap[fxNames[index]];
 			assert(fxInfo);
-			fxInfo->Update(catgegoryName, index, paramsIter->value);
+			fxInfo->Update(category, index, paramsIter->value);
 			++index;
 		}
 

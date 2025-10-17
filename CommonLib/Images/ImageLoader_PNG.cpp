@@ -1,5 +1,4 @@
 #include "ImageLoader_PNG.h"
-
 #include "LodePNG/lodepng.h"
 
 void SwapByteChunk(Byte* lhs, Byte* rhs, UInt32 chunkSize) {
@@ -10,7 +9,7 @@ void SwapByteChunk(Byte* lhs, Byte* rhs, UInt32 chunkSize) {
 }
 
 Bool ImageLoader_PNG::Load(const Char* fileName) {
-	m_Data.clear();
+	m_Data.Clear();
 
 	std::vector<unsigned char> png;
 	lodepng::State state; //optionally customize this one
@@ -22,7 +21,7 @@ Bool ImageLoader_PNG::Load(const Char* fileName) {
 		return false;
 	}
 
-	error = lodepng::decode(m_Data, m_Width, m_Height, state, png);
+	error = lodepng::decode(m_Data.Data(), m_Width, m_Height, state, png);
 	if (error) {
 		return false;
 	}
@@ -46,7 +45,7 @@ Bool ImageLoader_PNG::Load(const Char* fileName) {
 }
 
 Bool ImageLoader_PNG::IsValid() const {
-	return m_Data.size() > 0;
+	return m_Data.Length() > 0;
 }
 
 const Byte* ImageLoader_PNG::Data() const {

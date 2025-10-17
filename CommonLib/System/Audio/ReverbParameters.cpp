@@ -1,29 +1,26 @@
 #include "ReverbParameters.h"
-#include "AudioSystem.h"
+#include "SubmixVoice.h"
 
 IUnknown* ReverbParameters::InstantiateFX() {
 	IUnknown* pEffect = nullptr;
-	HRESULT hr = XAudio2CreateReverb(&pEffect);
-	if (FAILED(hr)) {
-		return nullptr;
-	}
+	verify(SUCCEEDED(XAudio2CreateReverb(&pEffect)));
 	return pEffect;
 }
 
-Bool ReverbParameters::UpdateParams(const StaticString& categoryName, UInt32 index, const rapidjson::Value& value) {
-	XAUDIO2FX_REVERB_PARAMETERS params;
+Bool ReverbParameters::UpdateParams(SubmixVoice* category, UInt32 index, const rapidjson::Value& value) {
+	TParameters params;
 	SetToDefault(params);
 	if (!UpdateFrom(&params, value)) {
 		assert(0);
 		return false;
 	}
 
-	if(!Singleton<AudioSystem>::GetInstance()->SetEffectParameters(categoryName, index, &params, sizeof(decltype(params)))) {
+	if(!category->SetEffectParameters(index, &params, sizeof(decltype(params)))) {
 		assert(0);
 		return false;
 	}
 
-	if (!Singleton<AudioSystem>::GetInstance()->EnableEffect(categoryName, index)) {
+	if (!category->EnableEffect(index)) {
 		assert(0);
 		return false;
 	}

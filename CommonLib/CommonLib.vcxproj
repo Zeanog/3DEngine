@@ -54,7 +54,7 @@
     <ClInclude Include="System\Audio\AVoice.h" />
     <ClInclude Include="System\Audio\EchoParameters.h" />
     <ClInclude Include="System\Audio\EQParameters.h" />
-    <ClInclude Include="System\Audio\Loaders\AudioLoader.h" />
+    <ClInclude Include="System\Audio\Loaders\AAudioLoader.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_MP3.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_OggVorbis.h" />
     <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h" />

@@ -36,6 +36,14 @@ public:
 	AList(File& file) {
 	}
 
+	TContainer&	Data() {
+		return m_Data;
+	}
+
+	const TContainer&	Data() const {
+		return m_Data;
+	}
+
 	TData&	operator[]( UInt32 index ) {
 		return m_Data[index];
 	}
@@ -178,7 +186,7 @@ public:
 
 template< typename _TData >
 class List : public AList<_TData> {
-	INHERITEDCLASS_TYPEDEFS( List, AList<_TData> )
+	INHERITEDCLASS_TYPEDEFS( List, AList )
 
 public:
 	typedef typename TSuper::TData	TData;

@@ -9,7 +9,7 @@ class AssetManager {
 
 public:
 	typedef _TAsset						TAsset;
-	typedef std::map<StaticString, TAsset*>	TContainer;
+	typedef Map<StaticString, TAsset*>	TContainer;
 	
 	typedef typename TContainer::iterator				TIterator;
 	typedef typename TContainer::const_iterator			TConstIterator;
@@ -37,29 +37,15 @@ public:
 	}
 
 	UInt32	Count() const {
-		return m_Container.size();
+		return m_Container.Size();
 	}
 
 	void	Add( const StaticString& path, TAsset* asset ) {
 		m_Container[path] = asset;
 	}
 
-	TAsset*	Find( const StaticString& path ) {
-		TIterator iter = m_Container.find( path );
-		if( iter == m_Container.end() ) {
-			return NULL;
-		}
-
-		return iter->second;
-	}
-
-	const TAsset*	Find( const StaticString& path ) const {
-		TConstIterator iter = m_Container.find( path );
-		if( iter == m_Container.end() ) {
-			return NULL;
-		}
-
-		return *iter;
+	Bool	Find(const StaticString& path, TAsset*& outValue) const {
+		return m_Container.Find(path, outValue);
 	}
 
 	TIterator	Begin() {
@@ -87,33 +73,15 @@ public:
 	}
 
 	TConstIterator	begin() const {
-		return m_Container.cbegin();
+		return m_Container.Begin();
 	}
 
 	TConstIterator	end() const {
-		return m_Container.cend();
+		return m_Container.End();
 	}
-
-	//
-	TReverseIterator	rbegin() {
-		return m_Container.rbegin();
-	}
-
-	TReverseIterator	rend() {
-		return m_Container.rend();
-	}
-
-	TConstReverseIterator	crbegin() {
-		return m_Container.crbegin();
-	}
-
-	TConstReverseIterator	crend() {
-		return m_Container.crend();
-	}
-	//
 
 	void	Clear() {
-		m_Container.clear();
+		m_Container.Clear();
 	}
 };
 
