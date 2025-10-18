@@ -30,7 +30,7 @@ public:
 /////////////////////////////////////////////
 
 struct EQParameters : public AParameters<FXEQ_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(EQParameters, AParameters<FXEQ_PARAMETERS>)
+	INHERITEDCLASS_TYPEDEFS(EQParameters, AParameters)
 
 public:
 	static constexpr void	SetToDefault(FXEQ_PARAMETERS& params) {

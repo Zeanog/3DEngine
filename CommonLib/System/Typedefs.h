@@ -82,16 +82,16 @@ public:
 };
 
 #define FOREACH( iterName, stlContainer )	\
-	for( auto iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
+	for( auto&& iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
 #define FOREACH_CONST( iterName, stlContainer )	\
-	for( auto iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
+	for( auto&& iterName = ContainerIterator<decltype(stlContainer)>::Begin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::End(stlContainer); iterName != iterName##End; iterName++ )
 
-#define FOREACH_R( iterName, stlContainer )	\
-	for( auto iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
+#define FOREACH_REV( iterName, stlContainer )	\
+	for( auto&& iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
-#define FOREACH_CONST_R( iterName, stlContainer )	\
-	for( auto iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
+#define FOREACH_CONST_REV( iterName, stlContainer )	\
+	for( auto&& iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
 

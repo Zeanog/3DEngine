@@ -21,7 +21,7 @@ public:
 /////////////////////////////////////////////
 
 struct EchoParameters : public AParameters<FXECHO_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(EchoParameters, AParameters<FXECHO_PARAMETERS>)
+	INHERITEDCLASS_TYPEDEFS(EchoParameters, AParameters)
 
 public:
 	static constexpr void	SetToDefault(FXECHO_PARAMETERS& params) {

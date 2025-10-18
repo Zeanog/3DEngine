@@ -1,7 +1,6 @@
 [
 	{
-		"Type": "Reverb",
-		"Params": {
+		"Reverb": {
 			"WetDryMix": 100.0,
 			"ReflectionsDelay": 5,
 			"ReverbDelay": 10,
@@ -25,8 +24,7 @@
 		}
 	},
 	{
-		"Type": "EQ",
-		"Params": {
+		"EQ": {
 			"Gain0": 100.0
 		}
 	}

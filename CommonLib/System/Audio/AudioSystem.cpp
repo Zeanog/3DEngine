@@ -159,7 +159,32 @@ Bool AudioSystem::SetEffectDescriptors(SubmixVoice* category, const Char** fxNam
 		for (UInt32 ix = 0; ix < numFx; ++ix) {
 			auto name = fxNames[ix];
 			auto info = &m_FxNameToInfoMap[name];
-			descriptors[ix] = { info->CreateFX(), false, category->NumChannels() };
+			descriptors[ix] = { info->Create(), false, category->NumChannels() };
+		}
+
+		Bool result = category->SetEffectChain(&chain);
+		assert(result);
+
+		for (UInt32 ix = 0; ix < numFx; ++ix) {
+			assert(descriptors[ix].pEffect);
+			verify(descriptors[ix].pEffect->Release() > 0);
+		}
+
+		return result;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+}
+
+Bool AudioSystem::SetEffectDescriptors(SubmixVoice* category, FXInfo** fxInfos, UInt32 numFx) {
+	__try {
+		auto descriptors = STACK_ALLOC(XAUDIO2_EFFECT_DESCRIPTOR, numFx);
+		XAUDIO2_EFFECT_CHAIN chain{ numFx, descriptors };
+
+		for (UInt32 ix = 0; ix < numFx; ++ix) {
+			auto info = fxInfos[ix];
+			descriptors[ix] = { info->Create(), false, category->NumChannels() };
 		}
 
 		Bool result = category->SetEffectChain(&chain);
@@ -259,7 +284,7 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 		return false;
 	}
 
-	FOREACH_CONST_R(iter, voiceList) {
+	FOREACH_CONST_REV(iter, voiceList) {
 		auto v = *iter;
 		if (!v->IsPlaying()) {
 			outVoice = v;
@@ -364,6 +389,7 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& ca
 	return LoadEffects(path, GetCategory(categoryName));
 }
 
+#include "System/Reflector.h"
 UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category) {
 	try {
 		rapidjson::Document	doc;
@@ -379,30 +405,30 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category)
 
 		Byte	index = 0;
 		auto	numFx = doc.Size();
-		auto	fxNames = STACK_ALLOC(const Char*, numFx);
+		auto	fxInfoList = STACK_ALLOC(FXInfo*, numFx);
+		auto	valueList = STACK_ALLOC(rapidjson::Value, numFx);
 
 		FOREACH(fxIter, doc) {
-			auto&& memberIter = fxIter->FindMember("Type");
-			assert(index < numFx);
-			fxNames[index++] = memberIter->value.GetString();
+			assert(fxIter->IsObject());
+			FOREACH_MEMBER(memberIter, (*fxIter)) {
+				assert(memberIter != fxIter->MemberEnd());
+				assert(index < numFx);
+
+				fxInfoList[index] = &m_FxNameToInfoMap[memberIter->name.GetString()];
+				valueList[index] = std::move(memberIter->value);
+				++index;
+			}
 		}
 		assert(numFx == index);
 
-		verify(SetEffectDescriptors(category, fxNames, (UInt32)numFx));
+		verify(SetEffectDescriptors(category, fxInfoList, (UInt32)numFx));
 
-		index = 0;
-		FOREACH(fxIter, doc) {
-			auto&& paramsIter = fxIter->FindMember("Params");
-			assert(index < numFx);
-			auto fxInfo = &m_FxNameToInfoMap[fxNames[index]];
-			assert(fxInfo);
-			fxInfo->Update(category, index, paramsIter->value);
-			++index;
+		for(UInt32 ix = 0; ix < numFx; ++ix) {
+			auto& fxInfo = fxInfoList[ix];
+			fxInfo->Update(category, ix, valueList[ix]);
 		}
-
-		//verify(CommitChanges(XAUDIO2_COMMIT_NOW));
-
-		return index;//Return number of effects loaded
+		
+		return numFx;//Return number of effects loaded
 	}
 	catch (...) {
 		return 0;

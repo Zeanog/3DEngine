@@ -455,8 +455,8 @@ public:
 
 #include <cstddef>
 
-#define REGISTER_MEMBER( type, member )	\
-m_MemberInfoMap.Add(#member, MemberInfo{ (UInt64)offsetof(type, member), sizeof(type::member), Singleton<ValueParser<decltype(type::member)>>::GetInstance() } );
+#define REGISTER_MEMBER( ownerType, member )	\
+m_MemberInfoMap.Add(#member, MemberInfo{ (UInt64)offsetof(ownerType, member), sizeof(ownerType::member), Singleton<ValueParser<decltype(ownerType::member)>>::GetInstance() } );
 
 template<typename TClass>
 class Reflector;
