@@ -22,7 +22,7 @@ class AudioSystem {
 	}
 
 	typedef LinkedList<SourceVoice*>	TVoiceList;
-	typedef Map<UInt64, TVoiceList>		TFormatToVoiceList;
+	typedef Map<UInt64, TVoiceList>		TFormatToVoiceListMap;
 
 protected:
 	IXAudio2* m_Audio2{};
@@ -31,8 +31,7 @@ protected:
 
 	List<AVoice*>	m_Voices{};
 
-	Map<SubmixVoice*, TFormatToVoiceList>	m_CategoryToVoiceListMap{};
-	Map<SourceVoice*, SubmixVoice*>			m_VoiceToCategoryMap{};
+	TFormatToVoiceListMap					m_FormatToVoiceListMap;
 
 	Map<StaticString, SubmixVoice*>			m_CategoryNameToVoiceMap{};
 	Map<SubmixVoice*, StaticString>			m_VoiceToCategoryNameMap{};
@@ -51,8 +50,8 @@ protected:
 	static UINT64		GenerateHash(const WAVEFORMATEX& format);
 	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
 
-	Bool				FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
-	Bool				AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice);
+	Bool				FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
+	Bool				AddSourceVoice(SourceVoice* voice);
 
 	void				OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT result);
 	void				OnBufferStartHandler(SourceVoice* voice, void* context);

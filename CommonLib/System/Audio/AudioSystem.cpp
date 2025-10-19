@@ -29,9 +29,8 @@ Bool AudioSystem::Init() {
 }
 
 void AudioSystem::Destroy() {
-	m_CategoryToVoiceListMap.Clear();
 	m_CategoryNameToVoiceMap.Clear();
-	m_VoiceToCategoryMap.Clear();
+	m_FormatToVoiceListMap.Clear();
 	m_VoiceToCategoryNameMap.Clear();
 
 	FOREACH(iter, m_Voices) {
@@ -95,7 +94,7 @@ SubmixVoice* AudioSystem::AddCategory(const StaticString& name, UInt32 numChanne
 	m_CategoryNameToVoiceMap.Add(name, voice);
 	m_VoiceToCategoryNameMap.Add(voice, name);
 
-	m_CategoryToVoiceListMap.Add(voice, TFormatToVoiceList());
+	//m_CategoryToVoiceListMap.Add(voice, TFormatToVoiceListMap());
 
 	return voice;
 }
@@ -137,12 +136,10 @@ Float32 AudioSystem::Submit(const StaticString& filePath, const StaticString& ca
 }
 
 void AudioSystem::StopAllVoices() {
-	FOREACH(iterVoiceFormatMap, m_CategoryToVoiceListMap) {
-		FOREACH(iterVoiceList, iterVoiceFormatMap->second) {
-			FOREACH(iterVoice, iterVoiceList->second) {
-				auto v = *iterVoice;
-				v->Stop();
-			}
+	FOREACH(iterVoiceList, m_FormatToVoiceListMap) {
+		FOREACH(iterVoice, iterVoiceList->second) {
+			auto v = *iterVoice;
+			v->Stop();
 		}
 	}
 }
@@ -238,12 +235,14 @@ MasteringVoice* AudioSystem::CreateMasteringVoice() {
 
 SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format) {
 	SourceVoice* voice{};
-	if (FindSourceVoice(voiceCategory, format, voice)) {
+	if (FindSourceVoice(format, voice)) {
+		voice->SetOutputTo(voiceCategory);
 		return voice;
 	}
 
 	voice = new SourceVoice(m_Audio2, format);
-	verify(AddSourceVoice(voiceCategory, voice));
+	verify(AddSourceVoice(voice));
+	voice->SetOutputTo(voiceCategory);
 	return voice;
 }
 
@@ -264,22 +263,17 @@ SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRat
 	return newVoice;
 }
 
-Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format, SourceVoice*& outVoice) const {
+Bool AudioSystem::FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const {
 	outVoice = nullptr;
 
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
-	auto& categoryMap = m_CategoryToVoiceListMap[voiceCategory];
-	if (categoryMap.Size() <= 0) {
-		return false;
-	}
-
 	UInt64 hash = GenerateHash(format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
-	if (!categoryMap.Contains(hash)) {
+	if (!m_FormatToVoiceListMap.Contains(hash)) {
 		return false;
 	}
 
-	auto& voiceList = categoryMap[hash];
+	auto& voiceList = m_FormatToVoiceListMap[hash];
 	if (voiceList.Length() <= 0) {
 		return false;
 	}
@@ -295,27 +289,23 @@ Bool AudioSystem::FindSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX
 	return false;
 }
 
-Bool AudioSystem::AddSourceVoice(SubmixVoice* voiceCategory, SourceVoice* voice) {
+Bool AudioSystem::AddSourceVoice(SourceVoice* voice) {
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
-	assert(m_CategoryToVoiceListMap.Contains(voiceCategory));
-	auto& categoryVoiceMap = m_CategoryToVoiceListMap[voiceCategory];
 	auto hash = GenerateHash(voice->Format());//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
-
-	if (!categoryVoiceMap.Contains(hash)) {
-		categoryVoiceMap.Add(hash, TVoiceList());
+	if (!m_FormatToVoiceListMap.Contains(hash)) {
+		m_FormatToVoiceListMap.Add(hash, TVoiceList());
 	}
-	auto& voiceList = categoryVoiceMap[hash];
+	auto& voiceList = m_FormatToVoiceListMap[hash];
 	voiceList.Add(voice);
 
 	m_Voices.Add(voice);
-	m_VoiceToCategoryMap.Add(voice, voiceCategory);
 
 	voice->OnVoiceError.AddListener(this, &AudioSystem::OnVoiceErrorHandler);
 	voice->OnBufferStart.AddListener(this, &AudioSystem::OnBufferStartHandler);
 	voice->OnBufferEnd.AddListener(this, &AudioSystem::OnBufferEndHandler);
 
-	return voice->SetOutputTo(voiceCategory);
+	return true;
 }
 
 void AudioSystem::OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT result) {
@@ -337,20 +327,15 @@ void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
-	assert(m_VoiceToCategoryMap.Contains(voice));
-	auto category = m_VoiceToCategoryMap[voice];
-
-	assert(m_CategoryToVoiceListMap.Contains(category));
-	auto& voiceListMap = m_CategoryToVoiceListMap[category];
-
 	assert(context);
 	Sound* snd = (Sound*)context;
 
 	auto hash = GenerateHash(snd->Format().Format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
-	assert(voiceListMap.Contains(hash));
-	auto& voiceList = voiceListMap[hash];
+	assert(m_FormatToVoiceListMap.Contains(hash));
+	auto& voiceList = m_FormatToVoiceListMap[hash];
 
 	assert(!voice->IsPlaying());
+	voice->SetOutputTo();//Clear output voices to avoid audio glitches when reusing the voice
 
 	//Place the voice to the back of the list so we can find open voices quickly
 	voiceList.Remove(voice);
@@ -411,7 +396,6 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category)
 		FOREACH(fxIter, doc) {
 			assert(fxIter->IsObject());
 			FOREACH_MEMBER(memberIter, (*fxIter)) {
-				assert(memberIter != fxIter->MemberEnd());
 				assert(index < numFx);
 
 				fxInfoList[index] = &m_FxNameToInfoMap[memberIter->name.GetString()];

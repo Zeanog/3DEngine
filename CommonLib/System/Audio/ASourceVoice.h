@@ -58,7 +58,7 @@ public:
 	template <typename... Voices>
 	Bool SetOutputTo(Voices... destVoices) {
 		static constexpr UINT32 NumDescriptors = sizeof...(Voices);
-		XAUDIO2_SEND_DESCRIPTOR descriptors[NumDescriptors];
+		XAUDIO2_SEND_DESCRIPTOR descriptors[max(NumDescriptors, 1)];//Needed if we pass in no voices
 		XAUDIO2_VOICE_SENDS sends{ NumDescriptors, descriptors };
 
 		std::size_t i = 0;
