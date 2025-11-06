@@ -5,6 +5,9 @@ I have been working on this slowly over a couple of years.  I found a demo (http
 
 I've also been using this to tryout various ideas in C++ I've had, like a foreach loop.  So some of the code is inefficient.  But I hope somewhat clever.  :D
 
+11/6/2025:
+Added a reflection system a couple of weeks ago.  Allows users to define a reflection object for a given data structure.  Needs work in regards to complex types like lists and maps.
+
 9/14/2025:
 Added first pass at xAudio2 implementation.
 
