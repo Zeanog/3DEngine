@@ -288,8 +288,6 @@ public:
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		assert(value.IsArray());
-		
 		auto parser = Singleton<ValueParser<_TElemValue>>::GetInstance();
 		FOREACH( iter, value ) {
 			_TElemValue elem{};
@@ -301,7 +299,7 @@ public:
 	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) const override {
 		assert(dest);
 		//assert(sizeof(TValue) == size);
-		//TODO: Possibly use size
+		//TODO: Possibly use size to validate
 		TValue& list = *(TValue*)dest;
 		Get(src, list);
 	}
@@ -314,13 +312,13 @@ class ValueParser<Map<StaticString, _TMapValue>> : public AValueParser<Map<Stati
 	}
 
 public:
-	typedef TSuper::TValue		TValue;//This is actually Map<_TKey, _TValue>
+	typedef TSuper::TValue		TValue;
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		assert(value.IsObject());
-
 		auto parser = Singleton<ValueParser<_TMapValue>>::GetInstance();
+
+		assert(value.IsObject());
 		FOREACH_MEMBER(iter, value) {
 			_TValue elem{};
 			parser->Get(iter->value, elem);
@@ -381,7 +379,7 @@ public:
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		assert(value.IsInt());
+		assert(value.IsUint());
 		outValue = (TValue)value.GetUint();
 	}
 };
@@ -532,7 +530,7 @@ public:
 
 	template<typename TObject>
 	Bool	Set(const StaticString& memberName, TObject* obj, const rapidjson::Value& memberValue) {
-		if (!m_MemberInfoMap.Contains(memberName)) {
+		if (!m_MemberInfoMap.Contains(memberName)) {//Ignore unknown members
 			return false;
 		}
 

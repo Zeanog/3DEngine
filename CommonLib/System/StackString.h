@@ -90,4 +90,4 @@ public:
 	}*/
 };
 
-#define STACK_STRING( name, sizeInBytes )	StackString name((Char*)_alloca((sizeInBytes)), (sizeInBytes))
+#define STACK_STRING( name, length )	StackString name(STACK_ALLOC(Char, (length)), (length))
