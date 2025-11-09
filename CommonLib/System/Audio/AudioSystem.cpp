@@ -370,9 +370,8 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& ca
 	return LoadEffects(path, GetCategoryVoice(categoryName));
 }
 
-#include "System/Reflector.h"
 #include "System/JsonLoader.h"
-UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category) {
+UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category) {//TODO: Possibly accept SourceVoices also
 	try {
 		rapidjson::Document	doc;
 		if (!rapidjson::LoadFrom(path, doc)) {

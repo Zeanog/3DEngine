@@ -11,13 +11,12 @@ public:
 	typedef _TParameters	TParameters;
 
 public:
-	static Bool	UpdateFrom(TParameters& inOutParams, const rapidjson::Value& value) {
+	static Bool	UpdateFrom(TParameters& outParams, const rapidjson::Value& value) {
 		assert(value.IsObject());
 
 		FOREACH_MEMBER(iter, value) {
-			auto memberName = iter->name.GetString();
 			auto reflector = Singleton<Reflector<TParameters>>::GetInstance();
-			reflector->Set(memberName, inOutParams, iter->value);//This is expected to fail when it attempts to parse "Type"
+			reflector->Set(iter->name.GetString(), outParams, iter->value);//This is expected to fail when it attempts to parse "Type"
 		}
 		return true;
 	}
