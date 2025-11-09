@@ -111,7 +111,7 @@ const RenderTarget* Light_Directional::LinkShadowMapTo(const ShaderProgram_GLSL&
 	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
 }
 
-void Light_Directional::DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform)
+void Light_Directional::DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -278,7 +278,7 @@ glm::mat4 Light_Spot::AsCameraTransform() const {
 	return m_Transform;
 }
 
-void Light_Spot::DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform)
+void Light_Spot::DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

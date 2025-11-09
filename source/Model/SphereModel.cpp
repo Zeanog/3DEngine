@@ -17,7 +17,7 @@ SphereModel::SphereModel(float radius, unsigned int meshPrecision)
 /** 
 *	Render
 */
-void SphereModel::render( const ShaderProgram_GLSL& program )
+void SphereModel::render( ShaderProgram_GLSL& program )
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

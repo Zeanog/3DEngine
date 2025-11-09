@@ -155,11 +155,11 @@ protected:
 	TPosition		m_TargetPosition;
 
 public:
-	CameraInterpolator() : TSuper(new Camera()), m_TargetRotation(glm::identity<TRotation>()) {
+	CameraInterpolator() : TSuper(new Camera()), m_TargetPosition(), m_TargetRotation(glm::identity<TRotation>()) {
 
 	}
 
-	CameraInterpolator(ICamera* decoratee) : TSuper(decoratee) {
+	CameraInterpolator(ICamera* decoratee) : TSuper(decoratee), m_TargetPosition(), m_TargetRotation(glm::identity<TRotation>()) {
 	}
 
 	virtual ~CameraInterpolator() {

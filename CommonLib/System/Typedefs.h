@@ -30,13 +30,31 @@ public:
 };
 
 template<typename TData>
+class TypeInfo<const TData> {
+public:
+	typedef TData	TUndecorated;
+};
+
+template<typename TData>
 class TypeInfo<TData&> {
 public:
 	typedef TData	TUndecorated;
 };
 
 template<typename TData>
+class TypeInfo<const TData&> {
+public:
+	typedef TData	TUndecorated;
+};
+
+template<typename TData>
 class TypeInfo<TData*> {
+public:
+	typedef TData	TUndecorated;
+};
+
+template<typename TData>
+class TypeInfo<const TData*> {
 public:
 	typedef TData	TUndecorated;
 };
@@ -92,6 +110,9 @@ public:
 
 #define FOREACH_CONST_REV( iterName, stlContainer )	\
 	for( auto&& iterName = ContainerIterator<decltype(stlContainer)>::ReverseBegin(stlContainer), iterName##End = ContainerIterator<decltype(stlContainer)>::ReverseEnd(stlContainer); iterName != iterName##End; iterName++ )
+
+#define FOR( indexType, indexName, startIndex, endIndex, indexStride) \
+	for( indexType indexName = (startIndex); indexName < (endIndex); indexName += (indexStride) )
 
 #define STACK_ALLOC( type, num )	(type*)_alloca( sizeof(type)*num )
 
@@ -187,10 +208,10 @@ inline void	__fastcall propName(Param<decltype(name)>::Type val) {			\
 }
 
 #define DEFINE_MEMBER_EX( type, propName )	\
-protected:											\
-type	m_##propName{};										\
-public:												\
-DEFINE_GETSET_EX( propName, m_##propName )					\
+protected:									\
+type	m_##propName{};						\
+public:										\
+DEFINE_GETSET_EX( propName, m_##propName )	\
 private:
 
-#define DEFINE_GETSET( name )	DEFINE_GETSET_EX(name, m_##name)
+#define DEFINE_GETSET( propName )	DEFINE_GETSET_EX(name, m_##propName)

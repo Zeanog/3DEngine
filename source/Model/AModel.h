@@ -10,28 +10,23 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include <string>
-
 #include <glm/mat3x3.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
-
 #include <glm/gtx/euler_angles.hpp>
 
-/** 
-*	Every renderable object inherits from this interface for simplicity
-*/
-class IModel
+class AModel
 {
 public:
 	typedef glm::quat	TRotation;
 
 public:
 	// Methods
-	IModel() : m_Rotation(glm::identity<TRotation>()), m_Bounds(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f))
+	AModel() : m_Rotation(glm::identity<TRotation>()), m_Bounds(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f))
 	{
 		
 	}
-	virtual ~IModel(){}
+	virtual ~AModel(){}
 
 	virtual bool	LoadImage(const StaticString& textureName);
 	virtual void	Position(const glm::vec3& pos);
@@ -57,7 +52,7 @@ public:
 	}
 	virtual void		Rotate(const TRotation& delta);
 	virtual void		Rotate(Float32 pitch, Float32 yaw, Float32 roll);
-	virtual void	render( const ShaderProgram_GLSL& program ) = 0;
+	virtual void	render( ShaderProgram_GLSL& program ) = 0;
 
 	Neo::Bounds	GetBounds() const {
 		return m_Bounds.Shift(m_Position);

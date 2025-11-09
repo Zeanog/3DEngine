@@ -2,16 +2,8 @@
 
 #include <windows.h>
 #include <gl/gl.h>
-#include "ModelLoaders/ModelLoader_FBX.h"
+#include "ModelLoaders/MeshLoader_FBX.h"
 #include "Rendering/Joint.h"
-
-void Neo::Mesh::Material::Bind() const {
-	TSuper::Bind();
-}
-
-void Neo::Mesh::Material::Unbind() const {
-	TSuper::Unbind();
-}
 
 Neo::Mesh::Mesh() {
 }
@@ -30,22 +22,53 @@ Bool Neo::Mesh::RenderMaterial(int index) const {
 		return false;
 	}
 
+	//TODO: Handle multiple textures per material
 	const AMaterial* matSlot = m_Materials[index];
 
-	matSlot->Bind();
+	//One pass for each channel
+	for (UInt32 ix = 0; ix < matSlot->Channels.Length(); ++ix)
+	{
+		matSlot->Channels[ix]->Bind();//TODO: Need to get the correct shader program to use here
 
-	const UInt32*	ibStart = &m_IndexBuffer[matSlot->Index];
-	Int32			indexCount = matSlot->PolyCount * 3;
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, ibStart);
+		const UInt32*	indexStart = &m_IndexBuffer[matSlot->Index];
+		UInt32			indexCount = matSlot->PolyCount * 3;
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
+		assert(!glGetError());
+
+		matSlot->Channels[ix]->Unbind();
+	}
+	return true;
+}
+
+Bool Neo::Mesh::RenderMaterial(int index, const List<StaticString>& channels) const {
+	if (index < 0 || index >= (int)m_Materials.Length()) {
+		return false;
+	}
+
+	//TODO: Handle multiple textures per material
+	const AMaterial* matSlot = m_Materials[index];
+
+	for (UInt32 ix = 0; ix < channels.Length(); ++ix)
+	{
+		auto channel = matSlot->ChannelMap[channels[ix]];
+		channel->Bind();
+	}
+
+	const UInt32* indexStart = &m_IndexBuffer[matSlot->Index];
+	UInt32			indexCount = matSlot->PolyCount * 3;
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
 	assert(!glGetError());
 
-	matSlot->Unbind();
-
+	for (UInt32 ix = 0; ix < channels.Length(); ++ix)
+	{
+		auto channel = matSlot->ChannelMap[channels[ix]];
+		channel->Unbind();
+	}
 	return true;
 }
 
 Bool Neo::Mesh::Render() const {
-	const UInt32*	ibStart = &m_IndexBuffer[0];
+	const UInt32* ibStart = &m_IndexBuffer[0];
 	Int32			indexCount = m_IndexBuffer.Count();
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, ibStart);
 	assert(!glGetError());
@@ -60,6 +83,10 @@ Bool Neo::Mesh::RenderJoints() const {
 }
 
 Bool Neo::Mesh::RenderJoints(const AnimKeyFrame* keyFrame) const {
+	if (!keyFrame) {
+		return false;
+	}
+
 	glm::mat4 transform;
 	for (UInt32 ix = 0; ix < m_Skeleton.NumJoints(); ++ix) {
 		transform = keyFrame->GetGlobalTransform(ix, m_Skeleton);
@@ -85,11 +112,14 @@ Bool Neo::Mesh::UploadData(const AMeshLoader& loader) {
 	m_Materials = loader.Materials();
 
 	m_Bounds += m_VertexBuffer.Positions();
-	
-	verify( m_Skeleton.UploadData(loader) );
-	for (UInt32 ix = 0; ix < loader.AnimationClips().Length(); ++ix) {
-		m_AnimationClips.Add(loader.AnimationClips()[ix]);
-	}
-	
+
+	verify(m_Skeleton.UploadData(loader));
+
+	auto& animNames = loader.AnimNames();
+	m_AnimNames = animNames;//TODO: Find a more efficient way to do this
+
+	auto& clips = loader.AnimationClips();
+	m_AnimationClips = clips;//TODO: Find a more efficient way to do this
+
 	return true;
 }

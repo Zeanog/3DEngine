@@ -27,7 +27,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     m_Format.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 
     long total_sections = ov_streams(&oggFile);
-    ogg_int64_t total_samples = ov_pcm_total(&oggFile, -1);
+    Int64 total_samples = (Int64)ov_pcm_total(&oggFile, -1);
     
     m_AudioDataSize = total_samples * (m_Format.Format.wBitsPerSample / 8) * m_Format.Format.nChannels;
     m_AudioData.reset(new Byte[m_AudioDataSize]);

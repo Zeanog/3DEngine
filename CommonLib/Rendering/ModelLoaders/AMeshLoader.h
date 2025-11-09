@@ -17,10 +17,10 @@ public:
 protected:
 	VertexBuffer	m_VertexBuffer;
 	IndexBuffer		m_IndexBuffer;
-	List<Neo::Mesh::AMaterialSlot*>	m_MaterialSlots;
+	List<Neo::Mesh::AMaterial*>	m_Materials;
 
-	List<JointInfo>			m_Joints;
-	List<AnimationClip*>	m_AnimationClips;
+	List<JointInfo>				m_Joints;
+	List<AnimationClip*>		m_AnimationClips;
 
 public:
 	virtual Bool	Load(const StaticString& fileName) = 0;
@@ -38,8 +38,8 @@ public:
 		return m_AnimationClips;
 	}
 
-	const List<Neo::Mesh::AMaterialSlot*>& MaterialSlots() const {
-		return m_MaterialSlots;
+	const List<Neo::Mesh::AMaterial*>& MaterialSlots() const {
+		return m_Materials;
 	}
 
 	const List<JointInfo>& Joints() const {

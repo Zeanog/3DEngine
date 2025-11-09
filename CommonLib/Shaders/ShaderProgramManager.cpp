@@ -1,6 +1,7 @@
 #include "ShaderProgramManager.h"
 
 #include "rapidjson/rapidjson.h"
+#include "ShaderManager_Vertex.h"
 
 ShaderProgramManager::ShaderProgramManager() {
 }
@@ -8,35 +9,24 @@ ShaderProgramManager::ShaderProgramManager() {
 ShaderProgramManager::~ShaderProgramManager() {
 }
 
-const ShaderProgramManager::TAsset*	ShaderProgramManager::Get(const StaticString& name) {
+const ShaderProgramManager::TAsset*	ShaderProgramManager::Get(const StaticString& vertPath, const StaticString& fragPath) {
 	TAsset* asset{};
-	m_Container.Find(name, asset);
-	/*if (asset) {
+
+	//TODO: Please find a better way of doing this!!!!!
+	UInt32 pathLength = vertPath.Length() + fragPath.Length() + 1;
+	STACK_STRING(uniqueName, pathLength);
+	strcat_s(uniqueName.CStr(), pathLength, vertPath.CStr());
+	strcat_s(uniqueName.CStr(), pathLength, fragPath.CStr());
+	//TODO: Please find a better way of doing this!!!!!
+
+	if (m_Container.Find(uniqueName.CStr(), asset)) {
 		return asset;
 	}
 
-	File file;
-	if (!file.Open(path, "rb")) {
-		return NULL;
-	}
-
-	const Char* encodedData = STACK_ALLOC(Char, file.Length());
-
-	file.Read(encodedData, file.Length());
-
 	asset = new TAsset();
-	json_value* root = json_parse(encodedData, file.Length());
-	if (!asset->ReadFrom(root)) {
-		DeletePtr(asset);
-		return NULL;
-	}
-
-	json_value_free(root);
-	root = NULL;
-
-	file.Close();
-
-	m_Container.Add(path, asset);*/
+	Load(uniqueName.CStr(), vertPath, fragPath, asset);
 	return asset;
+}
 
+void ShaderProgramManager::ReloadAll() {
 }

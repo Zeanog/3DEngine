@@ -38,8 +38,10 @@
     <ClInclude Include="Rendering\Joint.h" />
     <ClInclude Include="Rendering\Mesh.h" />
     <ClInclude Include="Rendering\Model.h" />
+    <ClInclude Include="Rendering\ModelLoaders\AMeshLoader.h" />
+    <ClInclude Include="Rendering\ModelLoaders\MeshLoader_FBX.h" />
     <ClInclude Include="Rendering\ModelLoaders\MeshManager.h" />
-    <ClInclude Include="Rendering\ModelLoaders\ModelLoader_FBX.h" />
+    <ClInclude Include="Rendering\ModelLoaders\ModelLoader.h" />
     <ClInclude Include="Rendering\ModelLoaders\ModelManager.h" />
     <ClInclude Include="Rendering\RenderDef.h" />
     <ClInclude Include="Rendering\VertexBuffer.h" />
@@ -82,13 +84,12 @@
     <ClInclude Include="System\Functors\MultiFunctor.h" />
     <ClInclude Include="System\Functors\ParamType.h" />
     <ClInclude Include="System\Functors\TypeList.h" />
-    <ClInclude Include="System\IJsonSerializable.h" />
     <ClInclude Include="System\Input\ADevice.h" />
     <ClInclude Include="System\Input\InputSystem.h" />
     <ClInclude Include="System\Input\Keyboard.h" />
     <ClInclude Include="System\Input\Mouse.h" />
     <ClInclude Include="System\Input\VirtualKey.h" />
-    <ClInclude Include="System\JsonSerializer.h" />
+    <ClInclude Include="System\JsonLoader.h" />
     <ClInclude Include="System\LinkedList.h" />
     <ClInclude Include="System\List.h" />
     <ClInclude Include="System\Map.h" />
@@ -124,8 +125,9 @@
     <ClCompile Include="Rendering\Joint.cpp" />
     <ClCompile Include="Rendering\Mesh.cpp" />
     <ClCompile Include="Rendering\Model.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\MeshLoader_FBX.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp" />
-    <ClCompile Include="Rendering\ModelLoaders\ModelLoader_FBX.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\ModelLoader.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\ModelManager.cpp" />
     <ClCompile Include="Rendering\RenderDef.cpp" />
     <ClCompile Include="Rendering\VertexBuffer.cpp" />
@@ -151,8 +153,9 @@
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
     <ClCompile Include="System\File.cpp" />
-    <ClCompile Include="System\JsonSerializer.cpp" />
+    <ClCompile Include="System\JsonLoader.cpp" />
     <ClCompile Include="System\StaticString.cpp" />
+    <ClCompile Include="System\String.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />
     <ClCompile Include="TinyXML\tinyxml2.cpp" />
   </ItemGroup>
@@ -223,7 +226,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)FbxSdk\include;$(ProjectDir)\Math;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(SolutionDir)packages\rapidjson.1.0.2\build\native\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Rendering\ModelLoaders\FbxSdk\include;$(ProjectDir)\Math;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(SolutionDir)packages\rapidjson.1.0.2\build\native\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>

@@ -4,44 +4,59 @@
 #include "System/Map.h"
 #include "System/Functors/Functor.h"
 #include "Rendering/Mesh.h"
+#include "Shaders/ShaderProgram_GLSL.h"
+#include "System/Reflector.h"
 
 class AModelLoader {
-	CLASS_TYPEDEFS(AModelLoader);
+	CLASS_TYPEDEFS(AModelLoader)
 
 public:
-	virtual Bool	Load(const StaticString& fileName) = 0;
+	virtual Bool	Load(const Char* fileName) = 0;
 	virtual	void	Clear() = 0;
 };
 
 class ModelLoader : public AModelLoader {
-	INHERITEDCLASS_TYPEDEFS(ModelLoader, AModelLoader);
+	INHERITEDCLASS_TYPEDEFS(ModelLoader, AModelLoader)
 
 protected:
-	typedef Functor<void, TYPELIST_1(json_value*)> TFieldParser;
-
-	Map < StaticString, TFieldParser>	m_FieldParsers;
+	DEFINE_MEMBER_EX(Bool, InvertNormals)
 
 	StaticString		m_MeshFilePath;
-	Bool				m_InvertNormals;
-	StaticString		m_FragProgamFilePath;
-	StaticString		m_VertProgamFilePath;
 
-	StaticString		m_FragShadowProgamFilePath;
-	StaticString		m_VertShadowProgamFilePath;
+	ShaderProgram_GLSL* m_ShaderProgram{};
+	List<StaticString>	m_RequiredChannels;//These are the textures to be provided to the shader
+
+	ShaderProgram_GLSL* m_ShadowProgram{};
+
+	typedef Functor<void, TYPELIST_1(const rapidjson::Value&)> TFieldParser;
+	Map < StaticString, TFieldParser>	m_FieldParsers;
 
 protected:
-	void				ParseMesh(json_value* node);
-	void				ParseInvertedNormals(json_value* node);
-	void				ParseShaderProgram(json_value* node);
-	void				ParseShadowProgram(json_value* node);
+	void				ParseMesh(const rapidjson::Value& value);
+	void				ParseInvertedNormals(const rapidjson::Value& value);
+	void				ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL& inoutProgram);
+	void				ParseShaderProgram(const rapidjson::Value& value);
+	void				ParseShadowProgram(const rapidjson::Value& value);
+
+	template<typename TData>
+	void				Parse(const rapidjson::Value& value, TData& outData) {
+		Singleton<ValueParser<TData>>::GetInstance()->Get(value, outData);
+	}
 
 public:
 	ModelLoader();
 
-	Neo::Mesh* Mesh() const;
-	bool			GetShaderPrograms(StaticString& vertProgPath, StaticString& fragProgPath) const;
-	bool			GetShadowPrograms(StaticString& vertProgPath, StaticString& fragProgPath) const;
+	Neo::Mesh*		Mesh() const;
+	const ShaderProgram_GLSL* GetShaderProgram() {
+		return m_ShaderProgram;
+	}
+	const ShaderProgram_GLSL* GetShadowPrograms() {
+		return m_ShadowProgram;
+	}
+	List<StaticString>&& GetRequiredChannels() {
+		return std::move(m_RequiredChannels);
+	}
 
-	virtual Bool	Load(const StaticString& fileName);
+	virtual Bool	Load(const Char* fileName);
 	virtual	void	Clear();
 };

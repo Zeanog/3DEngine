@@ -1,5 +1,5 @@
 {
-	"mesh": "data/Zombie.fbx",
+	"mesh": "Data/Zombie.fbx",
 	"invertNormals": true,
 	"shaderProgram": {
 		"vert": "data/deferredShading.vert",

@@ -1,7 +1,11 @@
 #pragma once
 
-#define BUS_BIT_SIZE	(64)
-#define BUS_BYTE_SIZE	(BUS_BIT_SIZE / 8)
+#if WIN32
+static constexpr UInt32 BUS_BIT_SIZE = 32;
+#else
+static constexpr UInt32 BUS_BIT_SIZE = 64;
+#endif
+static constexpr UInt32 BUS_BYTE_SIZE = (BUS_BIT_SIZE / 8);
 
 template< typename _TData >
 class Param {

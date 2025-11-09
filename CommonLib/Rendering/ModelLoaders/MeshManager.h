@@ -2,7 +2,7 @@
 
 #include "System/AssetManager.h"
 #include "Rendering/Mesh.h"
-#include "Rendering/ModelLoaders/ModelLoader_FBX.h"
+#include "Rendering/ModelLoaders/MeshLoader_FBX.h"
 #include "System/Singleton.h"
 
 class MeshManager {

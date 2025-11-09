@@ -3,8 +3,6 @@
 #include "AVoice.h"
 #include <xaudio2.h>
 
-#include "System/Win32/Error.h"
-
 template<typename TVoiceInterface>
 class ASourceVoice : public AVoice {
 	INHERITEDCLASS_TYPEDEFS(ASourceVoice, AVoice)
@@ -105,9 +103,9 @@ public:
 		const Char* msg{};
 
 		auto result = m_Voice->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
-		if (FAILED(result)) {
+		/*if (FAILED(result)) {
 			msg = GetErrorMessage(result);
-		}
+		}*/
 		return SUCCEEDED(result);
 	}
 

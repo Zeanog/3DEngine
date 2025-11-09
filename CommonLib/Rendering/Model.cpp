@@ -4,7 +4,6 @@
 #include "Images/ImageManager.h"
 #include "ModelLoaders/MeshManager.h"
 #include "Shaders/ShaderProgram_GLSL.h"
-#include "System/JsonSerializer.h"
 
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,13 +14,15 @@ Model::Model(const StaticString& meshPath) : m_Rotation(glm::identity<TRotation>
 {
 	m_Mesh = Singleton<MeshManager>::GetInstance()->Get(meshPath);
 
-	//m_DebugAnimPlayer.Start(m_Mesh->GetClip(0));
+	if (m_Mesh->NumClips() > 0) {
+		m_DebugAnimPlayer.Start(m_Mesh->GetClip(0));
+	}
 }
 
 Model::~Model() {
 }
 
-void Model::Render(const ShaderProgram_GLSL& program) const {
+void Model::Render(ShaderProgram_GLSL& program) const {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
@@ -36,7 +37,7 @@ void Model::Render(const ShaderProgram_GLSL& program) const {
 	m_Mesh->PreRender((VertexBuffer::VertexAttributes)(VertexBuffer::VertexAttributes::PositionAttrib | VertexBuffer::VertexAttributes::NormalAttrib | VertexBuffer::VertexAttributes::TexCoordsAttrib));
 
 	for (int ix = 0; ix < m_Mesh->NumMaterials(); ++ix) {
-		m_Mesh->RenderMaterial(ix);
+		m_Mesh->RenderMaterial(ix);//TODO: Handle unique programs per material
 	}
 
 	m_Mesh->PostRender();
@@ -46,7 +47,7 @@ void Model::Render(const ShaderProgram_GLSL& program) const {
 	glPopMatrix();
 }
 
-void Model::RenderJoints(Float32 deltaTime) {
+void Model::RenderJoints(ShaderProgram_GLSL& program, Float32 deltaTime) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
@@ -58,16 +59,22 @@ void Model::RenderJoints(Float32 deltaTime) {
 
 	m_DebugAnimPlayer.Update(deltaTime);
 
-	//m_Mesh->PreRender((VertexBuffer::VertexAttributes)(VertexBuffer::VertexAttributes::PositionAttrib | VertexBuffer::VertexAttributes::NormalAttrib | VertexBuffer::VertexAttributes::TexCoordsAttrib));
+	program.StartUsing();
+	program.LinkUniform("vColor", glm::vec4(0.0f, 1.0f, 0.5f, 1.0f));
 
-	//m_Mesh->Render();
 	m_Mesh->RenderJoints(m_DebugAnimPlayer.GetCurrentFrame());
 
-	//m_Mesh->PostRender();
+	program.StopUsing();
 
 	glPopMatrix();
 }
 
-Bool Model::UploadData(const AModelLoader& loader) {
+#include "Rendering/ModelLoaders/ModelLoader.h"
+Bool Model::UploadData(ModelLoader& loader) {
+	m_Mesh = loader.Mesh();
+	m_InvertedNormals = loader.InvertNormals();
+	m_ShaderProgram = loader.GetShaderProgram();
+	m_RequiredChannels = loader.GetRequiredChannels();
+	m_ShadowProgram = loader.GetShadowPrograms();
 	return true;
 }

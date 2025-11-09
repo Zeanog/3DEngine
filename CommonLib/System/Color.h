@@ -40,6 +40,26 @@ public:
 		return m_Components[ index ];
 	}
 
+	Bool operator==( const AColor& rhs ) const {
+		assert(NumComponents == rhs.NumComponents);
+		for ( UInt32 i = 0; i < NumComponents; ++i ) {
+			if (m_Components[i] != rhs.m_Components[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	Bool operator!=(const AColor& rhs) const {
+		assert(NumComponents == rhs.NumComponents);
+		for (UInt32 i = 0; i < NumComponents; ++i) {
+			if (m_Components[i] != rhs.m_Components[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	TData&	Red() {
 		return m_Components[0];
 	}
@@ -78,7 +98,7 @@ class Color;
 
 template<>
 class Color<Byte> : public AColor<Byte> {
-	INHERITEDCLASS_TYPEDEFS( Color, AColor<Byte> );
+	INHERITEDCLASS_TYPEDEFS( Color, AColor<Byte> )
 
 public:
 	static TSelf	White;
@@ -103,7 +123,7 @@ public:
 
 template<>
 class Color<Float32> : public AColor<Float32> {
-	INHERITEDCLASS_TYPEDEFS( Color, AColor<Float32> );
+	INHERITEDCLASS_TYPEDEFS( Color, AColor<Float32> )
 
 public:
 	static TSelf	White;

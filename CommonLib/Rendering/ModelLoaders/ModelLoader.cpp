@@ -1,52 +1,55 @@
 #include "ModelLoader.h"
-#include "System/json.h"
+#include "rapidjson\document.h"
 #include "System/File.h"
 #include "Rendering/ModelLoaders/MeshManager.h"
+#include "System/Reflector.h"
+#include "System/JsonLoader.h"
+#include "Shaders/ShaderProgramManager.h"
 
-/*
-{
-	"mesh":"data/Cicada.fbx",
-	"invertNormals": false,
-	"shaderProgram": {
-		"vert": "data/deferredShading.vert",
-		"frag": "data/deferredShading.frag"
-	}
-}
-*/
-void	ModelLoader::ParseMesh(json_value* node) {
-	assert(node->type == json_type::json_string);
-	m_MeshFilePath = node->u.string.ptr;
+void	ModelLoader::ParseMesh(const rapidjson::Value& value) {
+	Parse(value, m_MeshFilePath);
 }
 
-void ModelLoader::ParseInvertedNormals(json_value* node) {
-	assert(node->type == json_type::json_boolean);
-	m_InvertNormals = node->u.boolean;
+void ModelLoader::ParseInvertedNormals(const rapidjson::Value& value) {
+	Parse(value, m_InvertNormals);
 }
 
-void	ModelLoader::ParseShaderProgram(json_value* node) {
-	assert(node->type == json_type::json_object);
-	for (unsigned int ix = 0; ix < node->u.object.length; ++ix) {
-		if (String::StrICmp(node->u.object.values[ix].name, "vert") == 0 ) {
-			m_VertProgamFilePath = node->u.object.values[ix].value->u.string.ptr;
+void ModelLoader::ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL& inoutProgram) {
+	assert(value.IsObject());
+
+	static StaticString s_Vert("vert");
+	static StaticString s_Frag("frag");
+	StaticString vertProgFilePath;
+	StaticString fragProgFilePath;
+
+	FOREACH_MEMBER(memberIter, value) {
+		StaticString memberName(memberIter->name.GetString());
+		if (memberName == s_Vert) {
+			Parse(memberIter->value, vertProgFilePath);
 		}
-
-		if (String::StrICmp(node->u.object.values[ix].name, "frag") == 0) {
-			m_FragProgamFilePath = node->u.object.values[ix].value->u.string.ptr;
+		else if (memberName == s_Frag) {
+			Parse(memberIter->value, fragProgFilePath);
 		}
 	}
+
+	verify(inoutProgram.Create(vertProgFilePath, fragProgFilePath, NULL));
+	inoutProgram.EnumerateUniforms(m_RequiredChannels, GL_SAMPLER_2D);
+	//May need to manually add some channels here later
 }
 
-void	ModelLoader::ParseShadowProgram(json_value* node) {
-	assert(node->type == json_type::json_object);
-	for (unsigned int ix = 0; ix < node->u.object.length; ++ix) {
-		if (String::StrICmp(node->u.object.values[ix].name, "vert") == 0) {
-			m_VertShadowProgamFilePath = node->u.object.values[ix].value->u.string.ptr;
-		}
-
-		if (String::StrICmp(node->u.object.values[ix].name, "frag") == 0) {
-			m_FragShadowProgamFilePath = node->u.object.values[ix].value->u.string.ptr;
-		}
+void	ModelLoader::ParseShaderProgram(const rapidjson::Value& value) {
+	if (!m_ShaderProgram) {
+		m_ShaderProgram = new ShaderProgram_GLSL();
 	}
+	ParseProgram(value, *m_ShaderProgram);
+}
+
+void	ModelLoader::ParseShadowProgram(const rapidjson::Value& value) {
+	if (!m_ShadowProgram) {
+		m_ShadowProgram = new ShaderProgram_GLSL();
+	}
+	ParseProgram(value, *m_ShadowProgram);
+
 }
 
 ModelLoader::ModelLoader() {
@@ -67,47 +70,32 @@ ModelLoader::ModelLoader() {
 	m_FieldParsers.Add("shadowProgram", ssp);
 }
 
-Bool	ModelLoader::Load(const StaticString& fileName) {
-	File file;
-	if (!file.Open(fileName, "rb")) {
-		return false;
-	}
+Bool	ModelLoader::Load(const Char* fileName) {
+	rapidjson::Document	doc;
+	verify(rapidjson::LoadFrom(fileName, doc));
+	assert(doc.IsObject());
 
-	char* buffer = new char[file.Length()];
-	if (!file.Read(buffer, file.Length())) {
-		return false;
-	}
-
-	json_value* root = json_parse(buffer, file.Length());
-	assert(root->type == json_type::json_object);
-	for (unsigned int ix = 0; ix < root->u.object.length; ++ix) {
-		m_FieldParsers[root->u.object.values[ix].name]( root->u.object.values[ix].value );
-	}
-
-	DeleteArray(buffer);
-
-	if (!Singleton<MeshManager>::GetInstance()->IsLoaded(m_MeshFilePath)) {
-		Singleton<MeshManager>::GetInstance()->Load(m_MeshFilePath, m_InvertNormals);//This shouldnt be here. Need a mesh meta file
+	FOREACH_MEMBER(memberIter, doc) {
+		StaticString memberName(memberIter->name.GetString());
+		if (!m_FieldParsers.Contains(memberName)) {
+			continue;
+		}
+		auto& parser = m_FieldParsers[memberName];
+		parser(memberIter->value);
 	}
 
 	return true;
 }
 
 void	ModelLoader::Clear() {
+	m_MeshFilePath = "";
+	m_InvertNormals = false;
+	m_ShaderProgram = nullptr;
+	m_RequiredChannels.Clear();
+
+	m_ShadowProgram = nullptr;
 }
 
 Neo::Mesh* ModelLoader::Mesh() const {
 	return Singleton<MeshManager>::GetInstance()->Get(m_MeshFilePath);
-}
-
-bool ModelLoader::GetShaderPrograms(StaticString& vertProgPath, StaticString& fragProgPath) const {
-	vertProgPath = m_VertProgamFilePath;
-	fragProgPath = m_FragProgamFilePath;
-	return vertProgPath.Length() > 0 && fragProgPath.Length();
-}
-
-bool ModelLoader::GetShadowPrograms(StaticString& vertProgPath, StaticString& fragProgPath) const {
-	vertProgPath = m_VertShadowProgamFilePath;
-	fragProgPath = m_FragShadowProgamFilePath;
-	return vertProgPath.Length() > 0 && fragProgPath.Length();
 }

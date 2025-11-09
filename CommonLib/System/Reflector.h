@@ -4,8 +4,7 @@
 #include "List.h"
 #include "StaticString.h"
 #include "System\Singleton.h"
-
-#include "rapidjson\document.h"
+#include <rapidjson/document.h>
 
 template<>
 class ContainerIterator<rapidjson::Value> {
@@ -57,6 +56,54 @@ public:
 
 template<>
 class ContainerIterator<rapidjson::Value&> {
+public:
+	typedef typename rapidjson::Value	TContainer;
+
+	typedef typename TypeInfo<TContainer>::TUndecorated TUndecorated;
+
+	typedef typename TUndecorated::ValueIterator	Iterator;
+	typedef typename TUndecorated::ConstValueIterator	ConstIterator;
+
+	typedef typename TUndecorated::ValueIterator	ReverseIterator;
+	typedef typename TUndecorated::ConstValueIterator ConstReverseIterator;
+
+	static Iterator	Begin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstIterator	Begin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static Iterator	End(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstIterator	End(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+
+	static ReverseIterator	ReverseBegin(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ConstReverseIterator	ReverseBegin(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.Begin();
+	}
+	static ReverseIterator	ReverseEnd(typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+	static ConstReverseIterator	ReverseEnd(const typename TUndecorated& container) {
+		assert(container.IsArray());
+		return container.End();
+	}
+};
+
+template<>
+class ContainerIterator<const rapidjson::Value&> {
 public:
 	typedef typename rapidjson::Value	TContainer;
 
@@ -245,13 +292,13 @@ public:
 		
 		auto parser = Singleton<ValueParser<_TElemValue>>::GetInstance();
 		FOREACH( iter, value ) {
-			_TValue elem{};
+			_TElemValue elem{};
 			parser->Get(*iter, elem);
 			outValue.Add(elem);
 		}
 	}
 
-	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) const override {
 		assert(dest);
 		//assert(sizeof(TValue) == size);
 		//TODO: Possibly use size
@@ -281,18 +328,18 @@ public:
 		}
 	}
 
-	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) override {
+	virtual void Copy(const rapidjson::Value& src, Byte* dest, UInt64 size) const override {
 		assert(dest);
 		//assert(sizeof(TValue) == size);
 		//TODO: Possibly use size
-		TValue& list = *(TValue*)dest;
-		Get(src, list);
+		//TValue& list = *(TValue*)dest;
+		//Get(src, list);
 	}
 };
 //TODO: TEST!!!!!
 
 template<>
-class ValueParser<float> : public AValueParser<float> {
+class ValueParser<Float32> : public AValueParser<Float32> {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
@@ -308,7 +355,7 @@ public:
 };
 
 template<>
-class ValueParser<double> : public AValueParser<double> {
+class ValueParser<Float64> : public AValueParser<Float64> {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {
 	}
@@ -335,7 +382,23 @@ public:
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsInt());
-		outValue = (TValue)value.GetInt();
+		outValue = (TValue)value.GetUint();
+	}
+};
+
+template<>
+class ValueParser<Bool> : public AValueParser<Bool> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+		SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue		TValue;
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsBool());
+		outValue = value.GetBool();
 	}
 };
 
@@ -366,8 +429,8 @@ public:
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		assert(value.IsInt());
-		outValue = (TValue)value.GetInt();
+		assert(value.IsUint());
+		outValue = (TValue)value.GetUint();
 	}
 };
 
@@ -384,6 +447,54 @@ public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
 		assert(value.IsInt64());
 		outValue = value.GetInt64();
+	}
+};
+
+template<>
+class ValueParser<UInt64> : public AValueParser<UInt64> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+		SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue	TValue;
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsUint64());
+		outValue = (TValue)value.GetUint64();
+	}
+};
+
+template<>
+class ValueParser<String> : public AValueParser<String> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+	SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue		TValue;
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsString());
+		outValue = value.GetString();
+	}
+};
+
+template<>
+class ValueParser<StaticString> : public AValueParser<StaticString> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+		SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue		TValue;
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsString());
+		outValue = value.GetString();
 	}
 };
 
@@ -456,7 +567,7 @@ public:
 #include <cstddef>
 
 #define REGISTER_MEMBER( ownerType, member )	\
-m_MemberInfoMap.Add(#member, MemberInfo{ (UInt64)offsetof(ownerType, member), sizeof(ownerType::member), Singleton<ValueParser<decltype(ownerType::member)>>::GetInstance() } );
+m_MemberInfoMap.Add(#member, { (UInt64)offsetof(ownerType, member), sizeof(ownerType::member), Singleton<ValueParser<decltype(ownerType::member)>>::GetInstance() } );
 
 template<typename TClass>
 class Reflector;

@@ -9,7 +9,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-void Neo::Bounds::Render(const ShaderProgram_GLSL& program, const glm::vec3& offset) const {
+void Neo::Bounds::Render(ShaderProgram_GLSL& program, const glm::vec3& offset) const {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 

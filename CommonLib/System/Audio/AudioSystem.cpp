@@ -47,14 +47,14 @@ void AudioSystem::Destroy() {
 }
 
 #undef max
-UINT64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
+UInt64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
 	static constexpr Byte numChannelShift = 56;
 	static constexpr Byte samplesPerSecShift = 32;
 	static constexpr Byte bitsPerSampleShift = 16;
 	static constexpr auto uint16BitMask = std::numeric_limits<UInt16>::max();
 	static constexpr auto byteBitMask = std::numeric_limits<Byte>::max();
 
-	auto val = (UINT64)format.nChannels << numChannelShift | (UINT64)format.nSamplesPerSec << samplesPerSecShift | (UINT64)format.wBitsPerSample << bitsPerSampleShift | format.wFormatTag;
+	auto val = (UInt64)format.nChannels << numChannelShift | (UInt64)format.nSamplesPerSec << samplesPerSecShift | (UInt64)format.wBitsPerSample << bitsPerSampleShift | format.wFormatTag;
 
 	assert(((val >> numChannelShift) & byteBitMask) == format.nChannels);
 	assert(((val >> samplesPerSecShift) & uint16BitMask) == format.nSamplesPerSec);
@@ -64,20 +64,20 @@ UINT64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
 	return val;
 }
 
-UINT64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
+UInt64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
 	static constexpr Byte numChannelShift = 56;
 	static constexpr Byte samplesPerSecShift = 32;
-	static constexpr auto eightBitMask = std::numeric_limits<Byte>::max();
+	static constexpr auto byteBitMask = std::numeric_limits<Byte>::max();
 
-	auto val = (UINT64)numChannels << numChannelShift | (UINT64)sampleRate << samplesPerSecShift;
+	auto val = (UInt64)numChannels << numChannelShift | (UInt64)sampleRate << samplesPerSecShift;
 
-	assert(((val >> numChannelShift) & eightBitMask) == numChannels);
-	assert(((val >> samplesPerSecShift) & eightBitMask) == sampleRate);
+	assert(((val >> numChannelShift) & byteBitMask) == numChannels);
+	assert(((val >> samplesPerSecShift) & byteBitMask) == sampleRate);
 
 	return val;
 }
 
-SubmixVoice* AudioSystem::GetCategory(const StaticString& name) const {
+SubmixVoice* AudioSystem::GetCategoryVoice(const StaticString& name) const {
 	assert(m_CategoryNameToVoiceMap.Contains(name));
 	return m_CategoryNameToVoiceMap[name];
 }
@@ -94,21 +94,17 @@ SubmixVoice* AudioSystem::AddCategory(const StaticString& name, UInt32 numChanne
 	m_CategoryNameToVoiceMap.Add(name, voice);
 	m_VoiceToCategoryNameMap.Add(voice, name);
 
-	//m_CategoryToVoiceListMap.Add(voice, TFormatToVoiceListMap());
-
 	return voice;
 }
 
 SourceVoice* AudioSystem::Play(const Sound& snd, const StaticString& categoryName) {
-	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
-	//voice->Volume(1.0f);//TODO: Set volume back to full
+	auto voice = GetSourceVoice(GetCategoryVoice(categoryName), snd);
 	verify(voice->Start());
 	return voice;
 }
 
 SourceVoice* AudioSystem::Play(const Sound* snd, const StaticString& categoryName) {
-	auto voice = GetSourceVoice(GetCategory(categoryName), snd);
-	//voice->Volume(1.0f);//TODO: Set volume back to full
+	auto voice = GetSourceVoice(GetCategoryVoice(categoryName), snd);
 	verify(voice->Start());
 	return voice;
 }
@@ -119,7 +115,7 @@ Float32 AudioSystem::Play(const StaticString& filePath, const StaticString& cate
 	if (!snd) {
 		return 0.0f;
 	}
-	outVoice = GetSourceVoice(GetCategory(categoryName), snd);
+	outVoice = GetSourceVoice(GetCategoryVoice(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(outVoice->Start());
 	return snd->Duration();
@@ -130,7 +126,7 @@ Float32 AudioSystem::Submit(const StaticString& filePath, const StaticString& ca
 	if (!snd) {
 		return 0.0f;
 	}
-	outVoice = GetSourceVoice(GetCategory(categoryName), snd);
+	outVoice = GetSourceVoice(GetCategoryVoice(categoryName), snd);
 	//voice->Volume(1.0f);//TODO: Set volume back to full
 	return snd->Duration();
 }
@@ -145,7 +141,7 @@ void AudioSystem::StopAllVoices() {
 }
 
 Bool AudioSystem::SetEffectDescriptors(const StaticString& categoryName, const Char** fxNames, UInt32 numFx) {
-	return SetEffectDescriptors(GetCategory(categoryName), fxNames, numFx);
+	return SetEffectDescriptors(GetCategoryVoice(categoryName), fxNames, numFx);
 }
 
 Bool AudioSystem::SetEffectDescriptors(SubmixVoice* category, const Char** fxNames, UInt32 numFx) {
@@ -200,31 +196,31 @@ Bool AudioSystem::SetEffectDescriptors(SubmixVoice* category, FXInfo** fxInfos, 
 }
 
 Bool AudioSystem::IsEffectEnabled(const StaticString& categoryName, UInt32 index) {
-	return GetCategory(categoryName)->IsEffectEnabled(index);
+	return GetCategoryVoice(categoryName)->IsEffectEnabled(index);
 }
 
 Bool AudioSystem::EnableEffect(const StaticString& categoryName, UInt32 index) {
-	return GetCategory(categoryName)->EnableEffect(index);
+	return GetCategoryVoice(categoryName)->EnableEffect(index);
 }
 
 Bool AudioSystem::EnableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
-	return GetCategory(categoryName)->EnableEffect(index, operationSet);
+	return GetCategoryVoice(categoryName)->EnableEffect(index, operationSet);
 }
 
 Bool AudioSystem::DisableEffect(const StaticString& categoryName, UInt32 index) {
-	return GetCategory(categoryName)->DisableEffect(index);
+	return GetCategoryVoice(categoryName)->DisableEffect(index);
 }
 
 Bool AudioSystem::DisableEffect(const StaticString& categoryName, UInt32 index, UInt32 operationSet) {
-	return GetCategory(categoryName)->DisableEffect(index, operationSet);
+	return GetCategoryVoice(categoryName)->DisableEffect(index, operationSet);
 }
 
 Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize) {
-	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
+	return GetCategoryVoice(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, 0U);
 }
 
 Bool AudioSystem::SetEffectParameters(const StaticString& categoryName, UInt32 index, const void* parameterData, UInt32 parameterDataByteSize, UInt32 operationSet) {
-	return GetCategory(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
+	return GetCategoryVoice(categoryName)->SetEffectParameters(index, parameterData, parameterDataByteSize, operationSet);
 }
 
 MasteringVoice* AudioSystem::CreateMasteringVoice() {
@@ -371,10 +367,11 @@ void AudioSystem::ReloadAssets() {
 }
 
 UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& categoryName) {
-	return LoadEffects(path, GetCategory(categoryName));
+	return LoadEffects(path, GetCategoryVoice(categoryName));
 }
 
 #include "System/Reflector.h"
+#include "System/JsonLoader.h"
 UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category) {
 	try {
 		rapidjson::Document	doc;
@@ -389,23 +386,22 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category)
 		}
 
 		Byte	index = 0;
-		auto	numFx = doc.Size();
+		UInt32	numFx = doc.Size();
 		auto	fxInfoList = STACK_ALLOC(FXInfo*, numFx);
 		auto	valueList = STACK_ALLOC(rapidjson::Value, numFx);
 
 		FOREACH(fxIter, doc) {
 			assert(fxIter->IsObject());
-			FOREACH_MEMBER(memberIter, (*fxIter)) {
-				assert(index < numFx);
+			auto& typeIter = fxIter->FindMember("Type");
+			assert(index < numFx);
 
-				fxInfoList[index] = &m_FxNameToInfoMap[memberIter->name.GetString()];
-				valueList[index] = std::move(memberIter->value);
-				++index;
-			}
+			fxInfoList[index] = &m_FxNameToInfoMap[typeIter->value.GetString()];
+			valueList[index] = std::move(*fxIter);
+			++index;
 		}
 		assert(numFx == index);
 
-		verify(SetEffectDescriptors(category, fxInfoList, (UInt32)numFx));
+		verify(SetEffectDescriptors(category, fxInfoList, numFx));
 
 		for(UInt32 ix = 0; ix < numFx; ++ix) {
 			auto& fxInfo = fxInfoList[ix];

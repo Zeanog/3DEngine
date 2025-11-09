@@ -6,10 +6,8 @@
 #include "System/StackString.h"
 
 #include "System/File.h"
-#include "System/IJsonSerializable.h"
-#include "System/JsonSerializer.h"
 
-class VertexBuffer : public IJsonSerializable {
+class VertexBuffer {
 	CLASS_TYPEDEFS( VertexBuffer )
 
 public:

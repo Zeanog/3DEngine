@@ -1,16 +1,16 @@
 #pragma once
-#include "IModel.h"
+#include "AModel.h"
 
 /** 
 *	A simple sphere model that is easy to render
 */
-class SphereModel : public IModel
+class SphereModel : public AModel
 {
 public:
 	// Methods
 	SphereModel(float radius, unsigned int meshPrecision);
 
-	virtual void	render( const ShaderProgram_GLSL& program ) override;
+	virtual void	render( ShaderProgram_GLSL& program ) override;
 
 private:
 	// Fields

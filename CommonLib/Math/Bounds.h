@@ -92,6 +92,6 @@ namespace Neo {
 			return *this;
 		}
 
-		void	Render(const ShaderProgram_GLSL& program, const glm::vec3& offset ) const;
+		void	Render(ShaderProgram_GLSL& program, const glm::vec3& offset ) const;
 	};
 }

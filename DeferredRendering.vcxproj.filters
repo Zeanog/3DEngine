@@ -24,7 +24,7 @@
     <ClCompile Include="source\Model\GLSLShaderData.cpp">
       <Filter>Source\Model</Filter>
     </ClCompile>
-    <ClCompile Include="source\Model\IModel.cpp">
+    <ClCompile Include="source\Model\AModel.cpp">
       <Filter>Source\Model</Filter>
     </ClCompile>
     <ClCompile Include="source\Model\PlaneModel.cpp">
@@ -47,7 +47,7 @@
     <ClInclude Include="source\Model\GLSLShaderData.h">
       <Filter>Source\Model</Filter>
     </ClInclude>
-    <ClInclude Include="source\Model\IModel.h">
+    <ClInclude Include="source\Model\AModel.h">
       <Filter>Source\Model</Filter>
     </ClInclude>
     <ClInclude Include="source\Model\PlaneModel.h">

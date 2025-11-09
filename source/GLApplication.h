@@ -13,7 +13,7 @@
 #include "Math/Bounds.h"
 #include "System\Functors\Functor.h"
 
-class IModel;
+class AModel;
 class Model;
 
 class GLApplication {
@@ -53,7 +53,7 @@ protected:
 	void	LoadAssets();
 	void	ReleaseAssets();
 
-	void	RenderModels(const ShaderProgram_GLSL& program);
+	void	RenderModels(ShaderProgram_GLSL& program);
 	void	RenderModelShadows() {
 		RenderModels(m_ShadowMapGenerationProgram);
 	}
@@ -61,7 +61,7 @@ protected:
 	CameraInterpolator				m_Camera;
 
 	// Fields
-	List<IModel*> m_PrevModels{};
+	List<AModel*> m_PrevModels{};
 	Neo::Bounds	m_Bounds{};
 	List<Model*> m_Models{};
 

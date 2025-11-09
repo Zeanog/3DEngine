@@ -249,7 +249,7 @@ void GLApplication::Update()
 
 #define CAST_SHADOWS 1
 
-void GLApplication::RenderModels(const ShaderProgram_GLSL& program) {
+void GLApplication::RenderModels(ShaderProgram_GLSL& program) {
 	for (UInt32 i = 0; i < m_PrevModels.Length(); ++i) {
 		m_PrevModels[i]->render(program);
 	}
@@ -292,6 +292,10 @@ void GLApplication::Render()
 
 	m_multipleRenderTarget->SetAsTarget();
 	RenderModels(m_RenderModelProgram);
+
+	for (UInt32 i = 0; i < m_Models.Length(); ++i) {
+		m_Models[i]->RenderJoints(m_RenderModel_UnlitProgram, m_DeltaTime);
+	}
 
 #if _DEBUG
 	FOREACH(iter, *Singleton<DirectionalLightPool>::GetInstance()) {
@@ -363,13 +367,27 @@ void GLApplication::Release()
 #include "Rendering/ModelLoaders/MeshManager.h"
 #include "System/Audio/SourceVoice.h"
 #include "System/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
-#include "System/JsonSerializer.h"
+#include "System/JsonLoader.h"
+#include "Rendering/ModelLoaders/ModelManager.h"
 
 /**
 *	Load all the required assets
 */
 void GLApplication::LoadAssets()
 {
+#pragma region Setting Working Directory
+	DWORD bufferSize = GetCurrentDirectory(0, NULL);
+	assert(bufferSize > 0);
+
+	// Allocate a buffer to store the directory path
+	STACK_STRING(currentDirectory, bufferSize);
+
+	// Retrieve the current working directory
+	DWORD size = GetCurrentDirectory(bufferSize, &currentDirectory[0]);
+	assert( size == String::StrLen(currentDirectory.CStr()) );
+	File::SetWorkingDirectory(currentDirectory.CStr());
+#pragma endregion
+
 	m_state = 0;
 
 	m_multipleRenderTarget = new FrameBufferObject(m_windowWidth, m_windowHeight);
@@ -390,7 +408,7 @@ void GLApplication::LoadAssets()
 	verify(m_RenderModelProgram.Create("data/deferredShading.vert", "data/deferredShading.frag", NULL));
 	verify(m_ShadowMapGenerationProgram.Create("data/shadowMap.vert", "data/shadowMap.frag", NULL));
 
-	IModel* m = NULL;
+	AModel* m = NULL;
 
 	m = new SphereModel(1, 64);
 	m_PrevModels.Add(m);
@@ -438,29 +456,30 @@ void GLApplication::LoadAssets()
 #endif
 	m_Lights.Add(spotLight);
 
-	Model* model = NULL;
+	Model* model = nullptr;
 
 	rapidjson::Document	doc;
-	verify(rapidjson::LoadFrom("Data/Scene.json", doc));
+	auto scenePath = File::BuildFullPath("Scene.json");
+	verify(rapidjson::LoadFrom(scenePath, doc));
 
 	assert(doc["Model"].IsObject());
 	auto& docVal = doc["Model"];
-	StaticString modelPath = docVal.FindMember("Path")->value.GetString();
-	model = new Model(modelPath.CStr());
+	auto modelPath = docVal.FindMember("Path")->value.GetString();
+	model = Singleton<ModelManager>::GetInstance()->Get(File::RebuildFullPath(modelPath));
 	model->Position(glm::vec3(-2, 2.5f, 0));
 	m_Models.Add(model);
 
-	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 1, 44100);
-	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 1, 44100);
+	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 2, 44100);
+	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 2, 44100);
 
-	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects("Data/TestReverb.json", "Fx");
+	auto reverbPath = File::BuildFullPath("TestReverb.json");
+	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects(reverbPath, "Fx");
 
 	SourceVoice* selectedVoice{};
 
 	auto& musicValue = doc["Music"];
 	FOREACH(iter, musicValue) {
-		StaticString musicPath( iter->GetString() );
-		auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play(musicPath, "Music", selectedVoice);
+		auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play(iter->GetString(), "Music", selectedVoice);
 		//selectedVoice->Volume(0.1f);
 	}
 
@@ -482,12 +501,12 @@ void GLApplication::ReleaseAssets()
 	DeletePtr(m_deferredRendering);
 
 	Destroy(m_PrevModels);
-	Destroy(m_Models);
 	Destroy(m_Lights);
 
 	Singleton<ImageManager>::GetInstance()->Shutdown();
 	Singleton<SoundManager>::GetInstance()->Shutdown();
 	Singleton<MeshManager>::GetInstance()->Shutdown();
+	//Singleton<ModelManager>::GetInstance()->Shutdown();
 
 	Singleton<ShaderManager_Vertex>::GetInstance()->Shutdown();
 	Singleton<ShaderManager_Fragment>::GetInstance()->Shutdown();

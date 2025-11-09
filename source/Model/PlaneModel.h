@@ -1,16 +1,16 @@
 #pragma once
-#include "IModel.h"
+#include "AModel.h"
 
 /** 
 *	A plane model that is easy to render
 */
-class PlaneModel : public IModel
+class PlaneModel : public AModel
 {
 public:
 	// Methods
 	PlaneModel(float side);
 
-	virtual void	render( const ShaderProgram_GLSL& program ) override;
+	virtual void	render( ShaderProgram_GLSL& program ) override;
 
 protected:
 	// Fields

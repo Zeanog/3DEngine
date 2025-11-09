@@ -51,11 +51,11 @@ public:
 		return m_Data.end();
 	}
 
-	TConstIterator	begin() const {
+	TConstIterator	cbegin() const {
 		return m_Data.cbegin();
 	}
 
-	TConstIterator	end() const {
+	TConstIterator	cend() const {
 		return m_Data.cend();
 	} 
 
@@ -129,23 +129,15 @@ public:
 		m_Data.clear();
 	}
 
-	/*virtual Bool	ReadFrom( File& file ) {
-	return true;
-	}*/
-
-	//virtual Bool	WriteTo( File& file ) const {
-	//	//file.Write( Length() );
-	//	//file.Write( &m_Data[0], Length() );
-	//	return true;
-	//}
+	TSelf&	operator+=(const TSelf& rhs) {
+		if (this != &rhs) {
+			FOREACH(iter, rhs) {
+				Add(iter->first, iter->second);
+			}
+		}
+		return *this;
+	}
 };
-
-//template< typename _TKey, typename _TValue >
-//void DeleteContents(std::unordered_map<_TKey, _TValue*>& stlContainer) {
-//	for (typename std::unordered_map<_TKey, _TValue*>::iterator iter = stlContainer.begin(); iter != stlContainer.end(); iter++) {
-//		DeletePtr(iter->second);
-//	}
-//}
 
 template< typename _TKey, typename _TValue >
 class Map : public AMap<_TKey, _TValue> {

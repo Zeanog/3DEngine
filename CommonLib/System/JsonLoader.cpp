@@ -1,8 +1,5 @@
-#include "JsonSerializer.h"
-
-#include "StackString.h"
-#include "StaticString.h"
-#include "File.h"
+#include "JsonLoader.h"
+#include "System/File.h"
 
 namespace rapidjson {
 	Bool	LoadFrom(const StaticString& filePath, rapidjson::Document& outDoc) {
@@ -24,7 +21,7 @@ namespace rapidjson {
 		// If this becomes an issue change back to String and eat the allocation
 		STACK_STRING(jsonBody, file.Length());
 		//String	jsonBody;
-		verify( file.ReadContents(jsonBody) );
+		verify(file.ReadContents(jsonBody));
 		outDoc.Parse(jsonBody.CStr());
 		return !outDoc.IsNull();
 	}

@@ -16,7 +16,7 @@ PlaneModel::PlaneModel(float side)
 /** 
 *	Render
 */
-void PlaneModel::render( const ShaderProgram_GLSL& program )
+void PlaneModel::render( ShaderProgram_GLSL& program )
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

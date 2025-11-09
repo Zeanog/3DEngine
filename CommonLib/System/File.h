@@ -12,6 +12,16 @@ class List;
 
 class File {
 public:
+	static constexpr Char	Delimiters[] = { '\\', '/' };
+	static StaticString		DefaultDataPath;
+
+public:
+	static void	SetWorkingDirectory(const Char* path);
+	static const Char* BuildFullPath(StaticString& relativePath);
+	static const Char* BuildFullPath(const Char* relativePath);
+	static const Char* RebuildFullPath(String& inoutFullPath);
+	static const Char* RebuildFullPath(const Char* inFullPath);
+
 	Bool	Open( const StaticString& path, const Char* mode ) {
 		return Open( path.CStr(), mode );
 	}
