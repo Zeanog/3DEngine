@@ -5,9 +5,7 @@
 
 #include "System\List.h"
 
-#include "System\JsonSerializer.h"
-
-class IndexBuffer : public IJsonSerializable {
+class IndexBuffer {
 	CLASS_TYPEDEFS( IndexBuffer )
 
 public:
@@ -69,11 +67,3 @@ public:
 		return file.Write( &m_Indices[0], m_Indices.Length() );
 	}*/
 };
-
-//template<>
-//class JsonSerializer<IndexBuffer> {
-//public:
-//	static Bool	ReadFrom(json_value* jsonVal, IndexBuffer& list) {
-//		return list.ReadFrom(jsonVal);
-//	}
-//};

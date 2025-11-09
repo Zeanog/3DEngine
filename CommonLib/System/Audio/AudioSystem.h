@@ -8,6 +8,7 @@
 
 #include <mutex>
 #include <xaudio2.h>
+#include <rapidjson\document.h>
 
 
 class AVoice;
@@ -18,7 +19,7 @@ class Sound;
 
 class AudioSystem {
 	CLASS_TYPEDEFS(AudioSystem)
-	SINGLETON_DECLARATIONS(AudioSystem) {
+		SINGLETON_DECLARATIONS(AudioSystem) {
 	}
 
 	typedef LinkedList<SourceVoice*>	TVoiceList;
@@ -45,10 +46,10 @@ protected:
 	static std::mutex						m_Mutex;
 
 protected:
-	MasteringVoice*		CreateMasteringVoice();
+	MasteringVoice* CreateMasteringVoice();
 
-	static UINT64		GenerateHash(const WAVEFORMATEX& format);
-	static UINT64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
+	static UInt64		GenerateHash(const WAVEFORMATEX& format);
+	static UInt64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
 
 	Bool				FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
 	Bool				AddSourceVoice(SourceVoice* voice);
@@ -57,16 +58,16 @@ protected:
 	void				OnBufferStartHandler(SourceVoice* voice, void* context);
 	void				OnBufferEndHandler(SourceVoice* voice, void* context);
 
-	SubmixVoice* GetCategory(const StaticString& name) const;
+	SubmixVoice*		GetCategoryVoice(const StaticString& name) const;
 	const StaticString& GetCategoryName(SubmixVoice* categoryVoice) const;
 
-	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
-	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
-	SourceVoice* GetSourceVoice(SubmixVoice* voiceCategory, const Sound& sound);
+	SourceVoice*		GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format);
+	SourceVoice*		GetSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
+	SourceVoice*		GetSourceVoice(SubmixVoice* voiceCategory, const Sound& sound);
 
-	SubmixVoice* CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
+	SubmixVoice*		CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
 
-	Bool		CommitChanges(UInt32 operationSet) {
+	Bool				CommitChanges(UInt32 operationSet) {
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
 	}
 
@@ -74,10 +75,16 @@ public:
 	virtual Bool	Init();
 	virtual void	Destroy();
 
-	SubmixVoice*	AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
+	SubmixVoice* AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
 
 	SourceVoice* Play(const Sound& snd, const StaticString& categoryName);
 	SourceVoice* Play(const Sound* snd, const StaticString& categoryName);
+	Float32		 Play(const Char* filePath, const StaticString& categoryName, SourceVoice*& outVoice) {
+		return Play(StaticString(filePath), categoryName, outVoice);
+	}
+	Float32		 Submit(const Char* filePath, const StaticString& categoryName, SourceVoice*& outVoice) {
+		return Submit(StaticString(filePath), categoryName, outVoice);
+	}
 	Float32		 Play(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice);
 	Float32		 Submit(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice);
 

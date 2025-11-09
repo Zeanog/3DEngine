@@ -16,7 +16,7 @@ CubeModel::CubeModel(float side)
 /**
 *	Render
 */
-void CubeModel::render(const ShaderProgram_GLSL& program)
+void CubeModel::render(ShaderProgram_GLSL& program)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

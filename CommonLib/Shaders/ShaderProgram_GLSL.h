@@ -18,10 +18,16 @@ protected:
 	const Shader_Fragment_GLSL*		m_pFragmentShader{}; // Fragment shader handle
 	GLhandleARB						m_Handle = -1; // Shader handle
 
+	DEFINE_MEMBER_EX(Bool, IsInUse)
+
 public:
 	ShaderProgram_GLSL();
 
 	virtual ~ShaderProgram_GLSL() {
+	}
+
+	Bool	IsValid() const {
+		return m_pVertexShader && m_pFragmentShader && m_Handle != -1;
 	}
 
 	Bool	Create(const StaticString& vsPath, const StaticString& fsPath, const Char* header);
@@ -51,40 +57,57 @@ public:
 		return true;
 	}
 
-	void	StartUsing() const {
+	void	StartUsing() {
 		glUseProgramObjectARB( m_Handle );
 		int error = glGetError();
 		if (error) {
 			const Char* str = glErrorString(error);
 			int ix = 0;
 		}
-		//assert(!glGetError());
+		IsInUse(true);
 	}
 
-	void	StopUsing() const {
+	void	StopUsing() {
 		glUseProgramObjectARB( 0 );
 		assert(!glGetError());
+		IsInUse(false);
 	}
 
 	operator GLhandleARB() {
 		return m_Handle;
 	}
 
-	void	EnumerateUniforms(List<StaticString>& outUniforms) {
-		Int32 numUniforms = -1;
-		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORMS, &numUniforms);
+	template<typename... TGLenums>
+	void	EnumerateUniforms(List<StaticString>& outUniforms, TGLenums... enums) const {
+		static constexpr UInt32 NumEnums = sizeof...(enums);
+
+		Int32 maxNameLength = -1;
+		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
 		
-		Char	nameBuffer[256];
+		Char*	nameBuffer = STACK_ALLOC(Char, maxNameLength);
 		Int32	nameLength = -1;
 		Int32	size = -1;
 		GLenum	type;
-		for (int i = 0; i < numUniforms; i++)
-		{
-			glGetActiveUniform(m_Handle, (GLuint)i, STATIC_ARRAY_LENGTH(nameBuffer), &nameLength, &size, &type, nameBuffer);
+
+		Int32 numUniforms = -1;
+		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORMS, &numUniforms);
+
+		for (auto i = 0; i < numUniforms; i++) {
+			glGetActiveUniform(m_Handle, (GLuint)i, maxNameLength, &nameLength, &size, &type, nameBuffer);
 			if (!nameLength) {
 				continue;
 			}
-			outUniforms.Add(StaticString(nameBuffer));
+
+			if (NumEnums > 0) {//TODO: If no enums are provided then return all uniforms
+				for (auto typeToCheck : { enums... }) {
+					if (type == typeToCheck) {
+						outUniforms.Add(StaticString(nameBuffer));
+					}
+				}
+			}
+			else {
+				outUniforms.Add(StaticString(nameBuffer));
+			}
 		}
 	}
 };

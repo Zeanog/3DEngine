@@ -117,13 +117,7 @@
     <ClInclude Include="Rendering\RenderDef.h">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="System\IJsonSerializable.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\DataStructureLibrary.h">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="System\JsonSerializer.h">
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Mesh.h">
@@ -203,9 +197,6 @@
     </ClInclude>
     <ClInclude Include="Rendering\FrameBufferObject.h">
       <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ModelLoaders\ModelLoader_FBX.h">
-      <Filter>Rendering\ModelLoaders</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\ModelLoaders\ModelManager.h">
       <Filter>Rendering\ModelLoaders</Filter>
@@ -300,6 +291,18 @@
     <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3_ex.h">
       <Filter>System\Audio\Loaders\MiniMP3</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\AMeshLoader.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\MeshLoader_FBX.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\ModelLoader.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="System\JsonLoader.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
@@ -377,9 +380,6 @@
     <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp">
       <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\ModelLoaders\ModelLoader_FBX.cpp">
-      <Filter>Rendering\ModelLoaders</Filter>
-    </ClCompile>
     <ClCompile Include="Images\LodePng\lodepng.cpp">
       <Filter>Images\LodePng</Filter>
     </ClCompile>
@@ -428,9 +428,6 @@
     <ClCompile Include="System\Audio\SubmixVoice.cpp">
       <Filter>System\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="System\JsonSerializer.cpp">
-      <Filter>System</Filter>
-    </ClCompile>
     <ClCompile Include="System\Audio\Loaders\AudioLoader_MP3.cpp">
       <Filter>System\Audio\Loaders</Filter>
     </ClCompile>
@@ -445,6 +442,18 @@
     </ClCompile>
     <ClCompile Include="System\Audio\EchoParameters.cpp">
       <Filter>System\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\MeshLoader_FBX.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\ModelLoader.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="System\String.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\JsonLoader.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

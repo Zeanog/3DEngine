@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TypeDefs.h"
-#include "System/IJsonSerializable.h"
 #include <string>
 #include <assert.h>
 #include <stdio.h>
@@ -80,13 +79,29 @@ public:
 		return m_Data.find_last_of( ch, -1 );
 	}
 
+	static Int32 FindLastOf(const Char* str, Char ch) {
+		for( int ix = String::StrLen(str) - 1; ix >= 0; --ix ) {
+			if( str[ix] == ch ) {
+				return ix;
+			}
+		}
+		return -1;
+	}
+
 	Int32 FindIndexOf(const String& lookingFor) {
 		return m_Data.find(lookingFor.CStr(), (size_t)0);
+	}
+
+	static Int32 FindIndexOf(const Char* str, const Char* lookingFor) {
+		auto matchPtr = strstr(str, lookingFor);
+		return matchPtr != nullptr ? matchPtr - str : -1;
 	}
 
 	void	Replace(UInt32 offset, Int32 count, const Char* newSubString) {
 		m_Data.replace(offset, count, newSubString);
 	}
+
+	static const Char* Replace(const Char* str, UInt32 offset, Int32 count, const Char* newSubString);
 
 public:
 	inline static UInt32	StrLen( const Char* str ) {
@@ -119,20 +134,6 @@ public:
 		va_start(args, format);
 		auto str = Format(format, args);
 		va_end(args);
-	}
-};
-
-#include "System/JsonSerializer.h"
-
-template<>
-class JsonSerializer<String> {
-public:
-	static String	ReadFrom(const rapidjson::Value& jsonVal) {
-		assert(jsonVal.IsString());
-		return String(jsonVal.GetString());
-	}
-
-	static Bool	ReadFrom(const rapidjson::Value& jsonVal, String& str) {
-		str = ReadFrom(jsonVal);
+		return str;
 	}
 };

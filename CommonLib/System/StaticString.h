@@ -157,6 +157,15 @@ public:
 		return &(str.CStr()[index]);
 	}
 
+	static const Char* GetExtension(const Char* str) {
+		Int32 index = String::FindLastOf(str, '.');
+		if (index < 0) {
+			return NULL;
+		}
+
+		return &(str[index]);
+	}
+
 	static void		SetExtension( String& str, const Char* newExtension) {
 		Int32 index = str.FindLastOf('.');
 		if (index < 0) {

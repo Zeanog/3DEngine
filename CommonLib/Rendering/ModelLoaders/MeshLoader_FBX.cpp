@@ -12,6 +12,57 @@
 
 fbxsdk::FbxManager* MeshLoader_FBX::g_SdkManager;
 
+Bool GetMaterialFactor(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName) {
+	if (!lProperty.IsValid())
+	{
+		return false;
+	}
+	//FbxDouble3 lResult = lProperty.Get<FbxDouble3>();
+	double lResult = lProperty.Get<FbxDouble>();
+	if ( lResult == 1.0f) {//TODO: Test to see if this is necessary
+		return false;
+	}
+	return mat->UpdateChannel(channelName, Color<Float32>((float)lResult, (float)lResult, (float)lResult, 1.0f));
+}
+
+Bool GetMaterialTexture(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName) {
+	if (!lProperty.IsValid())
+	{
+		return false;
+	}
+
+	const int lTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
+	assert(lTextureCount <= 1);//We only support one texture per property for now
+	if (lTextureCount <= 0) {
+		return false;
+	}
+
+	for (int j = 0; j < lTextureCount; j++) {
+		FbxFileTexture* texture = FbxCast<FbxFileTexture>(lProperty.GetSrcObject<FbxFileTexture>(j));
+		if (!texture) {
+			continue;
+		}
+		if (texture->GetUserDataPtr())
+		{
+			return mat->UpdateChannel(channelName, new Neo::Image(*(static_cast<UInt32*>(texture->GetUserDataPtr())), GL_RGBA));
+		}
+
+		//TODO: Possibly find a better way to resolve texture paths
+		String fileName(texture->GetFileName());//TODO: Try and remove this allocation
+		if (fileName.Length() <= 0) {
+			continue;
+		}
+
+		auto image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
+		if (!image) {//If path fails then try to rebuild it to our data path
+			File::RebuildFullPath(fileName);
+			image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
+		}
+		return image && mat->UpdateChannel(channelName, image);
+	}
+	return false;
+}
+
 FbxAMatrix	GetLocalTransform(FbxNode* node) {
 	FbxAMatrix matrixGeo;
 	matrixGeo.SetIdentity();
@@ -60,19 +111,25 @@ void MeshLoader_FBX::DestroyGlobals() {
 }
 
 MeshLoader_FBX::MeshLoader_FBX() {
-	m_Importer = NULL;
 	m_Scene = NULL;
 	m_CurrentAnimLayer = NULL;
 
-	//m_Root = NULL;
+	//m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sAmbient, { "Ambient", GetMaterialTexture });
+	//m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sAmbientFactor, { "Ambient", GetMaterialFactor });
+
+	m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sDiffuse, { "Diffuse", GetMaterialTexture });
+	m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sDiffuseFactor, { "Diffuse", GetMaterialFactor });
+
+	m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sSpecular, { "Specular", GetMaterialTexture });
+	m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sSpecularFactor, { "Specular", GetMaterialFactor });
+
+	//m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sEmissive, { "Emissive", GetMaterialTexture });
+	//m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sEmissiveFactor, { "Emissive", GetMaterialFactor });
+
+	m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sNormalMap, { "NormalMap", GetMaterialTexture });
 }
 
 MeshLoader_FBX::~MeshLoader_FBX() {
-	if (m_Importer) {
-		m_Importer->Destroy();
-		m_Importer = NULL;
-	}
-
 	//Destroy(m_AnimationClips);
 }
 
@@ -81,7 +138,7 @@ void MeshLoader_FBX::LoadComponents(const fbxsdk::FbxScene* pScene, FbxAnimLayer
 	LoadComponents(pScene->GetRootNode(), pAnimLayer, pSupportVBO);
 }
 
-Bool MeshLoader_FBX::LoadComponents(FbxNode * pNode, FbxAnimLayer * pAnimLayer, bool pSupportVBO)
+Bool MeshLoader_FBX::LoadComponents(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bool pSupportVBO)
 {
 	const char* type = NULL;
 	FbxAMatrix mat;
@@ -91,16 +148,20 @@ Bool MeshLoader_FBX::LoadComponents(FbxNode * pNode, FbxAnimLayer * pAnimLayer, 
 	FbxNodeAttribute* lNodeAttribute = pNode->GetNodeAttribute();
 	if (lNodeAttribute)
 	{
+		// Bake mesh as VBO(vertex buffer object) into GPU.
 		if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh)
 		{
-			VertexBuffer vb;
-			IndexBuffer ib;
-			List<Neo::Mesh::AMaterialSlot*>	slots;
-			LoadComponents(pNode, vb, m_VertexBuffer.NumVerts(), ib, slots);
+			VertexBuffer vb;//TODO: Would be nice to avoid this extra copy
+			IndexBuffer ib;//TODO: Would be nice to avoid this extra copy
+			List<Neo::Mesh::AMaterial*>	mats;//TODO: Would be nice to avoid this extra copy
+			Map<StaticString, Neo::Mesh::AMaterial*> matMap;//TODO: Would be nice to avoid this extra copy
+
+			LoadComponents(pNode, vb, m_VertexBuffer.NumVerts(), ib, matMap, mats);
 
 			m_VertexBuffer += vb;
 			m_IndexBuffer += ib;
-			m_MaterialSlots += slots;
+			m_MaterialMap += matMap;
+			m_Materials += mats;
 		}
 		else if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
 			/*FbxSkeleton* lSkeleton = (FbxSkeleton*)lNodeAttribute;
@@ -146,74 +207,73 @@ Bool MeshLoader_FBX::LoadComponents(FbxNode * pNode, FbxAnimLayer * pAnimLayer, 
 	return false;
 }
 
-template<typename TTo, typename TFrom>
-void	Convert(TTo& to, const TFrom& from);
-
-template<>
-void Convert<glm::mat4, FbxMatrix>(glm::mat4& to, const FbxMatrix& from) {
+glm::mat4& Convert(glm::mat4& to, const FbxMatrix& from) {
 	for (Int32 iy = 0; iy < 4; ++iy) {
 		for (Int32 ix = 0; ix < 4; ++ix) {
 			to[iy][ix] = (Float32)from.Get(iy, ix);
 		}
 	}
+
+	return to;
 }
 
-template<>
-void Convert<glm::mat4, FbxAMatrix>(glm::mat4& to, const FbxAMatrix& from) {
+glm::mat4& Convert(glm::mat4& to, const FbxAMatrix& from) {
 	for (Int32 iy = 0; iy < 4; ++iy) {
 		for (Int32 ix = 0; ix < 4; ++ix) {
 			to[iy][ix] = (Float32)from.Get(iy, ix);
 		}
 	}
+
+	return to;
 }
 
-template<>
-void	Convert<glm::vec4, FbxVector4>(glm::vec4& to, const FbxVector4& from) {
+glm::vec4& Convert(glm::vec4& to, const FbxVector4& from) {
 	for (int ix = 0; ix < 4; ++ix) {
 		to[ix] = (Float32)from[ix];
 	}
+	return to;
 }
 
-template<>
-void	Convert<Vector<4>, FbxVector4>(Vector<4>& to, const FbxVector4& from) {
+Vector<4>& Convert(Vector<4>& to, const FbxVector4& from) {
 	for (int ix = 0; ix < 4; ++ix) {
 		to[ix] = (Float32)from[ix];
 	}
+	return to;
 }
 
-template<>
-void	Convert<Vector<3>, FbxVector4>(Vector<3>& to, const FbxVector4& from) {
+Vector<3>& Convert(Vector<3>& to, const FbxVector4& from) {
 	for (int ix = 0; ix < 3; ++ix) {
 		to[ix] = (Float32)from[ix];
 	}
+	return to;
 }
 
-template<>
-void	Convert<Vector<2>, FbxVector2>(Vector<2>& to, const FbxVector2& from) {
+Vector<2>& Convert(Vector<2>& to, const FbxVector2& from) {
 	for (int ix = 0; ix < 2; ++ix) {
 		to[ix] = (Float32)from[ix];
 	}
+	return to;
 }
 
-void MeshLoader_FBX::LoadSkeletonHierarchy(FbxNode * rootnode)
+void MeshLoader_FBX::LoadSkeletonHierarchy(FbxNode* rootnode)
 {
 	for (int childindex = 0; childindex < rootnode->GetChildCount(); ++childindex)
 	{
-		FbxNode *node = rootnode->GetChild(childindex);
+		FbxNode* node = rootnode->GetChild(childindex);
 		LoadSkeletonHierarchyre(node, 0, 0, -1);
 	}
 }
 
-StaticString JointPrefix("HIKCharacterNode1_");
+StaticString JointPrefix("HIKCharacterNode1_");//TODO: Find a better place for this
 
-void MeshLoader_FBX::LoadSkeletonHierarchyre(FbxNode * node, int depth, int index, int parentindex)
+void MeshLoader_FBX::LoadSkeletonHierarchyre(FbxNode* node, int depth, int index, int parentindex)
 {
 	if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 	{
 		JointInfo joint;
 		joint.ParentIndex = parentindex;
 		joint.Name = node->GetName() + JointPrefix.Length();
-		m_JointNodes.Add(node);
+		m_JointNameNodeMap.Add(joint.Name, node);
 		m_Joints.Add(joint);
 	}
 	for (int i = 0; i < node->GetChildCount(); i++)
@@ -223,152 +283,104 @@ void MeshLoader_FBX::LoadSkeletonHierarchyre(FbxNode * node, int depth, int inde
 }
 
 void MeshLoader_FBX::LoadAnimations(fbxsdk::FbxScene* pScene) {
-	int numStacks = pScene->GetSrcObjectCount<FbxAnimStack>();
-	//prop.GetSrcObject<FbxLayeredTexture>(j)
-	//pScene->GetSrcObject<FbxAnimStack>(0)
-	FbxAnimStack* pAnimStack = FbxCast<FbxAnimStack>(pScene->GetSrcObject<FbxAnimStack>(1));
-	if (!pAnimStack) {
-		return;
-	}
+	Int32 numStacks = pScene->GetSrcObjectCount<FbxAnimStack>();
+	FOR(Int32, ix, 0, numStacks, 1) {
+		FbxAnimStack* pAnimStack = pScene->GetSrcObject<FbxAnimStack>(ix);
+		if (!pAnimStack) {
+			continue;
+		}
 
-	//FbxAnimStack* pAnimStack = pScene->GetCurrentAnimationStack();
+		//We are ignoring that we may not be at frame 1
+		FbxTimeSpan animTimeSpan = pAnimStack->GetLocalTimeSpan();
+		FbxTime animDuration = animTimeSpan.GetDuration();
+		FbxLongLong frameCount = animDuration.GetFrameCount(FbxTime::EMode::eFrames24);
+		animDuration.SetFrame(frameCount, FbxTime::EMode::eFrames24);
 
-	FbxAnimEvaluator* pAnimEvaluator = pScene->GetAnimationEvaluator();
+		AnimationClip* animClip = new AnimationClip();
+		m_AnimNames.Add(pAnimStack->GetName());
+		m_AnimationClips.Add(pAnimStack->GetName(), animClip);
 
-	//We are ignoring that we may not be at frame 1
-	FbxTimeSpan animTimeSpan = pAnimStack->GetLocalTimeSpan();
-	FbxTime animDuration = animTimeSpan.GetDuration();
-	FbxLongLong frameCount = animDuration.GetFrameCount(FbxTime::EMode::eFrames24);
-	animDuration.SetFrame(frameCount, FbxTime::EMode::eFrames24);
+		animClip->Duration(animDuration.GetSecondDouble());
+		animClip->FrameRate((Float32)animDuration.GetFrameRate(FbxTime::EMode::eFrames24));
 
-	AnimationClip* animClip = new AnimationClip();
-	m_AnimationClips.Add(animClip);
+		FbxAnimEvaluator* pAnimEvaluator = pScene->GetAnimationEvaluator();
 
-	animClip->Duration(animDuration.GetSecondDouble());
-	animClip->FrameRate((Float32)animDuration.GetFrameRate(FbxTime::EMode::eFrames24));
+		AnimKeyFrame* pKeyFrame = NULL;
+		glm::mat4 mat;
+		Float64 fFrameCount = (Float64)frameCount;//Using float to avoid casting int to float in the loop
+		FOR(Float64, fFrameIndex, 0.0f, fFrameCount, 1.0f) {
+			pKeyFrame = new	AnimKeyFrame();
+			animClip->AddFrame(pKeyFrame);
+			pKeyFrame->Time(fFrameIndex / (Float64)animClip->FrameRate());
 
-	AnimKeyFrame* pKeyFrame = NULL;
-	glm::mat4 mat;
-	for (Int32 frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-		pKeyFrame = new	AnimKeyFrame();
-		animClip->AddFrame(pKeyFrame);
-		pKeyFrame->Time((float)frameIndex / animClip->FrameRate());
-
-		FbxTime time;
-		time.SetSecondDouble(pKeyFrame->Time());
-		for (UInt32 ix = 0; ix < m_Joints.Length(); ++ix) {
-			FbxAMatrix nodeTransform = pAnimEvaluator->GetNodeLocalTransform(m_JointNodes[ix], time, FbxNode::eSourcePivot);
-
-			Convert(mat, nodeTransform);
-
-			pKeyFrame->SetLocalTransform(ix, mat);
+			UInt32	index = 0;
+			FbxTime time;
+			time.SetSecondDouble(pKeyFrame->Time());
+			FOREACH(iter, m_JointNameNodeMap) {
+				FbxAMatrix nodeTransform = pAnimEvaluator->GetNodeLocalTransform(iter->second, time, FbxNode::eSourcePivot);
+				Convert(mat, nodeTransform);
+				pKeyFrame->SetLocalTransform(index++, mat);
+			}
 		}
 	}
 }
 
 glm::mat4 MeshLoader_FBX::GetJointLocalTransform(const StaticString& jointName, Float32 time) const {
+	assert(m_JointNameNodeMap.Contains(jointName));
+
+	FbxTime t;
+	t.SetSecondDouble(time);
+	auto fxNode = m_JointNameNodeMap[jointName];
+
 	glm::mat4 localMat;
-	for (UInt32 ix = 0; ix < m_Joints.Length(); ++ix) {
-		if (m_Joints[ix].Name == jointName) {
-			FbxTime t;
-			t.SetSecondDouble(time);
-			Convert(localMat, m_JointNodes[ix]->EvaluateLocalTransform(t, FbxNode::eSourcePivot));
-			return localMat;
-		}
-	}
-	return glm::identity<glm::mat4>();
+	return Convert(localMat, fxNode->EvaluateLocalTransform(t, FbxNode::eSourcePivot));
 }
 
-Bool GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPropertyName, const char * pFactorPropertyName, Neo::Mesh::AMaterialSlot*& outMaterial) {
-	Neo::Mesh::MaterialSlot_ColorChannel* matSlot = NULL;
-	const FbxProperty lProperty = pMaterial->FindProperty(pPropertyName);
-	const FbxProperty lFactorProperty = pMaterial->FindProperty(pFactorPropertyName);
-	if (!lProperty.IsValid())
-	{
-		return false;
-	}
-
-	String dataDirPath = FbxGetCurrentWorkPath().Buffer();
-	dataDirPath += "\\data\\";
-
-	const int lTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
-	matSlot = new Neo::Mesh::MaterialSlot_ColorChannel();
-	for (int j = 0; j < lTextureCount; j++)
-	{
-		FbxFileTexture* texture = FbxCast<FbxFileTexture>(lProperty.GetSrcObject<FbxFileTexture>(j));
-		// Then, you can get all the properties of the texture, include its name
-		const char* textureName = texture->GetName();
-
-		String fileName(texture->GetFileName());
-		if (fileName.Length() > 0) {
-			Int32 index = fileName.FindIndexOf(dataDirPath);
-			if (index < 0) {
-				index = fileName.FindLastOf('/');
-				if (index >= 0) {
-					//fileName = (&fileName[index + 1]);
-					fileName.Replace(0, index, dataDirPath.CStr());
-				}
-				else {
-					index = fileName.FindLastOf('\\');
-					if (index >= 0) {
-						fileName.Replace(0, index, dataDirPath.CStr());
-					}
-				}
-			}
-			matSlot->Texture = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
-		}
-		else if (texture && texture->GetUserDataPtr())
-		{
-			matSlot->Texture = new Neo::Image(*(static_cast<UInt32*>(texture->GetUserDataPtr())), GL_RGBA);
-		}
-	}
-
-	outMaterial = matSlot;
-
-	if (lFactorProperty.IsValid())
-	{
-		FbxDouble3 lResult = lProperty.Get<FbxDouble3>();
-		double lFactor = lFactorProperty.Get<FbxDouble>();
-		if (lFactor != 1)
-		{
-			if (!outMaterial) {
-				matSlot = new Neo::Mesh::MaterialSlot_ColorChannel();
-				outMaterial = matSlot;
-			}
-
-			matSlot->Diffuse[0] = (float)lFactor;
-			matSlot->Diffuse[1] = (float)lFactor;
-			matSlot->Diffuse[2] = (float)lFactor;
-			matSlot->Diffuse[3] = 1.0f;
-			return true;
-		}
-	}
-	return outMaterial != NULL;
-}
-
-void MeshLoader_FBX::LoadTextures(FbxMesh* pMesh, List<Neo::Mesh::AMaterialSlot*>& slots) {
+void MeshLoader_FBX::LoadMaterials(FbxMesh* pMesh, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
 	FbxProperty lProperty;
 	const Char* d = NULL;
-	int lNbMat = pMesh->GetNode()->GetSrcObjectCount();
+	Int32 lNbMat = pMesh->GetNode()->GetSrcObjectCount();
 
-	for (int lMaterialIndex = 0; lMaterialIndex < lNbMat; lMaterialIndex++)
-	{
-		FbxSurfaceMaterial *lMaterial = (FbxSurfaceMaterial *)pMesh->GetNode()->GetSrcObject(lMaterialIndex);
-		Neo::Mesh::AMaterialSlot* matSlot = NULL;
-		if (!lMaterial)
+	FOR(Int32, lMaterialIndex, 0, lNbMat, 1) {
+		auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(lMaterialIndex);
+		
+		if (!pMaterial)
 		{
 			continue;
 		}
+		auto name = pMaterial->GetName();
+		if(!name || !name[0]) {
+			continue;
+		}
 
-		if (GetMaterialProperty(lMaterial, FbxSurfaceMaterial::sDiffuse, FbxSurfaceMaterial::sDiffuseFactor, matSlot)) {
-			matSlot->Index = 0;
-			matSlot->PolyCount = pMesh->GetPolygonCount();
-			slots.Add(matSlot);
+		Neo::Mesh::AMaterial* mat = new Neo::Mesh::Material();
+
+		mats.Add(mat);
+		matMap.Add(pMaterial->GetName(), mat);
+
+		mat->Index = 0;
+		mat->PolyCount = pMesh->GetPolygonCount();
+
+#if _DEBUG
+		List<StaticString>	propertyNames;//To allow us to see all the of the properties in the debugger
+#endif
+		for (auto&& prop = pMaterial->GetFirstProperty(); prop.IsValid(); prop = pMaterial->GetNextProperty(prop)) {
+			StaticString propName(prop.GetNameAsCStr());
+
+#if _DEBUG
+			propertyNames.Add(propName);
+#endif
+
+			if (!m_MaterialPropertyParsers.Contains(propName)) {
+				continue;
+			}
+			const auto& parser = m_MaterialPropertyParsers[propName];
+			parser.Parse(prop, mat);
 		}
 	}
 }
 
-void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, List<Neo::Mesh::AMaterialSlot*>& slots) {
+void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
 	FbxMesh* pMesh = pNode->GetMesh();
 	if (!pMesh->GetNode()) {
 		return;
@@ -417,15 +429,11 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 
 	int lPolygonVertexCount = lPolygonCount * TRIANGLE_VERTEX_COUNT;
 
-	LoadTextures(pMesh, slots);
-
-	/*if (!slots.Length()) {
-		slots.Add(new Neo::Mesh::MaterialSlot_Texture(0, lPolygonCount));
-	}*/
+	LoadMaterials(pMesh, matMap, mats);
 
 	FbxStringList lUVNames;
 	pMesh->GetUVSetNames(lUVNames);
-	const char * lUVName = NULL;
+	const char* lUVName = NULL;
 	//if (mHasUV && lUVNames.GetCount())
 	//{
 		//lUVs = new float[lPolygonVertexCount * UV_STRIDE];
@@ -433,7 +441,7 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 	//}
 
 	// Populate the array with vertex attribute, if by control point.
-	const FbxVector4 * lControlPoints = pMesh->GetControlPoints();
+	const FbxVector4* lControlPoints = pMesh->GetControlPoints();
 	FbxVector4 lCurrentVertex;
 	FbxVector4 lCurrentNormal;
 	FbxVector2 lCurrentUV;
@@ -460,7 +468,7 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 		}
 
 		// Where should I save the vertex attribute index, according to the material
-		const int lIndexOffset = slots[lMaterialIndex]->Index + (slots[lMaterialIndex]->PolyCount - 1) * TRIANGLE_VERTEX_COUNT;
+		const int lIndexOffset = mats[lMaterialIndex]->Index + (mats[lMaterialIndex]->PolyCount - 1) * TRIANGLE_VERTEX_COUNT;
 
 		for (int lVerticeIndex = 0; lVerticeIndex < TRIANGLE_VERTEX_COUNT; ++lVerticeIndex)
 		{
@@ -487,8 +495,8 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 		}
 	}
 
-	for (UInt32 ix = 0; ix < slots.Length(); ++ix) {
-		slots[ix]->Index += appendingOffset;
+	for (UInt32 ix = 0; ix < mats.Length(); ++ix) {
+		mats[ix]->Index += appendingOffset;
 	}
 }
 
@@ -498,26 +506,24 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 	}
 
 	int lFileFormat = -1;
-	m_Importer = FbxImporter::Create(g_SdkManager, "");
-	if (!g_SdkManager->GetIOPluginRegistry()->DetectReaderFileFormat(fileName.CStr(), lFileFormat))
+	if (g_SdkManager && !g_SdkManager->GetIOPluginRegistry()->DetectReaderFileFormat(fileName.CStr(), lFileFormat))
 	{
 		// Unrecognizable file format. Try to fall back to FbxImporter::eFBX_BINARY
 		lFileFormat = g_SdkManager->GetIOPluginRegistry()->FindReaderIDByDescription("FBX binary (*.fbx)");
 	}
 
-	// Initialize the importer by providing a filename.
-	m_Importer->Initialize(fileName.CStr(), lFileFormat);
+	auto importer = FbxImporter::Create(g_SdkManager, "");
+	importer->Initialize(fileName.CStr(), lFileFormat);
 
 	m_Scene = FbxScene::Create(g_SdkManager, fileName.CStr());
-	if (!m_Importer->Import(m_Scene))
+	if (!importer->Import(m_Scene))
 	{
 		return false;
 	}
+	importer->Destroy();
+	importer = nullptr;
 
-	// Set the scene status flag to refresh 
-		// the scene in the first timer callback.
-
-		// Convert Axis System to what is used in this example, if needed
+	// Convert Axis System to what is used in this example, if needed
 	FbxAxisSystem SceneAxisSystem = m_Scene->GetGlobalSettings().GetAxisSystem();
 	FbxAxisSystem OurAxisSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd, FbxAxisSystem::eRightHanded);
 	if (SceneAxisSystem != OurAxisSystem)
@@ -533,131 +539,35 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 		FbxSystemUnit::cm.ConvertScene(m_Scene);
 	}
 
-	// Get the list of all the animation stack.
-	m_Scene->FillAnimStackNameArray(m_AnimStackNameArray);
-
-	// Get the list of all the cameras in the scene.
-	// FillCameraArray(mScene, mCameraArray);
-
 	// Convert mesh, NURBS and patch into triangle mesh
 	FbxGeometryConverter lGeomConverter(g_SdkManager);
 
-	lGeomConverter.Triangulate(m_Scene, true, true);//node //<<------------------------------------------timing more..
+	verify( lGeomConverter.Triangulate(m_Scene, true, true) );
 
 	// Split meshes per material, so that we only have one material per mesh (for VBO support)
-	lGeomConverter.SplitMeshesPerMaterial(m_Scene, /*replace*/true);
+	verify( lGeomConverter.SplitMeshesPerMaterial(m_Scene, /*replace*/false) );
 
 	// Bake the scene for one frame
 	LoadComponents(m_Scene, m_CurrentAnimLayer, fileName.CStr(), /*SupportVBO*/true);
 
 	LoadSkeletonHierarchy(m_Scene->GetRootNode());
 
-	// Initialize the frame period.
-	//mFrameTime.SetTime(0, 0, 0, 1, 0, m_Scene->GetGlobalSettings().GetTimeMode());
-
 	LoadAnimations(m_Scene);
 
-	assert(m_MaterialSlots[0] != NULL);
-	for (UInt32 ix = 1; ix < m_MaterialSlots.Length(); ++ix) {
-		if (!m_MaterialSlots[ix]->Texture) {
-			m_MaterialSlots[ix]->Texture = m_MaterialSlots[0]->Texture;
+	static StaticString diffuseChannel("Diffuse");
+
+	//TODO: Not sure if this is the best way to handle missing textures
+	assert(m_Materials[0] != NULL);
+	assert(m_Materials[0]->ChannelMap.Contains(diffuseChannel));
+	auto defaultChannel = m_Materials[0]->ChannelMap[diffuseChannel];
+	for (UInt32 ix = 1; ix < m_Materials.Length(); ++ix) {
+		if (!m_Materials[ix]->ChannelMap.Contains(diffuseChannel)) {
+		}
+		auto channel = m_Materials[ix]->ChannelMap[diffuseChannel];
+		if (channel && !channel->Texture) {
+			channel->Texture = defaultChannel->Texture;
 		}
 	}
-
-	//lResult = true;
 
 	return true;
-}
-
-Bool MeshLoader_Simple::Load(const StaticString& path) {
-	File file;
-
-	if (!file.Open(path, "rb")) {
-		return false;
-	}
-
-	UInt32 fileLength = file.Length();
-	const Char* encodedJson = STACK_ALLOC(Char, fileLength);
-	file.Read(encodedJson, fileLength);
-
-	json_value* root = json_parse(encodedJson, fileLength);
-	Bool validRead = Load(root);
-	json_value_free(root);
-	root = NULL;
-	return validRead;
-}
-
-Bool MeshLoader_Simple::Load(json_value* root) {
-	if (root->type != json_type::json_object) {
-		return false;
-	}
-
-	json_value* obj = root;
-
-	if (root->type == json_type::json_string) {
-		File file;
-
-		file.Open(root->u.string.ptr, "rb");
-
-		UInt32 dataLength = file.Length();
-		Char* encodedJson = STACK_ALLOC(Char, dataLength + 1);
-		file.Read(encodedJson, dataLength);
-		file.Close();
-
-		obj = json_parse(encodedJson, dataLength);
-	}
-
-	if (obj->type != json_type::json_object) {
-		if (obj != root) {
-			json_value_free(obj);
-		}
-		return false;
-	}
-
-	IndexBuffer* ib = NULL;
-	for (UInt32 ix = 0; ix < obj->u.object.length; ++ix) {
-		if (!String::StrICmp(obj->u.object.values[ix].name, "vertexBuffer")) {
-			if (!m_VertexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
-				if (obj != root) {
-					json_value_free(obj);
-				}
-				return false;
-			}
-			continue;
-		}
-
-		if (!String::StrICmp(obj->u.object.values[ix].name, "indexBuffer")) {
-			if (!m_IndexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
-				if (obj != root) {
-					json_value_free(obj);
-				}
-				return false;
-			}
-			continue;
-		}
-
-		//if (!String::StrICmp(obj->u.object.values[ix].name, "parts")) {
-		//	if (!JsonSerializer<List<Neo::Mesh::MaterialSlot_Texture*>>::ReadFrom(obj->u.object.values[ix].value, m_MaterialSlots)) {
-		//		if (obj != root) {
-		//			json_value_free(obj);
-		//		}
-		//		return false;
-		//	}
-
-		//	//Validate Material Data
-		//	for (int im = 0; im < m_MaterialSlots.Length(); ++im) {
-		//		assert(m_MaterialSlots[im].Index >= 0 && m_MaterialSlots[im].EndIndex() < m_IndexBuffer.Count());
-		//	}
-		//	continue;
-		//}
-	}
-
-	if (obj != root) {
-		json_value_free(obj);
-	}
-	return true;
-}
-
-glm::mat4 MeshLoader_Simple::GetJointLocalTransform(const StaticString& jointName, Float32 time) const {
-	return glm::identity<glm::mat4>();
 }

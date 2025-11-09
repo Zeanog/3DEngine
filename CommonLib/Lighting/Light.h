@@ -55,7 +55,7 @@ public:
 		m_ShadowFBO->showTexture("tShadowMap", renderWidth, renderHeight, xPos, yPos);
 	}
 
-	virtual void DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform)
+	virtual void DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform)
 	{
 		
 	}
@@ -97,7 +97,7 @@ public:
 	virtual const RenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 	virtual const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 
-	virtual void DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform) override;
+	virtual void DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform) override;
 };
 
 class Light_Point : public ALight {
@@ -141,7 +141,7 @@ public:
 };
 
 class Light_Spot : public ALight {
-	INHERITEDCLASS_TYPEDEFS( Light_Spot, ALight);
+	INHERITEDCLASS_TYPEDEFS( Light_Spot, ALight)
 
 public:
 	static void RenderShadows(const Functor<void>& perLightRenderHandler, const ICamera& camera);
@@ -210,7 +210,7 @@ public:
 
 	virtual const RenderTarget*			LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 	virtual 	const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
-	void								DebugRender(const ShaderProgram_GLSL& program, const glm::mat4& transform);
+	void								DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform);
 
 	//AOB: Then remove ToMat4x4 and just use Transform getter
 	virtual glm::mat4		AsCameraTransform() const;

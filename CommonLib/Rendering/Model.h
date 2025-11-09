@@ -2,7 +2,7 @@
 
 #include "Mesh.h"
 #include "Images/Image.h"
-#include "System/IJsonSerializable.h"
+#include "Shaders/ShaderProgram_GLSL.h"
 
 #include <glm/mat3x3.hpp>
 #include <glm/vec3.hpp>
@@ -37,7 +37,7 @@ public:
 	}
 
 	void		Update(Float32 deltaTime) {
-		if (m_Time < 0.0f) {
+		if (!m_Clip || m_Time < 0.0f) {
 			return;
 		}
 		m_Time += deltaTime;
@@ -46,7 +46,10 @@ public:
 		}
 	}
 
-	const AnimKeyFrame*	GetCurrentFrame() const {
+	const AnimKeyFrame* GetCurrentFrame() const {
+		if (!m_Clip || m_Time < 0.0f) {
+			return nullptr;
+		}
 		Int32 currentFrame = (Int32)(m_Time * m_Clip->FrameRate());
 		return m_Clip->GetFrame(currentFrame);
 	}
@@ -57,12 +60,18 @@ public:
 	typedef glm::quat	TRotation;
 
 protected:
-	TRotation		m_Rotation;
-	glm::vec3		m_Position;
+	TRotation		m_Rotation{};
+	glm::vec3		m_Position{};
 
 	AnimationPlayer	m_DebugAnimPlayer;
 
-	const Neo::Mesh* m_Mesh;
+	const Neo::Mesh* m_Mesh{};
+	Bool			 m_InvertedNormals{};
+
+	const ShaderProgram_GLSL* m_ShaderProgram{};
+	List<StaticString>	m_RequiredChannels;
+
+	const ShaderProgram_GLSL* m_ShadowProgram{};
 
 public:
 	DECLARE_GETSET(Position)
@@ -76,18 +85,16 @@ public:
 
 	virtual ~Model();
 
-	virtual void	Render(const ShaderProgram_GLSL& program) const;
-	virtual void	RenderJoints( Float32 deltaTime );
+	virtual void	Render(ShaderProgram_GLSL& program) const;
+	virtual void	RenderJoints(ShaderProgram_GLSL& program, Float32 deltaTime);
 
-	Bool			UploadData(const AModelLoader& loader);
+	Bool			UploadData(class ModelLoader& loader);
 
-	DECLARE_GETSET(Mesh);
-	/*void			AddImage(const Neo::Image* img) {
-		m_Images.Add(img);
-	}*/
+	DECLARE_GETSET(Mesh)
 
 	Neo::Bounds	GetBounds() const {
-		Neo::Bounds b( m_Mesh->GetBounds() );
+		assert(m_Mesh);
+		Neo::Bounds b(m_Mesh->GetBounds());
 		return b.Shift(m_Position);
 	}
 

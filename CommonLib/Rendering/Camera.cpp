@@ -5,10 +5,10 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-Camera::Camera() : m_Rotation(glm::identity<TRotation>()) {
+Camera::Camera() : m_Position(), m_Rotation(glm::identity<ICamera::TRotation>()) {
 }
 
-Camera::Camera(const glm::mat3x3& rot, const glm::vec3& pos) : Camera() {
+Camera::Camera(const glm::mat3x3& rot, const ICamera::TPosition& pos) : Camera() {
 	Position( pos );
 	m_Rotation = rot;
 }

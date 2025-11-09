@@ -1,5 +1,5 @@
 #include "Joint.h"
-#include "Rendering/ModelLoaders/ModelLoader_FBX.h"
+#include "Rendering/ModelLoaders/MeshLoader_FBX.h"
 
 #include <windows.h>
 #include <gl/glew.h>

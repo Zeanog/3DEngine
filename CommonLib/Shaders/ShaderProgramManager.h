@@ -5,6 +5,7 @@
 #include "System\Singleton.h"
 
 class ShaderProgramManager {
+	CLASS_TYPEDEFS(ShaderProgramManager)
 	SINGLETON_DECLARATIONS(ShaderProgramManager);
 
 public:
@@ -21,27 +22,25 @@ public:
 		m_Container.Shutdown();
 	}
 
-	void			Set(const Char* name, TAsset* asset) {
-		Set(StaticString(name), asset);
+	const TAsset*	Get(const String& vertPath, const String& fragPath) {
+		return Get(StaticString(vertPath.CStr()), StaticString(fragPath.CStr()));
 	}
 
-	void			Set(const String& name, TAsset* asset) {
-		Set(name.CStr(), asset);
+	const TAsset*	Get(const StaticString& vertPath, const StaticString& fragPath);
+
+	void	ReloadAll();
+
+protected:
+	Bool	Load(const Char* key, const StaticString& vertPath, const StaticString& fragPath, TAsset* asset) {
+		assert(asset);
+
+		if (!asset->Create(vertPath, fragPath, nullptr)) {
+			DeletePtr(asset);
+			return NULL;
+		}
+
+
+		m_Container.Add(key, asset);
+		return true;
 	}
-
-	void			Set(const StaticString& name, TAsset* asset) {
-		m_Container.Add(name, asset);
-	}
-
-	const TAsset*	Get(const Char* name) {
-		return Get(StaticString(name));
-	}
-
-	const TAsset*	Get(const String& name) {
-		return Get(name.CStr());
-	}
-
-	const TAsset*	Get(const StaticString& name);
-
-	//void	ReloadAll();
 };

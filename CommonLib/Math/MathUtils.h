@@ -50,7 +50,7 @@ public:
 	
 	static Float32	Sqrt( Float32 val );
 
-	static Float32	MilliSec2Sec(UInt64 millsec) {
+	static constexpr Float32	MilliSec2Sec(UInt64 millsec) {
 		return millsec / 1000.0f;
 	}
 
@@ -58,19 +58,19 @@ public:
 		return millsec / 1000.0f;
 	}
 
-	static Float32	MilliSec2Sec(Int32 millsec) {
+	static constexpr Float32	MilliSec2Sec(Int32 millsec) {
 		return millsec / 1000.0f;
 	}
 
-	static Int32	Sec2MilliSec(Float32 sec) {
+	static constexpr Int32	Sec2MilliSec(Float32 sec) {
 		return (Int32)(sec * 1000.0f);
 	}
 
-	static Float32			Radians2Deg(Float32 radians) {
+	static constexpr Float32			Radians2Deg(Float32 radians) {
 		return radians * (180.0f / PI);
 	}
 
-	static Float32			Deg2Radians(Float32 degrees) {
+	static constexpr Float32			Deg2Radians(Float32 degrees) {
 		return degrees * (PI / 180.0f);
 	}
 
@@ -89,11 +89,11 @@ public:
 		return val < 0 ? -val : val;
 	}
 
-	__inline static Bool		IsPowerOfTwo(UInt32 val) {
+	static constexpr Bool		IsPowerOfTwo(UInt32 val) {
 		return val && (val & (val - 1)) == 0;
 	}
 
-	__inline static Bool		IsPowerOfTwo(Int32 val) {
+	static constexpr Bool		IsPowerOfTwo(Int32 val) {
 		return val && (val & (val - 1)) == 0;
 	}
 

@@ -18,15 +18,18 @@ namespace Neo {
 		CLASS_TYPEDEFS(Mesh)
 
 	public:
-		struct AMaterial {
+		class AMaterial {
 			CLASS_TYPEDEFS(AMaterial)
+
+		protected:
+			Map<ShaderProgram_GLSL*, List<StaticString>>	m_ShaderProgramRequirements;//Channels required per shader program
 
 		public:
 			struct Channel {
 				Color<Float32>	Color = decltype(Color)::White;
-				const Neo::Image* Texture = NULL;
+				const Neo::Image* Texture{};
 
-				Channel(decltype(Color) c, decltype(Texture) t) {
+				Channel(const decltype(Color)& c, decltype(Texture) t) {
 					Color = c;
 					Texture = t;
 				}
@@ -44,125 +47,133 @@ namespace Neo {
 			};
 
 			Int32	Index = -1;
-			Int32	PolyCount = 0;
+			UInt32	PolyCount = 0;
 
-			Map<StaticString, Channel*>	Channels;
+			Map<StaticString, Channel*>	ChannelMap;
+			List<Channel*>				Channels;
 
 			AMaterial() {
-				AddChannel("Diffuse");
 			}
 
-			AMaterial(Int32 i, Int32 polyCount) : AMaterial() {
+			AMaterial(Int32 i, UInt32 polyCount) : AMaterial() {
 				Index = i;
 				PolyCount = polyCount;
 			}
 
+			Bool	Equals(const AMaterial& rhs) const {
+				if (Index != rhs.Index) {
+					return false;
+				}
+
+				if (PolyCount != rhs.PolyCount) {
+					return false;
+				}
+
+				if (Channels.Length() != rhs.Channels.Length()) {
+					return false;
+				}
+
+				for (UInt32 ix = 0; ix < Channels.Length(); ++ix) {
+					auto lhsChannel = Channels[ix];
+					auto rhsChannel = rhs.Channels[ix];
+					if (lhsChannel->Color != rhsChannel->Color) {
+						return false;
+					}
+					if (lhsChannel->Texture != rhsChannel->Texture) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			Bool	operator==(const AMaterial& rhs) const {
+				return Equals(rhs);
+			}
+
+			Bool	operator!=(const AMaterial& rhs) const {
+				return !Equals(rhs);
+			}
+
+			template<typename... ChannelNames>
+			void AddShaderProgram(ShaderProgram_GLSL* program, ChannelNames... names) {
+				assert(!m_ShaderProgramRequirements.Contains(program));
+
+				static decltype(m_ShaderProgramRequirements)::TValue requirements;
+				std::initializer_list<int>{
+					(requirements.Add(names), 0)...
+				};
+				m_ShaderProgramRequirements.Add(program, requirements);
+				requirements.Clear();
+			}
+
 			void AddChannel(const StaticString& channelName) {
-				Channels.Add(channelName, new AMaterial::Channel(Color<Float32>(), NULL));
+				ChannelMap.Add(channelName, new AMaterial::Channel(Color<Float32>::White, nullptr));
+				Channels.Add(ChannelMap[channelName]);
 			}
 
 			void AddChannel(const char* channelName) {
 				AddChannel(StaticString(channelName));
 			}
 
-			void UpdateChannel(const StaticString& channelName, const Neo::Image* texture) {
+			Bool UpdateChannel(const StaticString& channelName, const Neo::Image* texture) {
 				try {
-					auto channel = Channels[channelName];
-					if (channel) {
-						channel->Texture = texture;
+					if(!ChannelMap.Contains(channelName)){
+						AddChannel(channelName);
 					}
+					auto channel = ChannelMap[channelName];
+					assert(channel && !channel->Texture);//For now only allow one update
+					channel->Texture = texture;
+					return true;
 				}
 				catch (...) {
+					return false;
 				}
 			}
 
-			void UpdateChannel(const char* channelName, const Neo::Image* texture) {
-				UpdateChannel(StaticString(channelName), texture);
+			Bool UpdateChannel(const char* channelName, const Neo::Image* texture) {
+				return UpdateChannel(StaticString(channelName), texture);
 			}
 
-			void UpdateChannel(const StaticString& channelName, const Color<Float32>& color) {
+			Bool UpdateChannel(const StaticString& channelName, const Color<Float32>& color) {
 				try {
-					auto channel = Channels[channelName];
-					if (channel) {
-						channel->Color = color;
+					if (!ChannelMap.Contains(channelName)) {
+						AddChannel(channelName);
 					}
+					auto channel = ChannelMap[channelName];
+					assert(channel);
+					channel->Color = color;
+					return true;
 				}
 				catch (...) {
+					return false;
 				}
 			}
 
-			void UpdateChannel(const char* channelName, const Color<Float32>& color) {
-				UpdateChannel(StaticString(channelName), color);
-			}
-
-			virtual void		Bind(List<StaticString> channelNames) const {
-				/*if (DiffuseTexture) {
-					DiffuseTexture->Bind();
-				}*/
-				FOREACH(iter, channelNames) {
-					auto channel = Channels[*iter];
-					if (channel) {
-						channel->Bind();
-					}
-				}
-			}
-			virtual void		Bind() const {
-				/*if (DiffuseTexture) {
-					DiffuseTexture->Bind();
-				}*/
-				FOREACH_CONST(iter, Channels) {
-					if (iter->second) {
-						iter->second->Bind();
-					}
-				}
-			}
-			virtual void		Unbind() const {
-				/*if (DiffuseTexture) {
-					DiffuseTexture->Unbind();
-				}*/
-				FOREACH_CONST(iter, Channels) {
-					if (iter->second) {
-						iter->second->Unbind();
-					}
-				}
+			Bool UpdateChannel(const char* channelName, const Color<Float32>& color) {
+				return UpdateChannel(StaticString(channelName), color);
 			}
 		};
 
-		struct Material : public AMaterial {
+		class Material : public AMaterial {
 			INHERITEDCLASS_TYPEDEFS(Material, AMaterial)
 
 		public:
-			Float32			Shininess;
+			Float32			Shininess{};//TODO: Dont think this should be here.  Basically a specular channel
 
 			Material() {
-				/*Emissive = decltype(Emissive)::Black;
-				Ambient = decltype(Ambient)::White;
-				Specular = decltype(Specular)::Black;*/
-				AddChannel("Emissive");
-				AddChannel("Ambient");
-				AddChannel("Specular");
-				Shininess = 0.0f;
 			}
 
 			Material(Int32 i, Int32 polyCount) : TSuper(i, polyCount) {
-				AddChannel("Emissive");
-				AddChannel("Ambient");
-				AddChannel("Specular");
-				Shininess = 0.0f;
 			}
 
 			Material&	operator=(const Material& rhs) {
 				Index = rhs.Index;
 				PolyCount = rhs.PolyCount;
-
+				ChannelMap = rhs.ChannelMap;
 				Channels = rhs.Channels;
-				
 				return *this;
 			}
-
-			virtual void		Bind() const override;
-
-			virtual void		Unbind() const override;
 		};
 
 	protected:
@@ -173,7 +184,8 @@ namespace Neo {
 
 		Skeleton		m_Skeleton;
 
-		List<AnimationClip*>	m_AnimationClips;
+		List<StaticString> m_AnimNames;
+		Map<StaticString, AnimationClip*>	m_AnimationClips;
 
 		Bounds			m_Bounds;
 
@@ -193,8 +205,17 @@ namespace Neo {
 			return m_Bounds;
 		}
 
+		UInt32 NumClips() const {
+			return m_AnimationClips.Size();
+		}
+
 		const AnimationClip* GetClip(int index) const {
-			return m_AnimationClips[index];
+			auto& name = m_AnimNames[index];
+			return m_AnimationClips[name];
+		}
+
+		const AnimationClip* GetClip(const StaticString& name) const {
+			return m_AnimationClips[name];
 		}
 
 		void	PreRender(VertexBuffer::VertexAttributes attribs) const;
@@ -204,6 +225,7 @@ namespace Neo {
 			return m_Materials[index];
 		}
 		Bool	RenderMaterial(int index) const;
+		Bool	RenderMaterial(int index, const List<StaticString>& channels) const;
 		Bool	Render() const;
 		Bool	RenderJoints() const;
 		Bool	RenderJoints(const AnimKeyFrame* pKeyFrame) const;
@@ -298,36 +320,4 @@ namespace Neo {
 			return true;
 		}*/
 	};
-};
-
-template<>
-class JsonSerializer<Neo::Mesh::Material> {
-public:
-	/*static Vector<_NumDimensions>	ReadFrom(json_value* root) {
-		Vector<_NumDimensions>	val;
-		ReadFrom(file, val);
-		return val;
-	}*/
-
-	//static Neo::Mesh::Material	ReadFrom(json_value* root) {
-	//	Neo::Mesh::Material outVal;
-	//	for (UInt32 ix = 0; ix < root->u.object.length; ++ix) {
-	//		if (!String::StrICmp(root->u.object.values[ix].name, "Index")) {
-	//			outVal.Index = (Int32)root->u.object.values[ix].value->u.integer;
-	//			continue;
-	//		}
-
-	//		if (!String::StrICmp(root->u.object.values[ix].name, "PolyCount")) {
-	//			outVal.PolyCount = (Int32)root->u.object.values[ix].value->u.integer;
-	//			continue;
-	//		}
-
-	//		/*if (!String::StrICmp(root->u.object.values[ix].name, "TexturePath")) {
-	//			outVal.TexturePath = root->u.object.values[ix].value->u.string.ptr;
-	//			continue;
-	//		}*/
-	//	}
-
-	//	return outVal;
-	//}
 };

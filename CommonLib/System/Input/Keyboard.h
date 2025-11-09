@@ -119,12 +119,12 @@ public:
 		}
 
 		Byte uncompressedData[KeyboardState::NumKeys];
-		hr = m_pDevice->GetDeviceState(STATIC_ARRAY_LENGTH(uncompressedData), uncompressedData);
+		hr = m_pDevice->GetDeviceState(KeyboardState::NumKeys, uncompressedData);
 		if (FAILED(hr)) {
 			return false;
 		}
 
-		if (m_State.Compress(uncompressedData, STATIC_ARRAY_LENGTH(uncompressedData))) {
+		if (m_State.Compress(uncompressedData, KeyboardState::NumKeys)) {
 			NotifyObservers();
 		}
 		return true;

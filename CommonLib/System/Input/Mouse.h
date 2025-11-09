@@ -45,7 +45,7 @@ public:
 			outString += String::Format("DeltaY: %d\n", DeltaY);
 			outString += String::Format("DeltaZ: %d\n", DeltaZ);
 
-			for (int ix = 0; ix < STATIC_ARRAY_LENGTH(Btns); ++ix) {
+			for (int ix = 0, count = STATIC_ARRAY_LENGTH(Btns); ix < count; ++ix) {
 				Btns[ix].ToString(outString);
 				outString += "\n";
 			}
@@ -105,7 +105,7 @@ public:
 		m_DeviceState.DeltaZ = state.lZ;
 		notifyListeners |= m_DeviceState.DeltaZ != 0;
 
-		for (int ix = 0; ix < STATIC_ARRAY_LENGTH(m_DeviceState.Btns); ++ix) {
+		for (int ix = 0, count = STATIC_ARRAY_LENGTH(m_DeviceState.Btns); ix < count; ++ix) {
 			m_DeviceState.Btns[ix].Set(state.rgbButtons[ix] & 0x80, state.rgbButtons[ix] ^ (Byte)m_DeviceState.Btns[ix].IsSet());
 			notifyListeners |= m_DeviceState.Btns[ix].Changed();
 		}

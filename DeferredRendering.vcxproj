@@ -91,7 +91,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>VL_FLOAT;WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\rapidjson\include;$(ProjectDir)\CommonLib\FbxSdk\include;$(ProjectDir)\CommonLib\Math;$(ProjectDir)\..\tinyxml;$(ProjectDir)\CommonLib\glew-2.1.0\include;$(ProjectDir)\CommonLib;$(ProjectDir)\source;$(SolutionDir)packages\rapidjson.1.0.2\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\rapidjson\include;$(ProjectDir)\CommonLib\Rendering\ModelLoaders\FbxSdk\include;$(ProjectDir)\CommonLib\Math;$(ProjectDir)\..\tinyxml;$(ProjectDir)\CommonLib\glew-2.1.0\include;$(ProjectDir)\CommonLib;$(ProjectDir)\source;$(SolutionDir)packages\rapidjson.1.0.2\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -99,7 +99,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libfbxsdk.lib;libfbxsdk-md.lib;glu32.lib;opengl32.lib;glew32.lib;CommonLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)\CommonLib\FbxSdk\lib\vs2015\x86\release;$(ProjectDir)\CommonLib\glew-2.1.0\lib\release\Win32;$(ProjectDir)\CommonLib\glew-2.1.0\lib\Release\Win32;$(ProjectDir)\CommonLib\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\CommonLib\Rendering\ModelLoaders\FbxSdk\lib\vs2015\x86\release;$(ProjectDir)\CommonLib\glew-2.1.0\lib\release\Win32;$(ProjectDir)\CommonLib\glew-2.1.0\lib\Release\Win32;$(ProjectDir)\CommonLib\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -168,7 +168,7 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Model\CubeModel.cpp" />
     <ClCompile Include="source\Model\GLSLShaderData.cpp" />
-    <ClCompile Include="source\Model\IModel.cpp" />
+    <ClCompile Include="source\Model\AModel.cpp" />
     <ClCompile Include="source\Model\PlaneModel.cpp" />
     <ClCompile Include="source\Model\SphereModel.cpp" />
   </ItemGroup>
@@ -177,7 +177,7 @@
     <ClInclude Include="source\GLApplication.h" />
     <ClInclude Include="source\Model\CubeModel.h" />
     <ClInclude Include="source\Model\GLSLShaderData.h" />
-    <ClInclude Include="source\Model\IModel.h" />
+    <ClInclude Include="source\Model\AModel.h" />
     <ClInclude Include="source\Model\PlaneModel.h" />
     <ClInclude Include="source\Model\SphereModel.h" />
   </ItemGroup>
