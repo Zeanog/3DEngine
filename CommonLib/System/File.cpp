@@ -27,12 +27,11 @@ const Char* File::RebuildFullPath(const Char* path, const Char* removePath, cons
 		for (int ix = 0, count = STATIC_ARRAY_LENGTH(File::Delimiters); ix < count; ++ix) {
 			index = String::FindLastOf(path, File::Delimiters[ix]);
 			if (index >= 0) {
-				path = String::Replace(path, 0, index + 1, addPath);
 				break;
 			}
 		}
 	}
-	return path;
+	return String::Replace(path, 0, index + 1, addPath);
 }
 
 const Char* File::RebuildFullPath(String& path, const Char* newWorkingDirPath) {

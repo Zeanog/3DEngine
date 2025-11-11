@@ -16,15 +16,9 @@ const Char* String::Replace(const Char* str, UInt32 offset, Int32 count, const C
 	}
 	else {
 		assert(sizeInBytes == 1);
-		pre[0] = '\0';
+		pre = "";
 	}
 
-	const Char* newStr{};
-	if (pre[0] == '\0') {
-		newStr = String::Format("%s%s", newSubString, post.CStr());
-	}
-	else {
-		newStr = String::Format("%s%s%s", pre.CStr(), newSubString, post.CStr());
-	}
+	const Char* newStr = String::Format("%s%s%s", pre.CStr(), newSubString, post.CStr());
 	return newStr;
 }
