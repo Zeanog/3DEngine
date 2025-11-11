@@ -55,7 +55,7 @@ Bool GetMaterialTexture(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat,
 
 		auto image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
 		if (!image) {//If path fails then try to rebuild it to our data path
-			File::RebuildFullPath(fileName);
+			File::RebuildFullDataPath(fileName);
 			image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
 		}
 		return image && mat->UpdateChannel(channelName, image);

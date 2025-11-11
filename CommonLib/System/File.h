@@ -13,14 +13,22 @@ class List;
 class File {
 public:
 	static constexpr Char	Delimiters[] = { '\\', '/' };
-	static StaticString		DefaultDataPath;
+	static StaticString		WorkingDirectory;
+	static StaticString		WorkingDataDirectory;
 
 public:
-	static void	SetWorkingDirectory(const Char* path);
+	//TODO: Possibly move these to a 'FileSystem' class
+	static void			SetWorkingDirectory(const Char* path);
+	static const Char* RebuildFullPath(String& path, const Char* removePath, const Char* addPath);
+	static const Char* RebuildFullPath(const Char* path, const Char* removePath, const Char* addPath);
+	static const Char* RebuildFullPath(String& path, const Char* newWorkingDirPath);
+	static const Char* RebuildFullPath(const Char* path, const Char* newWorkingDirPath);
 	static const Char* BuildFullPath(StaticString& relativePath);
 	static const Char* BuildFullPath(const Char* relativePath);
 	static const Char* RebuildFullPath(String& inoutFullPath);
 	static const Char* RebuildFullPath(const Char* inFullPath);
+	static const Char* RebuildFullDataPath(String& inoutFullPath);
+	static const Char* RebuildFullDataPath(const Char* inFullPath);
 
 	Bool	Open( const StaticString& path, const Char* mode ) {
 		return Open( path.CStr(), mode );
