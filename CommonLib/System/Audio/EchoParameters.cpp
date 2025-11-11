@@ -10,7 +10,7 @@ IUnknown* EchoParameters::InstantiateFX() {
 Bool EchoParameters::UpdateParams(SubmixVoice* category, UInt32 index, const rapidjson::Value& value) {
 	TParameters params;
 	SetToDefault(params);
-	if (!UpdateFrom(params, value)) {
+	if (!UpdateFrom(value, params)) {
 		assert(0);
 		return false;
 	}

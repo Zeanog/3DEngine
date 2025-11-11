@@ -369,10 +369,9 @@ void GLApplication::Release()
 #include "System/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
 #include "System/JsonLoader.h"
 #include "Rendering/ModelLoaders/ModelManager.h"
+#include "Rendering/ModelLoaders/SceneLoader.h"
 
-/**
-*	Load all the required assets
-*/
+
 void GLApplication::LoadAssets()
 {
 #pragma region Setting Working Directory
@@ -458,37 +457,10 @@ void GLApplication::LoadAssets()
 
 	Model* model = nullptr;
 
-	rapidjson::Document	doc;
-	auto scenePath = File::BuildFullPath("Scene.json");
-	verify(rapidjson::LoadFrom(scenePath, doc));
+	Singleton<SceneLoader>::GetInstance()->Load("Scene.json");
+	m_Models.AddRange(Singleton<SceneLoader>::GetInstance()->Models());
 
-	assert(doc["Model"].IsObject());
-	auto& docVal = doc["Model"];
-	auto modelPath = docVal.FindMember("Path")->value.GetString();
-	model = Singleton<ModelManager>::GetInstance()->Get(File::RebuildFullPath(modelPath));
-	model->Position(glm::vec3(-2, 2.5f, 0));
-	m_Models.Add(model);
-
-	Singleton<AudioSystem>::GetInstance()->AddCategory("Music", 2, 44100);
-	Singleton<AudioSystem>::GetInstance()->AddCategory("Fx", 2, 44100);
-
-	auto reverbPath = File::BuildFullPath("TestReverb.json");
-	auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects(reverbPath, "Fx");
-
-	SourceVoice* selectedVoice{};
-
-	auto& musicValue = doc["Music"];
-	FOREACH(iter, musicValue) {
-		auto musicDuration = Singleton<AudioSystem>::GetInstance()->Play(iter->GetString(), "Music", selectedVoice);
-		//selectedVoice->Volume(0.1f);
-	}
-
-	assert(doc["TestSound"].IsObject());
-	StaticString soundPath( doc["TestSound"].FindMember("Path")->value.GetString() );
-
-	auto fxDuration = Singleton<AudioSystem>::GetInstance()->Play(soundPath, "Fx", selectedVoice);
-
-	m_Camera.Position(glm::vec3(0.0f, -4.0f, -10.0f));
+	m_Camera.Position(Singleton<SceneLoader>::GetInstance()->CameraPosition());
 }
 
 #include "Shaders/ShaderProgramManager.h"

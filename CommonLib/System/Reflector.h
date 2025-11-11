@@ -347,8 +347,25 @@ public:
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		assert(value.IsDouble());
-		outValue = value.GetDouble();
+		assert(value.IsNumber());
+		if(value.IsInt()) {
+			outValue = (TValue)value.GetInt();
+		}
+		else if(value.IsUint()) {
+			outValue = (TValue)value.GetUint();
+		}
+		/*else if (value.IsInt64()) {
+			outValue = (TValue)value.GetInt64();
+		}
+		else if (value.IsUint64()) {
+			outValue = (TValue)value.GetUint64();
+		}*/
+		else if (value.IsDouble()) {
+			outValue = (TValue)value.GetDouble();
+		}
+		else {
+			assert(0);//Unknown number type
+		}
 	}
 };
 
@@ -363,8 +380,25 @@ public:
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		assert(value.IsDouble());
-		outValue = value.GetDouble();
+		assert(value.IsNumber());
+		if (value.IsInt()) {
+			outValue = (TValue)value.GetInt();
+		}
+		else if (value.IsUint()) {
+			outValue = (TValue)value.GetUint();
+		}
+		/*else if (value.IsInt64()) {
+			outValue = (TValue)value.GetInt64();
+		}
+		else if (value.IsUint64()) {
+			outValue = (TValue)value.GetUint64();
+		}*/
+		else if (value.IsDouble()) {
+			outValue = (TValue)value.GetDouble();
+		}
+		else {
+			assert(0);//Unknown number type
+		}
 	}
 };
 
@@ -518,7 +552,8 @@ public:
 		}
 
 		auto& info = m_MemberInfoMap[memberName];
-		TMember* memberAddr = (TMember*)((Byte*)obj + info.Offset);
+		Byte* objPtr = (Byte*)obj;
+		TMember* memberAddr = (TMember*)(objPtr + info.Offset);
 		*memberAddr = memberValue;
 		return true;
 	}

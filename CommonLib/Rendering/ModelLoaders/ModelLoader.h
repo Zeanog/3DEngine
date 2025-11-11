@@ -7,16 +7,16 @@
 #include "Shaders/ShaderProgram_GLSL.h"
 #include "System/Reflector.h"
 
-class AModelLoader {
-	CLASS_TYPEDEFS(AModelLoader)
+class IModelLoader {
+	CLASS_TYPEDEFS(IModelLoader)
 
 public:
 	virtual Bool	Load(const Char* fileName) = 0;
 	virtual	void	Clear() = 0;
 };
 
-class ModelLoader : public AModelLoader {
-	INHERITEDCLASS_TYPEDEFS(ModelLoader, AModelLoader)
+class ModelLoader : public IModelLoader {
+	INHERITEDCLASS_TYPEDEFS(ModelLoader, IModelLoader)
 
 protected:
 	DEFINE_MEMBER_EX(Bool, InvertNormals)

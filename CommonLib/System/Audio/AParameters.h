@@ -11,7 +11,7 @@ public:
 	typedef _TParameters	TParameters;
 
 public:
-	static Bool	UpdateFrom(TParameters& outParams, const rapidjson::Value& value) {
+	static Bool	UpdateFrom(const rapidjson::Value& value, TParameters& outParams) {
 		assert(value.IsObject());
 
 		FOREACH_MEMBER(iter, value) {

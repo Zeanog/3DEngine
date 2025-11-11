@@ -303,6 +303,9 @@
     <ClInclude Include="System\JsonLoader.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\SceneLoader.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
@@ -454,6 +457,9 @@
     </ClCompile>
     <ClCompile Include="System\JsonLoader.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\SceneLoader.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

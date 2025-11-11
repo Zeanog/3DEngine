@@ -43,6 +43,7 @@
     <ClInclude Include="Rendering\ModelLoaders\MeshManager.h" />
     <ClInclude Include="Rendering\ModelLoaders\ModelLoader.h" />
     <ClInclude Include="Rendering\ModelLoaders\ModelManager.h" />
+    <ClInclude Include="Rendering\ModelLoaders\SceneLoader.h" />
     <ClInclude Include="Rendering\RenderDef.h" />
     <ClInclude Include="Rendering\VertexBuffer.h" />
     <ClInclude Include="Shaders\ShaderManager_Fragment.h" />
@@ -129,6 +130,7 @@
     <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\ModelLoader.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\ModelManager.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\SceneLoader.cpp" />
     <ClCompile Include="Rendering\RenderDef.cpp" />
     <ClCompile Include="Rendering\VertexBuffer.cpp" />
     <ClCompile Include="Shaders\ShaderManager_Fragment.cpp" />
