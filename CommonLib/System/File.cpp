@@ -1,45 +1,62 @@
 #include "File.h"
 #include "List.h"
 
-StaticString	File::DefaultDataPath;
+StaticString	File::WorkingDirectory;
+StaticString	File::WorkingDataDirectory;
 
 void File::SetWorkingDirectory(const Char* path) {
-	DefaultDataPath = String::Format("%s", path);
+	WorkingDirectory = String::Format("%s\\", path);
+	WorkingDataDirectory = String::Format("%sData\\", WorkingDirectory.CStr());
 }
 
 const Char* File::BuildFullPath(StaticString& relativePath) {
-	return String::Format("%s\\%s", DefaultDataPath.CStr(), relativePath.CStr());
+	return String::Format("%s\\%s", WorkingDirectory.CStr(), relativePath.CStr());
 }
 
 const Char* File::BuildFullPath(const Char* relativePath) {
-	return String::Format("%s\\%s", DefaultDataPath.CStr(), relativePath);
+	return String::Format("%s\\%s", WorkingDirectory.CStr(), relativePath);
 }
 
-const Char* File::RebuildFullPath(String& inoutFullPath) {
-	Int32 index = inoutFullPath.FindIndexOf(File::DefaultDataPath.Str());
+const Char* File::RebuildFullPath(String& path, const Char* removePath, const Char* addPath) {
+	return RebuildFullPath(path.CStr(), removePath, addPath);
+}
+
+const Char* File::RebuildFullPath(const Char* path, const Char* removePath, const Char* addPath) {
+	Int32 index = String::FindIndexOf(path, removePath);
 	if (index < 0) {
 		for (int ix = 0, count = STATIC_ARRAY_LENGTH(File::Delimiters); ix < count; ++ix) {
-			index = inoutFullPath.FindLastOf(File::Delimiters[ix]);
+			index = String::FindLastOf(path, File::Delimiters[ix]);
 			if (index >= 0) {
-				inoutFullPath.Replace(0, index + 1, File::DefaultDataPath.CStr());
+				path = String::Replace(path, 0, index + 1, addPath);
 				break;
 			}
 		}
 	}
-	return inoutFullPath.CStr();
+	return path;
+}
+
+const Char* File::RebuildFullPath(String& path, const Char* newWorkingDirPath) {
+	return RebuildFullPath(path, File::WorkingDirectory.CStr(), newWorkingDirPath);
+}
+
+const Char* File::RebuildFullPath(const Char* path, const Char* newWorkingDirPath) {
+	return RebuildFullPath(path, File::WorkingDirectory.CStr(), newWorkingDirPath);
+}
+
+const Char* File::RebuildFullPath(String& inoutFullPath) {
+	return RebuildFullPath(inoutFullPath, File::WorkingDirectory.CStr());
+}
+
+const Char* File::RebuildFullDataPath(String& inoutFullPath) {
+	return RebuildFullPath(inoutFullPath, File::WorkingDataDirectory.CStr());
 }
 
 const Char* File::RebuildFullPath(const Char* inFullPath) {
-	Int32 index = String::FindIndexOf(inFullPath, File::DefaultDataPath.CStr());
-	if (index < 0) {
-		for (int ix = 0, count = STATIC_ARRAY_LENGTH(File::Delimiters); ix < count; ++ix) {
-			index = String::FindLastOf(inFullPath, File::Delimiters[ix]);
-			if (index >= 0) {
-				return String::Replace(inFullPath, 0, index + 1, File::DefaultDataPath.CStr());
-			}
-		}
-	}
-	return inFullPath;
+	return RebuildFullPath(inFullPath, File::WorkingDirectory.CStr());
+}
+
+const Char* File::RebuildFullDataPath(const Char* inPath) {
+	return RebuildFullPath(inPath, File::WorkingDataDirectory.CStr(), File::WorkingDataDirectory.CStr());
 }
 
 Bool File::ReadContents(List<Byte>& outContents) {

@@ -30,8 +30,8 @@ Bool AudioLoader_MP3::Load(const Char* fileName) {
         return false;
     }
 
-    auto buffer = new TData[dec.samples * dec.info.channels];
-    auto samples_read = mp3dec_ex_read(&dec, buffer, dec.samples * dec.info.channels);
+    auto buffer = new TData[dec.samples * (uint64_t)dec.info.channels];
+    auto samples_read = mp3dec_ex_read(&dec, buffer, dec.samples * (uint64_t)dec.info.channels);
     m_AudioDataSize = samples_read * sizeof(TData);
     m_AudioData.reset((Byte*)buffer);
  
