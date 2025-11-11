@@ -24,6 +24,8 @@ void ModelLoader::ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL
 
 	FOREACH_MEMBER(memberIter, value) {
 		StaticString memberName(memberIter->name.GetString());
+
+		//TODO: Change this to be a 'Map' so we can avoid the if/else chain
 		if (memberName == s_Vert) {
 			Parse(memberIter->value, vertProgFilePath);
 		}

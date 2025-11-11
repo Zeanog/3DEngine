@@ -70,6 +70,12 @@ public:
 		return Length() - 1;
 	}
 
+	void AddRange(const AList<TData>& other) {
+		FOREACH_CONST(elem, other.m_Data) {
+			Add(*elem);
+		}
+	}
+
 	void	RemoveIndex(UInt32 index) {
 		m_Data.erase(Begin() + index);
 	}

@@ -407,7 +407,7 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category)
 			fxInfo->Update(category, ix, valueList[ix]);
 		}
 		
-		return numFx;//Return number of effects loaded
+		return numFx;
 	}
 	catch (...) {
 		return 0;

@@ -4,15 +4,15 @@
 StaticString	File::DefaultDataPath;
 
 void File::SetWorkingDirectory(const Char* path) {
-	DefaultDataPath = String::Format("%s\\Data\\", path);
+	DefaultDataPath = String::Format("%s", path);
 }
 
 const Char* File::BuildFullPath(StaticString& relativePath) {
-	return String::Format("%s%s", DefaultDataPath.CStr(), relativePath.CStr());
+	return String::Format("%s\\%s", DefaultDataPath.CStr(), relativePath.CStr());
 }
 
 const Char* File::BuildFullPath(const Char* relativePath) {
-	return String::Format("%s%s", DefaultDataPath.CStr(), relativePath);
+	return String::Format("%s\\%s", DefaultDataPath.CStr(), relativePath);
 }
 
 const Char* File::RebuildFullPath(String& inoutFullPath) {

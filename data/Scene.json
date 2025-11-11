@@ -1,12 +1,47 @@
 {
-	"Model": {
-		"Path": "Data/Zombie.neom"
+	"Camera": {
+		"position": {
+			"x": 0,
+			"y": -4,
+			"z": -10
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		}
 	},
-	"Music": [
-		"Data/that-s-the-way-it-is-music-travel-love-ft-bugoy-drilon.mp3",
-		"Data/5.1SurroundSoundTest.mp3"
+	"Models": [
+		{
+			"path": "Data\\Zombie.neom",
+			"position": {
+				"x": -2,
+				"y": 2.5,
+				"z": 0
+			},
+			"rotation": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			}
+		}
 	],
-	"TestSound": {
-		"Path": "Data/baseball_hit.wav"
+	"AudioChannels": {
+		"Music": {
+			"Channels": 2,
+			"SampleRate": 44100,
+			"Paths": [
+				"Data\\that-s-the-way-it-is-music-travel-love-ft-bugoy-drilon.mp3",
+				"Data\\5.1SurroundSoundTest.mp3"
+			]
+		},
+		"Fx": {
+			"Channels": 2,
+			"SampleRate": 44100,
+			"Shader": "Data\\TestReverb.afx",
+			"Paths": [
+				"Data\\baseball_hit.wav"
+			]
+		}
 	}
 }
