@@ -1,7 +1,7 @@
 #pragma once
 
 #include "System/AssetManager.h"
-#include "System/Audio/Sound.h"
+#include "Audio/Sound.h"
 #include "System/Singleton.h"
 
 class AAudioLoader;

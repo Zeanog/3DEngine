@@ -7,12 +7,12 @@
 #include "System/Typedefs.h"
 #include "System/Input/VirtualKey.h"
 #include "Images/ImageManager.h"
-#include "System/Audio/Loaders/SoundManager.h"
+#include "Audio/Loaders/SoundManager.h"
 #include "Lighting/Light.h"
 #include "Rendering/Model.h"
 
 #include "System/Input/InputSystem.h"
-#include "System/Audio/AudioSystem.h"
+#include "Audio/AudioSystem.h"
 //#include "System\Audio\SubmixVoice.h"
 //#include "System/Configuration.h"
 #include "Math/MathUtils.h"
@@ -365,7 +365,7 @@ void GLApplication::Release()
 }
 
 #include "Rendering/ModelLoaders/MeshManager.h"
-#include "System/Audio/SourceVoice.h"
+#include "Audio/SourceVoice.h"
 #include "System/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
 #include "System/JsonLoader.h"
 #include "Rendering/ModelLoaders/ModelManager.h"
@@ -455,12 +455,11 @@ void GLApplication::LoadAssets()
 #endif
 	m_Lights.Add(spotLight);
 
-	Model* model = nullptr;
-
 	Singleton<SceneLoader>::GetInstance()->Load("Scene.json");
 	m_Models.AddRange(Singleton<SceneLoader>::GetInstance()->Models());
 
 	m_Camera.Position(Singleton<SceneLoader>::GetInstance()->CameraPosition());
+	m_Camera.Rotation(Singleton<SceneLoader>::GetInstance()->CameraRotation());
 }
 
 #include "Shaders/ShaderProgramManager.h"

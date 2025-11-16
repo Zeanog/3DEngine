@@ -1,7 +1,7 @@
 #include "SceneLoader.h"
 #include "System/File.h"
 #include "ModelManager.h"
-#include "System/Audio/AudioSystem.h"
+#include "Audio/AudioSystem.h"
 #include "System/JsonLoader.h"
 
 #include "Rendering/Model.h"
@@ -26,11 +26,17 @@ void SceneLoader::ParseModels(const rapidjson::Value& value) {
 
 void SceneLoader::ParseAudioChannels(const rapidjson::Value& value) {
 	FOREACH_MEMBER(memberIter, value) {
-		auto channelName = memberIter->name.GetString();
-		auto numChannelsIter = memberIter->value.FindMember("Channels");
+		//TODO: Possibly dont this and just make sure our check is case-insensitive
+		auto nameLen = String::StrLen(memberIter->name.GetString()) + 1;//Include NULL terminator
+		STACK_STRING(chName, nameLen);
+		chName = memberIter->name.GetString();//String copy
+		chName[0] = std::toupper(chName[0]);
+		StaticString channelName(chName.CStr());//String copy
+
+		auto numChannelsIter = memberIter->value.FindMember("channels");
 		assert(numChannelsIter != memberIter->value.MemberEnd());
 
-		auto sampleRateIter = memberIter->value.FindMember("SampleRate");
+		auto sampleRateIter = memberIter->value.FindMember("sampleRate");
 		assert(sampleRateIter != memberIter->value.MemberEnd());
 
 		UInt32 numChannels{};
@@ -41,14 +47,14 @@ void SceneLoader::ParseAudioChannels(const rapidjson::Value& value) {
 
 		Singleton<AudioSystem>::GetInstance()->AddCategory(channelName, numChannels, sampleRate);
 
-		auto shaderIter = memberIter->value.FindMember("Shader");
+		auto shaderIter = memberIter->value.FindMember("shader");
 		if (shaderIter != memberIter->value.MemberEnd()) {
 			auto fxPath = File::BuildFullPath(shaderIter->value.GetString());
 			auto numEffects = Singleton<AudioSystem>::GetInstance()->LoadEffects(fxPath, channelName);
 		}
 
 		SourceVoice* selectedVoice{};
-		auto pathsIter = memberIter->value.FindMember("Paths");
+		auto pathsIter = memberIter->value.FindMember("paths");
 		FOREACH(pathIter, pathsIter->value) {
 			Singleton<AudioSystem>::GetInstance()->Play(pathIter->GetString(), channelName, selectedVoice);
 		}
@@ -65,22 +71,22 @@ void SceneLoader::ParseOrientation(const rapidjson::Value& value, glm::vec3& out
 
 Bool	SceneLoader::Load(const Char* fileName) {
 	rapidjson::Document	doc;
-	auto scenePath = File::BuildFullPath("Data\\Scene.json");
+	auto scenePath = File::RebuildFullDataPath(fileName);
 	verify(rapidjson::LoadFrom(scenePath, doc));
 
 #pragma region Camera
-	auto&& cameraVal = doc["Camera"];
+	auto&& cameraVal = doc["camera"];
 	assert(cameraVal.IsObject());
 
 	glm::vec3 pos;
 	glm::vec3 rot;
 	ParseOrientation(cameraVal, pos, rot);
 	CameraPosition(pos);
-	CameraRotation(rot);
+	CameraRotation(glm::quat(glm::radians(rot)));
 #pragma endregion
 
-	ParseModels(doc["Models"]);
-	ParseAudioChannels(doc["AudioChannels"]);
+	ParseModels(doc["models"]);
+	ParseAudioChannels(doc["audioChannels"]);
 
 	return true;
 }

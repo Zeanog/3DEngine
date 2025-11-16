@@ -141,7 +141,7 @@ public:
 
 template< typename _TKey, typename _TValue >
 class Map : public AMap<_TKey, _TValue> {
-	INHERITEDCLASS_TYPEDEFS(Map, AMap)
+	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue))
 
 protected:
 

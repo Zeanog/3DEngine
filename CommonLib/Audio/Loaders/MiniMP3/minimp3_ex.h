@@ -405,7 +405,7 @@ int mp3dec_load_cb(mp3dec_t *dec, mp3dec_io_t *io, uint8_t *buf, size_t buf_size
     } while(1);
     size_t allocated = MINIMP3_MAX_SAMPLES_PER_FRAME*sizeof(mp3d_sample_t);
     if (detected_samples)
-        allocated += detected_samples*sizeof(mp3d_sample_t);
+        allocated += (size_t)detected_samples*sizeof(mp3d_sample_t);
     else
         allocated += (buf_size/frame_info.frame_bytes)*samples*sizeof(mp3d_sample_t);
     info->buffer = (mp3d_sample_t*)malloc(allocated);
@@ -485,7 +485,7 @@ int mp3dec_load_cb(mp3dec_t *dec, mp3dec_io_t *io, uint8_t *buf, size_t buf_size
         }
     } while (frame_info.frame_bytes);
     if (detected_samples && info->samples > detected_samples)
-        info->samples = detected_samples; /* cut padding */
+        info->samples = (size_t)detected_samples; /* cut padding */
     /* reallocate to normal buffer size */
     if (allocated != info->samples*sizeof(mp3d_sample_t))
     {
@@ -755,7 +755,7 @@ seek_zero:
                 return ret;
         } else
         {
-            int ret = mp3dec_iterate_buf(dec->file.buffer + dec->start_offset, dec->file.size - dec->start_offset, mp3dec_load_index, dec);
+            int ret = mp3dec_iterate_buf(dec->file.buffer + dec->start_offset, dec->file.size - (size_t)dec->start_offset, mp3dec_load_index, dec);
             if (ret && MP3D_E_USER != ret)
                 return ret;
         }
@@ -821,7 +821,7 @@ seek_zero:
         }
     }
     dec->offset = dec->index.frames[i].offset;
-    dec->to_skip = position - dec->index.frames[i].sample;
+    dec->to_skip = (int)(position - dec->index.frames[i].sample);
     while ((i + 1) < dec->index.num_frames && !dec->index.frames[i].sample && !dec->index.frames[i + 1].sample)
     {   /* skip not decodable first frames */
         const uint8_t *hdr;
@@ -901,7 +901,7 @@ size_t mp3dec_ex_read_frame(mp3dec_ex_t *dec, mp3d_sample_t **buf, mp3dec_frame_
             uint64_t buf_size = end_offset - dec->offset;
             if (!buf_size)
                 return 0;
-            dec->buffer_samples = mp3dec_decode_frame(&dec->mp3d, dec_buf, MINIMP3_MIN(buf_size, (uint64_t)INT_MAX), dec->buffer, frame_info);
+            dec->buffer_samples = mp3dec_decode_frame(&dec->mp3d, dec_buf, (int)MINIMP3_MIN(buf_size, (uint64_t)INT_MAX), dec->buffer, frame_info);
         }
         dec->buffer_consumed = 0;
         if (dec->info.hz != frame_info->hz || dec->info.layer != frame_info->layer)
@@ -939,7 +939,7 @@ return_e_decode:
     if (dec->detected_samples)
     {   /* count decoded samples to properly cut padding */
         if (dec->cur_sample + out_samples >= dec->detected_samples)
-            out_samples = dec->detected_samples - dec->cur_sample;
+            out_samples = (size_t)(dec->detected_samples - dec->cur_sample);
     }
     dec->cur_sample += out_samples;
     *buf = dec->buffer + dec->buffer_consumed;
@@ -1176,12 +1176,12 @@ static int mp3dec_open_file_h(HANDLE file, mp3dec_map_info_t *map_info)
     s.LowPart = GetFileSize(file, (DWORD*)&s.HighPart);
     if (s.LowPart == INVALID_FILE_SIZE && GetLastError() != NO_ERROR)
         goto error;
-    map_info->size = s.QuadPart;
+    map_info->size = (size_t)s.QuadPart;
 
     mapping = CreateFileMapping(file, NULL, PAGE_READONLY, 0, 0, NULL);
     if (!mapping)
         goto error;
-    map_info->buffer = (const uint8_t*)MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, s.QuadPart);
+    map_info->buffer = (const uint8_t*)MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, (SIZE_T)s.QuadPart);
     CloseHandle(mapping);
     if (!map_info->buffer)
         goto error;

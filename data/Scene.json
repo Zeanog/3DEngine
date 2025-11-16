@@ -1,5 +1,5 @@
 {
-	"Camera": {
+	"camera": {
 		"position": {
 			"x": 0,
 			"y": -4,
@@ -11,7 +11,7 @@
 			"z": 0
 		}
 	},
-	"Models": [
+	"models": [
 		{
 			"path": "Data\\Zombie.neom",
 			"position": {
@@ -26,20 +26,20 @@
 			}
 		}
 	],
-	"AudioChannels": {
-		"Music": {
-			"Channels": 2,
-			"SampleRate": 44100,
-			"Paths": [
+	"audioChannels": {
+		"music": {
+			"channels": 2,
+			"sampleRate": 44100,
+			"paths": [
 				"Data\\that-s-the-way-it-is-music-travel-love-ft-bugoy-drilon.mp3",
 				"Data\\5.1SurroundSoundTest.mp3"
 			]
 		},
-		"Fx": {
-			"Channels": 2,
-			"SampleRate": 44100,
-			"Shader": "Data\\TestReverb.afx",
-			"Paths": [
+		"fx": {
+			"channels": 2,
+			"sampleRate": 44100,
+			"shader": "Data\\TestReverb.afx",
+			"paths": [
 				"Data\\baseball_hit.wav"
 			]
 		}

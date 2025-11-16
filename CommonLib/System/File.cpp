@@ -63,10 +63,13 @@ Bool File::ReadContents(List<Byte>& outContents) {
 
 	errno = 0;//Reset the error num
 
-	outContents.EnsureSize(Length());
-	UInt32 numElementsRead = fread_s((void*)&outContents[0], outContents.Length(), 1, outContents.Length(), m_File);
-	outContents.Resize(numElementsRead);//I have seen it load extra stuff to the end when loading JSON.  We need to resize to correct lenth
+	auto startIndex = outContents.Length();
+	outContents.EnsureSize(startIndex + Length());
+	UInt32 numElementsRead = fread_s((void*)&outContents[startIndex], outContents.Length() - startIndex, 1, Length(), m_File);
+	assert(numElementsRead <= Length());
+	auto newLength = numElementsRead + startIndex;
+	outContents.Resize(newLength);//I have seen it load extra stuff to the end when loading JSON.  We need to resize to correct lenth
 
 	assert(!ReportedError());
-	return numElementsRead <= outContents.Length();
+	return true;
 }
