@@ -4,7 +4,7 @@
 #include "System/DataStructureLibrary.h"
 
 #define MINIMP3_IMPLEMENTATION
-#include "System/Audio/Loaders/MiniMP3/minimp3_ex.h"
+#include "Audio/Loaders/MiniMP3/minimp3_ex.h"
 
 #include <xaudio2.h>
 
@@ -17,21 +17,21 @@ Bool AudioLoader_MP3::Load(const Char* fileName) {
         return false;
     }
 
-    //I am hoping to avoid an allocation for each file load
+    //Avoid an allocation for each file load
     List<Byte>* fileData = Singleton<DataStructureLibrary<List<Byte>>>::GetInstance()->CheckOut();
-    //fileData->Clear();
+    fileData->Clear();
     verify(file.ReadContents(*fileData));
 
     mp3dec_ex_t dec;
     const Byte* data = &(*fileData)[0];
-    int error = mp3dec_ex_open_buf(&dec, data, fileData->Length(), MP3D_SEEK_TO_SAMPLE);
+    int error = mp3dec_ex_open_buf(&dec, data, (size_t)fileData->Length(), MP3D_SEEK_TO_SAMPLE);
     Singleton<DataStructureLibrary<List<Byte>>>::GetInstance()->Return(fileData);
     if (error) {
         return false;
     }
 
-    auto buffer = new TData[dec.samples * (uint64_t)dec.info.channels];
-    auto samples_read = mp3dec_ex_read(&dec, buffer, dec.samples * (uint64_t)dec.info.channels);
+    auto buffer = new TData[(size_t)dec.samples * (size_t)dec.info.channels];
+    auto samples_read = mp3dec_ex_read(&dec, buffer, (size_t)dec.samples * (size_t)dec.info.channels);
     m_AudioDataSize = samples_read * sizeof(TData);
     m_AudioData.reset((Byte*)buffer);
  

@@ -20,6 +20,15 @@ public:
 		m_Allocated = size;
 	}
 
+	StackString(Char* buffer, Int32 size, const Char* str) {
+		m_pData = buffer;
+		m_Size = size;
+		m_Allocated = size;
+
+		assert(str);
+		String::StrCpy(m_pData, size, str);
+	}
+
 	/*virtual Bool	ReadFrom(json_value* val) {
 		m_pData = val->u.string.ptr;
 		m_Size = val->u.string.length;
@@ -91,3 +100,4 @@ public:
 };
 
 #define STACK_STRING( name, length )	StackString name(STACK_ALLOC(Char, (length)), (length))
+#define STACK_STRING_COPY( name, cstr )	StackString name(STACK_ALLOC(Char, String::StrLen(cstr)), String::StrLen(cstr), cstr)

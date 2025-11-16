@@ -32,7 +32,7 @@ Bool DebugConsole::AttachIO() {
 	}
 
 	auto err = freopen_s(&m_hOutputFile, "CONOUT$", "w", stdout);
-	return !err && IsOpen();
+	return !err && AttachConsole(ATTACH_PARENT_PROCESS) && IsOpen();
 }
 
 void DebugConsole::DetachIO() {

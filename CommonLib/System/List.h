@@ -192,7 +192,7 @@ public:
 
 template< typename _TData >
 class List : public AList<_TData> {
-	INHERITEDCLASS_TYPEDEFS( List, AList )
+	INHERITEDCLASS_TYPEDEFS( List, AList<_TData>)
 
 public:
 	typedef typename TSuper::TData	TData;

@@ -19,6 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Audio\AParameters.h" />
+    <ClInclude Include="Audio\ASourceVoice.h" />
+    <ClInclude Include="Audio\AudioSystem.h" />
+    <ClInclude Include="Audio\AVoice.h" />
+    <ClInclude Include="Audio\EchoParameters.h" />
+    <ClInclude Include="Audio\EQParameters.h" />
+    <ClInclude Include="Audio\Loaders\AAudioLoader.h" />
+    <ClInclude Include="Audio\Loaders\AudioLoader_MP3.h" />
+    <ClInclude Include="Audio\Loaders\AudioLoader_OggVorbis.h" />
+    <ClInclude Include="Audio\Loaders\AudioLoader_RIFF.h" />
+    <ClInclude Include="Audio\Loaders\SoundManager.h" />
+    <ClInclude Include="Audio\MasteringVoice.h" />
+    <ClInclude Include="Audio\ReverbParameters.h" />
+    <ClInclude Include="Audio\Sound.h" />
+    <ClInclude Include="Audio\SourceVoice.h" />
+    <ClInclude Include="Audio\SourceVoiceCallbacks.h" />
+    <ClInclude Include="Audio\SubmixVoice.h" />
     <ClInclude Include="Images\Image.h" />
     <ClInclude Include="Images\ImageLoader.h" />
     <ClInclude Include="Images\ImageLoader_PNG.h" />
@@ -53,24 +70,6 @@
     <ClInclude Include="Shaders\Shader_GLSL.h" />
     <ClInclude Include="System\AssetManager.h" />
     <ClInclude Include="System\Audio\AParameters.h" />
-    <ClInclude Include="System\Audio\ASourceVoice.h" />
-    <ClInclude Include="System\Audio\AVoice.h" />
-    <ClInclude Include="System\Audio\EchoParameters.h" />
-    <ClInclude Include="System\Audio\EQParameters.h" />
-    <ClInclude Include="System\Audio\Loaders\AAudioLoader.h" />
-    <ClInclude Include="System\Audio\Loaders\AudioLoader_MP3.h" />
-    <ClInclude Include="System\Audio\Loaders\AudioLoader_OggVorbis.h" />
-    <ClInclude Include="System\Audio\Loaders\AudioLoader_RIFF.h" />
-    <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3.h" />
-    <ClInclude Include="System\Audio\Loaders\MiniMP3\minimp3_ex.h" />
-    <ClInclude Include="System\Audio\Loaders\SoundManager.h" />
-    <ClInclude Include="System\Audio\MasteringVoice.h" />
-    <ClInclude Include="System\Audio\AudioSystem.h" />
-    <ClInclude Include="System\Audio\ReverbParameters.h" />
-    <ClInclude Include="System\Audio\Sound.h" />
-    <ClInclude Include="System\Audio\SourceVoice.h" />
-    <ClInclude Include="System\Audio\SourceVoiceCallbacks.h" />
-    <ClInclude Include="System\Audio\SubmixVoice.h" />
     <ClInclude Include="System\Color.h" />
     <ClInclude Include="System\Configuration.h" />
     <ClInclude Include="System\DataStructureLibrary.h" />
@@ -106,6 +105,19 @@
     <ClInclude Include="TinyXML\tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Audio\AudioSystem.cpp" />
+    <ClCompile Include="Audio\EchoParameters.cpp" />
+    <ClCompile Include="Audio\EQParameters.cpp" />
+    <ClCompile Include="Audio\Loaders\AudioLoader_MP3.cpp" />
+    <ClCompile Include="Audio\Loaders\AudioLoader_OggVorbis.cpp" />
+    <ClCompile Include="Audio\Loaders\AudioLoader_RIFF.cpp" />
+    <ClCompile Include="Audio\Loaders\SoundManager.cpp" />
+    <ClCompile Include="Audio\MasteringVoice.cpp" />
+    <ClCompile Include="Audio\ReverbParameters.cpp" />
+    <ClCompile Include="Audio\Sound.cpp" />
+    <ClCompile Include="Audio\SourceVoice.cpp" />
+    <ClCompile Include="Audio\SourceVoiceCallbacks.cpp" />
+    <ClCompile Include="Audio\SubmixVoice.cpp" />
     <ClCompile Include="Images\Image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -138,19 +150,6 @@
     <ClCompile Include="Shaders\ShaderProgramManager.cpp" />
     <ClCompile Include="Shaders\ShaderProgram_GLSL.cpp" />
     <ClCompile Include="Shaders\Shader_GLSL.cpp" />
-    <ClCompile Include="System\Audio\EchoParameters.cpp" />
-    <ClCompile Include="System\Audio\EQParameters.cpp" />
-    <ClCompile Include="System\Audio\Loaders\AudioLoader_MP3.cpp" />
-    <ClCompile Include="System\Audio\Loaders\AudioLoader_OggVorbis.cpp" />
-    <ClCompile Include="System\Audio\Loaders\AudioLoader_RIFF.cpp" />
-    <ClCompile Include="System\Audio\Loaders\SoundManager.cpp" />
-    <ClCompile Include="System\Audio\MasteringVoice.cpp" />
-    <ClCompile Include="System\Audio\AudioSystem.cpp" />
-    <ClCompile Include="System\Audio\ReverbParameters.cpp" />
-    <ClCompile Include="System\Audio\Sound.cpp" />
-    <ClCompile Include="System\Audio\SourceVoice.cpp" />
-    <ClCompile Include="System\Audio\SourceVoiceCallbacks.cpp" />
-    <ClCompile Include="System\Audio\SubmixVoice.cpp" />
     <ClCompile Include="System\Color.cpp" />
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
@@ -322,6 +321,7 @@
     <Import Project="..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets" Condition="Exists('..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets')" />
     <Import Project="..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets" Condition="Exists('..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets')" />
     <Import Project="..\packages\rapidjson.1.0.2\build\native\rapidjson.targets" Condition="Exists('..\packages\rapidjson.1.0.2\build\native\rapidjson.targets')" />
+    <Import Project="..\packages\flatbuffers-native-windows-nolibs.1.11.0\build\native\flatbuffers-native-windows-nolibs.targets" Condition="Exists('..\packages\flatbuffers-native-windows-nolibs.1.11.0\build\native\flatbuffers-native-windows-nolibs.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -330,5 +330,6 @@
     <Error Condition="!Exists('..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ImeSense.Packages.LibOgg.1.3.5.5\build\native\ImeSense.Packages.LibOgg.targets'))" />
     <Error Condition="!Exists('..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ImeSense.Packages.LibVorbis.1.3.7.5\build\native\ImeSense.Packages.LibVorbis.targets'))" />
     <Error Condition="!Exists('..\packages\rapidjson.1.0.2\build\native\rapidjson.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\rapidjson.1.0.2\build\native\rapidjson.targets'))" />
+    <Error Condition="!Exists('..\packages\flatbuffers-native-windows-nolibs.1.11.0\build\native\flatbuffers-native-windows-nolibs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\flatbuffers-native-windows-nolibs.1.11.0\build\native\flatbuffers-native-windows-nolibs.targets'))" />
   </Target>
 </Project>
