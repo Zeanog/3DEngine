@@ -79,7 +79,7 @@ public:
 
 	template<typename... TGLenums>
 	void	EnumerateUniforms(List<StaticString>& outUniforms, TGLenums... enums) const {
-		static constexpr UInt32 NumEnums = sizeof...(enums);
+		static constexpr UInt32 NumEnums = sizeof...(TGLenums);
 
 		Int32 maxNameLength = -1;
 		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
@@ -92,22 +92,26 @@ public:
 		Int32 numUniforms = -1;
 		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORMS, &numUniforms);
 
-		for (auto i = 0; i < numUniforms; i++) {
-			glGetActiveUniform(m_Handle, (GLuint)i, maxNameLength, &nameLength, &size, &type, nameBuffer);
+		for (auto ix = 0; ix < numUniforms; ++ix) {
+			glGetActiveUniform(m_Handle, (GLuint)ix, maxNameLength, &nameLength, &size, &type, nameBuffer);
 			if (!nameLength) {
 				continue;
 			}
 
-			if (NumEnums > 0) {//TODO: If no enums are provided then return all uniforms
+#pragma warning(push)
+#pragma warning(disable:4984) //C4984: 'if constexpr' is a C++17 language extension
+			if constexpr (NumEnums <= 0) {
+				outUniforms.Add(nameBuffer);
+			}
+			else {
+				//TODO: Try and find a better way.  Maybe create a sorted type list
 				for (auto typeToCheck : { enums... }) {
 					if (type == typeToCheck) {
-						outUniforms.Add(StaticString(nameBuffer));
+						outUniforms.Add(nameBuffer);
 					}
 				}
 			}
-			else {
-				outUniforms.Add(StaticString(nameBuffer));
-			}
+#pragma warning(pop)
 		}
 	}
 };

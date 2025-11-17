@@ -26,6 +26,7 @@ public:
 		}
 
 		auto& info = m_MemberInfoMap[memberName];
+		assert(sizeof(TMember) == info.Size);
 		Byte* objPtr = (Byte*)obj;
 		TMember* memberAddr = (TMember*)(objPtr + info.Offset);
 		*memberAddr = memberValue;
@@ -39,14 +40,13 @@ public:
 
 	template<typename TObject>
 	Bool	Set(const StaticString& memberName, TObject* obj, const rapidjson::Value& memberValue) {
-		if (!m_MemberInfoMap.Contains(memberName)) {//Ignore unknown members
+		if (!m_MemberInfoMap.Contains(memberName)) {
 			return false;
 		}
 
 		auto& info = m_MemberInfoMap[memberName];
 		Byte* objPtr = (Byte*)obj;
 		auto memberAddr = objPtr + info.Offset;
-		assert(info.Offset == (memberAddr - objPtr));
 		info.Parser->Copy(memberValue, memberAddr, info.Size);
 		return true;
 	}
