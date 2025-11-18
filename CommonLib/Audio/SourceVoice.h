@@ -44,6 +44,10 @@ public:
 		return SUCCEEDED(m_Voice->Stop(0, operationSet));
 	}
 
+	Bool	FlushBuffers() {
+		return SUCCEEDED(m_Voice->FlushSourceBuffers());
+	}
+
 	virtual void SetFrequencyRatio(Float32 ratio) {
 		verify(SUCCEEDED(m_Voice->SetFrequencyRatio(ratio)));
 	}
@@ -58,22 +62,40 @@ public:
 		return ratio;
 	}
 
-	virtual Bool IsPlaying() const {
+	virtual UInt64 SamplesPlayed() const {
 		assert(m_Voice);
 		XAUDIO2_VOICE_STATE state;
 		m_Voice->GetState(&state);
+		return state.SamplesPlayed;
+	}
+
+	virtual Bool IsPlaying() const {
+		assert(m_Voice);
+		XAUDIO2_VOICE_STATE state;
+		m_Voice->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
 		return state.BuffersQueued > 0;
 	}
 
 	virtual const Sound* PlayingSound() const {
 		assert(m_Voice);
 		XAUDIO2_VOICE_STATE state;
-		m_Voice->GetState(&state);
+		m_Voice->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
 		if (state.BuffersQueued <= 0) {
 			return nullptr;
 		}
 		//This is assuming we set a sounds context to itself
 		return (const Sound*)state.pCurrentBufferContext;
+	}
+
+	virtual Sound* PlayingSound() {
+		assert(m_Voice);
+		XAUDIO2_VOICE_STATE state;
+		m_Voice->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
+		if (state.BuffersQueued <= 0) {
+			return nullptr;
+		}
+		//This is assuming we set a sounds context to itself
+		return (Sound*)state.pCurrentBufferContext;
 	}
 
 public:

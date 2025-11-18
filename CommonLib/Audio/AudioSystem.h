@@ -10,7 +10,6 @@
 #include <xaudio2.h>
 #include <rapidjson\document.h>
 
-
 class AVoice;
 class MasteringVoice;
 class SourceVoice;
@@ -32,7 +31,7 @@ protected:
 
 	List<AVoice*>	m_Voices{};
 
-	TFormatToVoiceListMap					m_FormatToVoiceListMap;
+	TFormatToVoiceListMap					m_FormatToVoiceListMap{};
 
 	Map<StaticString, SubmixVoice*>			m_CategoryNameToVoiceMap{};
 	Map<SubmixVoice*, StaticString>			m_VoiceToCategoryNameMap{};
@@ -41,7 +40,7 @@ protected:
 		Functor<IUnknown*>															Create;
 		Functor<Bool, TYPELIST_3(SubmixVoice*, UInt32, const rapidjson::Value&)>	Update;
 	};
-	Map<StaticString, FXInfo>				m_FxNameToInfoMap;
+	Map<StaticString, FXInfo>				m_FxNameToInfoMap{};
 
 	static std::mutex						m_Mutex;
 

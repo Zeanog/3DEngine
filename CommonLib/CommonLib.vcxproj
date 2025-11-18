@@ -230,6 +230,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)Rendering\ModelLoaders\FbxSdk\include;$(ProjectDir)\Math;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(SolutionDir)packages\rapidjson.1.0.2\build\native\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -6,6 +6,14 @@
 Sound::~Sound() {
 }
 
+void Sound::StartOffset(UInt32 samplesOffset) {
+	m_Buffer.PlayBegin = samplesOffset;
+}
+
+UInt32	Sound::StartOffset() const {
+	return m_Buffer.PlayBegin;
+}
+
 Bool Sound::UploadData(AAudioLoader& loader) {
 	m_Format = loader.Format();
 

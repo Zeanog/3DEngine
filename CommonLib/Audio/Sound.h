@@ -27,5 +27,7 @@ public:
 		return &m_Buffer;
 	}
 
+	void	StartOffset(UInt32 samplesOffset);
+	UInt32	StartOffset() const;
 	Bool	UploadData(AAudioLoader& loader);
 };
