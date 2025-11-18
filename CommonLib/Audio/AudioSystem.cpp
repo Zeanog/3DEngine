@@ -321,9 +321,11 @@ void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
 };
 
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
+	assert(voice);
 	assert(context);
 	Sound* snd = (Sound*)context;
-	snd->StartOffset(0);//Reset if restarted
+	snd->StartOffset(0);//Reset starting position if restarted
+	voice->SetOutputTo();//Clear output voices to avoid audio glitches when reusing the voice
 
 	auto hash = GenerateHash(snd->Format().Format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
 
@@ -339,8 +341,6 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 			voiceList.Add(voice);
 		}
 	}
-
-	voice->SetOutputTo();//Clear output voices to avoid audio glitches when reusing the voice
 };
 
 void AudioSystem::ReloadAssets() {
@@ -358,7 +358,7 @@ void AudioSystem::ReloadAssets() {
 				auto v = *iterVoice;
 				if (v->IsPlaying()) {
 					auto playingSnd = v->PlayingSound();
-					playingVoices->Add({ v, v->SamplesPlayed(), v->PlayingSound()});// This will lose any voices playing with an operationSet
+					playingVoices->Add({v, v->SamplesPlayed(), v->PlayingSound()});// This will lose any voices playing with an operationSet
 				}
 				v->Stop();
 		}

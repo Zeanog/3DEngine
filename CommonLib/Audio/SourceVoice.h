@@ -73,7 +73,14 @@ public:
 		assert(m_Voice);
 		XAUDIO2_VOICE_STATE state;
 		m_Voice->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
-		return state.BuffersQueued > 0;
+		return state.BuffersQueued > 0 && state.pCurrentBufferContext != nullptr;
+	}
+
+	virtual Bool IsPlaying(const Sound* snd) const {
+		assert(m_Voice);
+		XAUDIO2_VOICE_STATE state;
+		m_Voice->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
+		return state.BuffersQueued > 0 && ((Sound*)state.pCurrentBufferContext == snd);
 	}
 
 	virtual const Sound* PlayingSound() const {
