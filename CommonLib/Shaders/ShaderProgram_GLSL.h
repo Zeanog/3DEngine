@@ -84,7 +84,7 @@ public:
 		Int32 maxNameLength = -1;
 		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
 		
-		Char*	nameBuffer = STACK_ALLOC(Char, maxNameLength);
+		Char*	nameBuffer = STACK_ALLOC(Char, maxNameLength + 1);//Include NULL character
 		Int32	nameLength = -1;
 		Int32	size = -1;
 		GLenum	type;
@@ -104,7 +104,7 @@ public:
 				outUniforms.Add(nameBuffer);
 			}
 			else {
-				//TODO: Try and find a better way.  Maybe create a sorted type list
+				//TODO: Try and find a way to remove this linear search.  Maybe create a sorted enums list?
 				for (auto typeToCheck : { enums... }) {
 					if (type == typeToCheck) {
 						outUniforms.Add(nameBuffer);

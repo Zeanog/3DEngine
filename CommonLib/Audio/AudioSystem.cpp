@@ -321,49 +321,58 @@ void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
 };
 
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
-	std::lock_guard<std::mutex> guard(m_Mutex);
-
 	assert(context);
 	Sound* snd = (Sound*)context;
+	snd->StartOffset(0);//Reset if restarted
 
 	auto hash = GenerateHash(snd->Format().Format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
-	assert(m_FormatToVoiceListMap.Contains(hash));
-	auto& voiceList = m_FormatToVoiceListMap[hash];
 
-	assert(!voice->IsPlaying());
+	{
+		std::lock_guard<std::mutex> guard(m_Mutex);
+
+		assert(m_FormatToVoiceListMap.Contains(hash));
+		auto& voiceList = m_FormatToVoiceListMap[hash];
+
+		if (!voice->IsPlaying()) {
+			//Place the voice to the back of the list so we can find open voices quickly
+			voiceList.Remove(voice);
+			voiceList.Add(voice);
+		}
+	}
+
 	voice->SetOutputTo();//Clear output voices to avoid audio glitches when reusing the voice
-
-	//Place the voice to the back of the list so we can find open voices quickly
-	voiceList.Remove(voice);
-	voiceList.Add(voice);
 };
 
-//#include "System/DataStructureLibrary.h"
-
 void AudioSystem::ReloadAssets() {
-	//List<SourceVoice*>* playingVoices = Singleton<DataStructureLibrary<List<SourceVoice*>>>::GetInstance()->CheckOut();
-	//playingVoices->Clear();
+	struct PlayingVoiceInfo {
+		SourceVoice* Voice;
+		UInt64		CurrentOffset;
+		Sound*		CurrentSound;
+	};
 
-	////Store which voices are playing
-	//FOREACH(iterVoiceFormatMap, m_CategoryToVoiceListMap) {
-	//	FOREACH(iterVoiceList, iterVoiceFormatMap->second) {
-	//		FOREACH(iterVoice, iterVoiceList->second) {
-	//			auto v = *iterVoice;
-	//			if (v->IsPlaying()) {
-	//				playingVoices->Add(v);// This will lose any voices playing with an operationSet
-	//			}
-	//			v->Stop();
-	//		}
-	//	}
-	//}
-	//Singleton<SoundManager>::GetInstance()->ReloadAll();
+	auto playingVoices = Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->CheckOut();
+	playingVoices->Clear();
 
-	//FOREACH(iter, *playingVoices) {
-	//	auto v = *iter;
-	//	v->Start();
-	//}
+	FOREACH(iterVoiceListMap, m_FormatToVoiceListMap) {
+		FOREACH(iterVoice, iterVoiceListMap->second) {
+				auto v = *iterVoice;
+				if (v->IsPlaying()) {
+					auto playingSnd = v->PlayingSound();
+					playingVoices->Add({ v, v->SamplesPlayed(), v->PlayingSound()});// This will lose any voices playing with an operationSet
+				}
+				v->Stop();
+		}
+	}
+	Singleton<SoundManager>::GetInstance()->ReloadAll();
 
-	//Singleton<DataStructureLibrary<List<SourceVoice*>>>::GetInstance()->Return(playingVoices);
+	FOREACH(iter, *playingVoices) {
+		auto info = *iter;
+		info.CurrentSound->StartOffset(info.CurrentOffset);
+		info.Voice->Start(info.CurrentSound);
+		//info.Voice->Start();
+	}
+
+	Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->Return(playingVoices);
 }
 
 UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& categoryName) {
