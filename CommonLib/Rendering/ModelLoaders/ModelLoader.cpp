@@ -35,7 +35,7 @@ void ModelLoader::ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL
 	}
 
 	verify(inoutProgram.Create(vertProgFilePath, fragProgFilePath, NULL));
-	inoutProgram.EnumerateUniforms(m_RequiredChannels, GL_SAMPLER_2D);//TODO: Need to remove prefix to get channel name
+	inoutProgram.EnumerateUniforms(m_RequiredChannels, 1U, GL_SAMPLER_2D);
 	//May need to manually add some channels here later
 }
 

@@ -7,7 +7,7 @@ IUnknown* ReverbParameters::InstantiateFX() {
 	return pEffect;
 }
 
-Bool ReverbParameters::UpdateParams(SubmixVoice* category, UInt32 index, const rapidjson::Value& value) {
+Bool ReverbParameters::UpdateParams(SubmixVoice* category, UInt32 fxIndex, const rapidjson::Value& value) {
 	TParameters params;
 	SetToDefault(params);
 	if (!UpdateFrom(value, params)) {
@@ -15,12 +15,12 @@ Bool ReverbParameters::UpdateParams(SubmixVoice* category, UInt32 index, const r
 		return false;
 	}
 
-	if(!category->SetEffectParameters(index, &params, sizeof(decltype(params)))) {
+	if(!category->SetEffectParameters(fxIndex, &params, sizeof(decltype(params)))) {
 		assert(0);
 		return false;
 	}
 
-	if (!category->EnableEffect(index)) {
+	if (!category->EnableEffect(fxIndex)) {
 		assert(0);
 		return false;
 	}
