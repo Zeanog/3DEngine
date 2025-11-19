@@ -4,7 +4,7 @@
 
 template< class TFunctorOwner, typename _TFunctionPointer >
 class FunctionHandler : public IFunctorImpl_Compare<FunctionHandler<TFunctorOwner, _TFunctionPointer>, typename TFunctorOwner::TReturn, typename TFunctorOwner::TParamList> {
-	INHERITEDCLASS_TYPEDEFS( FunctionHandler, TEMPLATE_3(IFunctorImpl_Compare, TEMPLATE_2(FunctionHandler, TFunctorOwner, _TFunctionPointer), typename TFunctorOwner::TReturn, typename TFunctorOwner::TParamList) );
+	INHERITEDCLASS_TYPEDEFS( FunctionHandler, TEMPLATE_3(IFunctorImpl_Compare, TEMPLATE_2(FunctionHandler, TFunctorOwner, _TFunctionPointer), typename TFunctorOwner::TReturn, typename TFunctorOwner::TParamList) )
 
 public:
 	typedef typename TFunctorOwner::TReturn	TReturn;

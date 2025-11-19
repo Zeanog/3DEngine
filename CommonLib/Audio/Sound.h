@@ -29,5 +29,6 @@ public:
 
 	void	StartOffset(UInt32 samplesOffset);
 	UInt32	StartOffset() const;
+
 	Bool	UploadData(AAudioLoader& loader);
 };

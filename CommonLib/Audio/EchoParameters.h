@@ -31,5 +31,5 @@ public:
 	}
 
 	static IUnknown* InstantiateFX();
-	static Bool UpdateParams(class SubmixVoice* category, UInt32 index, const rapidjson::Value& value);
+	static Bool UpdateParams(class SubmixVoice* category, UInt32 fxIndex, const rapidjson::Value& value);
 };

@@ -29,7 +29,7 @@ protected:
 	ShaderProgram_GLSL* m_ShadowProgram{};
 
 	typedef Functor<void, TYPELIST_1(const rapidjson::Value&)> TFieldParser;
-	Map < StaticString, TFieldParser>	m_FieldParsers;
+	Map<StaticString, TFieldParser>	m_FieldParsers;
 
 protected:
 	void				ParseMesh(const rapidjson::Value& value);

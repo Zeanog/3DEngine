@@ -7,7 +7,7 @@
 
 template< class TFunctorOwner, class _TObject, class _TMemberFunctionPointer >
 class AMemberFunctionHandler : public IFunctorImpl_Compare<AMemberFunctionHandler<TFunctorOwner, _TObject, _TMemberFunctionPointer>, typename TFunctorOwner::TReturn, typename TFunctorOwner::TParamList> {
-	INHERITEDCLASS_TYPEDEFS(AMemberFunctionHandler, TEMPLATE_3(IFunctorImpl_Compare, TEMPLATE_3(AMemberFunctionHandler, TFunctorOwner, _TObject, _TMemberFunctionPointer), typename TFunctorOwner::TReturn, typename TFunctorOwner::TParamList));
+	INHERITEDCLASS_TYPEDEFS(AMemberFunctionHandler, TEMPLATE_3(IFunctorImpl_Compare, TEMPLATE_3(AMemberFunctionHandler, TFunctorOwner, _TObject, _TMemberFunctionPointer), typename TFunctorOwner::TReturn, typename TFunctorOwner::TParamList))
 
 public:
 	typedef typename TFunctorOwner::TReturn	TReturn;
@@ -63,7 +63,7 @@ class MemberFunctionHandler;
 
 template< class TFunctorOwner, class _TObject, class _TMemberFunctionPointer >
 class MemberFunctionHandler<TFunctorOwner, TNull, _TObject, _TMemberFunctionPointer> : public AMemberFunctionHandler<TFunctorOwner, _TObject, _TMemberFunctionPointer> {
-	INHERITEDCLASS_TYPEDEFS( MemberFunctionHandler, TEMPLATE_3(AMemberFunctionHandler, TFunctorOwner, _TObject, _TMemberFunctionPointer));
+	INHERITEDCLASS_TYPEDEFS( MemberFunctionHandler, TEMPLATE_3(AMemberFunctionHandler, TFunctorOwner, _TObject, _TMemberFunctionPointer))
 
 public:
 	MemberFunctionHandler() {}

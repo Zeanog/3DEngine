@@ -353,23 +353,23 @@ void AudioSystem::ReloadAssets() {
 	auto playingVoices = Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->CheckOut();
 	playingVoices->Clear();
 
+	// This will lose any voices playing with an operationSet
 	FOREACH(iterVoiceListMap, m_FormatToVoiceListMap) {
 		FOREACH(iterVoice, iterVoiceListMap->second) {
 				auto v = *iterVoice;
 				if (v->IsPlaying()) {
 					auto playingSnd = v->PlayingSound();
-					playingVoices->Add({v, v->SamplesPlayed(), v->PlayingSound()});// This will lose any voices playing with an operationSet
+					playingVoices->Add({v, v->SamplesPlayed(), v->PlayingSound()});
 				}
 				v->Stop();
 		}
 	}
-	Singleton<SoundManager>::GetInstance()->ReloadAll();
+	Singleton<SoundManager>::GetInstance()->ReloadAll();//Reload All Sound Data
 
 	FOREACH(iter, *playingVoices) {
 		auto info = *iter;
 		info.CurrentSound->StartOffset(info.CurrentOffset);
 		info.Voice->Start(info.CurrentSound);
-		//info.Voice->Start();
 	}
 
 	Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->Return(playingVoices);

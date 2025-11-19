@@ -78,40 +78,53 @@ public:
 	}
 
 	template<typename... TGLenums>
-	void	EnumerateUniforms(List<StaticString>& outUniforms, TGLenums... enums) const {
+	Bool	EnumerateUniforms(List<StaticString>& outUniforms, UInt32 numPrefixCharsToStrip, TGLenums... enums) const {
 		static constexpr UInt32 NumEnums = sizeof...(TGLenums);
 
-		Int32 maxNameLength = -1;
-		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
-		
-		Char*	nameBuffer = STACK_ALLOC(Char, maxNameLength + 1);//Include NULL character
-		Int32	nameLength = -1;
-		Int32	size = -1;
-		GLenum	type;
+		try {
+			Int32 maxNameLength = -1;
+			glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
+			assert(numPrefixCharsToStrip < (UInt32)maxNameLength);
 
-		Int32 numUniforms = -1;
-		glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORMS, &numUniforms);
+			Char* nameBuffer = STACK_ALLOC(Char, maxNameLength + 1);//Include NULL character
+			Int32	nameLength = -1;
+			Int32	size = -1;
+			GLenum	type;
 
-		for (auto ix = 0; ix < numUniforms; ++ix) {
-			glGetActiveUniform(m_Handle, (GLuint)ix, maxNameLength, &nameLength, &size, &type, nameBuffer);
-			if (!nameLength) {
-				continue;
-			}
+			Int32 numUniforms = -1;
+			glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORMS, &numUniforms);
+
+			for (auto ix = 0; ix < numUniforms; ++ix) {
+				glGetActiveUniform(m_Handle, (GLuint)ix, maxNameLength, &nameLength, &size, &type, nameBuffer);
+				if (!nameLength) {
+					continue;
+				}
 
 #pragma warning(push)
 #pragma warning(disable:4984) //C4984: 'if constexpr' is a C++17 language extension
-			if constexpr (NumEnums <= 0) {
-				outUniforms.Add(nameBuffer);
-			}
-			else {
-				//TODO: Try and find a way to remove this linear search.  Maybe create a sorted enums list?
-				for (auto typeToCheck : { enums... }) {
-					if (type == typeToCheck) {
-						outUniforms.Add(nameBuffer);
+				if constexpr (NumEnums <= 0) {
+					outUniforms.Add(nameBuffer + numPrefixCharsToStrip);
+				}
+				else {
+					//TODO: Try and find a way to remove this linear search.  Maybe create a sorted enums list?
+					for (auto typeToCheck : { enums... }) {
+						if (type == typeToCheck) {
+							outUniforms.Add(nameBuffer + numPrefixCharsToStrip);
+						}
 					}
 				}
-			}
 #pragma warning(pop)
+			}
+
+			return true;
 		}
+		catch (...) {
+			return false;
+		}
+	}
+
+	template<typename... TGLenums>
+	Bool	EnumerateUniforms(List<StaticString>& outUniforms, TGLenums... enums) const {
+		return EnumerateUniforms(outUniforms, 0U, enums...);
 	}
 };
