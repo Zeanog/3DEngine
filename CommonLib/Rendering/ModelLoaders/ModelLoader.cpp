@@ -35,8 +35,6 @@ void ModelLoader::ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL
 	}
 
 	verify(inoutProgram.Create(vertProgFilePath, fragProgFilePath, NULL));
-	inoutProgram.EnumerateUniforms(m_RequiredChannels, 1U, GL_SAMPLER_2D);
-	//May need to manually add some channels here later
 }
 
 void	ModelLoader::ParseShaderProgram(const rapidjson::Value& value) {
@@ -44,6 +42,8 @@ void	ModelLoader::ParseShaderProgram(const rapidjson::Value& value) {
 		m_ShaderProgram = new ShaderProgram_GLSL();
 	}
 	ParseProgram(value, *m_ShaderProgram);
+	m_ShaderProgram->EnumerateUniforms(m_RequiredChannels, 1U, GL_SAMPLER_2D);
+	//May need to manually add some channels here later
 }
 
 void	ModelLoader::ParseShadowProgram(const rapidjson::Value& value) {
