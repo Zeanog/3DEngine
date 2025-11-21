@@ -54,9 +54,15 @@ void	ModelLoader::ParseShadowProgram(const rapidjson::Value& value) {
 
 }
 
-ModelLoader::ModelLoader() {
+Map<StaticString, ModelLoader::TFieldParser> ModelLoader::m_FieldParsers;
+
+void ModelLoader::BuildFieldParsers() {
+	if (m_FieldParsers.Size() > 0) {
+		return;
+	}
+
 	TFieldParser pm;
-	pm.AddListener(this, &ModelLoader::ParseMesh);
+	pm.AddListener(this, &TSelf::ParseMesh);
 	m_FieldParsers.Add("mesh", pm);
 
 	TFieldParser pin;
@@ -70,6 +76,10 @@ ModelLoader::ModelLoader() {
 	TFieldParser ssp;
 	ssp.AddListener(this, &TSelf::ParseShadowProgram);
 	m_FieldParsers.Add("shadowProgram", ssp);
+}
+
+ModelLoader::ModelLoader() {
+	BuildFieldParsers();
 }
 
 Bool	ModelLoader::Load(const Char* fileName) {
