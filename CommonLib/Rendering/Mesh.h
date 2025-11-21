@@ -21,9 +21,6 @@ namespace Neo {
 		class AMaterial {
 			CLASS_TYPEDEFS(AMaterial)
 
-		protected:
-			Map<ShaderProgram_GLSL*, List<StaticString>>	m_ShaderProgramRequirements;//Channels required per shader program
-
 		public:
 			struct Channel {
 				Color<Float32>	Color = decltype(Color)::White;
@@ -95,21 +92,10 @@ namespace Neo {
 				return !Equals(rhs);
 			}
 
-			template<typename... ChannelNames>
-			void AddShaderProgram(ShaderProgram_GLSL* program, ChannelNames... names) {
-				assert(!m_ShaderProgramRequirements.Contains(program));
-
-				static decltype(m_ShaderProgramRequirements)::TValue requirements;
-				std::initializer_list<int>{
-					(requirements.Add(names), 0)...
-				};
-				m_ShaderProgramRequirements.Add(program, requirements);
-				requirements.Clear();
-			}
-
 			void AddChannel(const StaticString& channelName) {
-				ChannelMap.Add(channelName, new AMaterial::Channel(Color<Float32>::White, nullptr));
-				Channels.Add(ChannelMap[channelName]);
+				auto chan = new AMaterial::Channel(Color<Float32>::White, nullptr);
+				ChannelMap.Add(channelName, chan);
+				Channels.Add(chan);
 			}
 
 			void AddChannel(const char* channelName) {

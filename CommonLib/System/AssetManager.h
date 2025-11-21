@@ -41,7 +41,7 @@ public:
 	}
 
 	void	Add( const StaticString& path, TAsset* asset ) {
-		m_Container[path] = asset;
+		m_Container.Add(path, asset);
 	}
 
 	Bool	Find(const StaticString& path, TAsset*& outValue) const {

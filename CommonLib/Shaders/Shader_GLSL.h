@@ -16,8 +16,6 @@ protected:
 
 	const StaticString	m_Version;
 
-	List<const Char*>	m_ShaderChunks;
-
 public:
 	virtual Bool	ReadFrom( const StaticString& path ) = 0;
 	virtual Bool	ReadFrom(const StaticString& path, const Char* header ) = 0;

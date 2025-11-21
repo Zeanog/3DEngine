@@ -2,7 +2,7 @@
 #include "ModelLoader.h"
 
 ModelManager::ModelManager() {
-	m_Loaders[ StaticString(".neom") ] = new ModelLoader();
+	m_Loaders.Add(StaticString(".neom"), new ModelLoader());
 }
 
 ModelManager::~ModelManager() {

@@ -561,11 +561,17 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 	assert(m_Materials[0]->ChannelMap.Contains(diffuseChannel));
 	auto defaultChannel = m_Materials[0]->ChannelMap[diffuseChannel];
 	for (UInt32 ix = 1; ix < m_Materials.Length(); ++ix) {
-		if (!m_Materials[ix]->ChannelMap.Contains(diffuseChannel)) {
+		auto material = m_Materials[ix];
+		if (!material->ChannelMap.Contains(diffuseChannel)) {
+			material->UpdateChannel(diffuseChannel, defaultChannel->Texture);
+			material->UpdateChannel(diffuseChannel, defaultChannel->Color);
+			continue;
 		}
-		auto channel = m_Materials[ix]->ChannelMap[diffuseChannel];
+
+		auto channel = material->ChannelMap[diffuseChannel];
 		if (channel && !channel->Texture) {
 			channel->Texture = defaultChannel->Texture;
+			channel->Color = defaultChannel->Color;
 		}
 	}
 

@@ -59,11 +59,17 @@ public:
 		return m_Data.cend();
 	} 
 
+	Bool	Contains(typename Param<TKey>::Type key) const {
+		return m_Data.cend() != m_Data.find(key);
+	}
+
 	TValue&	operator[](typename Param<TKey>::Type key) {
+		assert(Contains(key));//We require the use of Add to insert values
 		return m_Data[key];
 	}
 
 	const TValue&	operator[](typename Param<TKey>::Type key) const {
+		assert(Contains(key));//We require the use of Add to insert values
 		TConstIterator iter = m_Data.find(key);
 		return iter->second;
 	}
@@ -79,41 +85,6 @@ public:
 	void	Remove(typename Param<TKey>::Type key) {
 		m_Data.erase(key);
 	}
-
-	/*Int32	AddUnique(const TData& data) {
-		for (Int32 ix = 0; ix < Length(); ++ix) {
-			if (m_Data[ix] == data) {
-				return ix;
-			}
-		}
-		m_Data.push_back(data);
-		return Length() - 1;
-	}*/
-
-	/*TConstIterator	Find(const TData& data) const {
-		FOREACH_CONST(iter, m_Data) {
-			TData d = *iter;
-			if (d == data) {
-				return iter;
-			}
-		}
-
-		return cend();
-	}*/
-
-	Bool	Contains(typename Param<TKey>::Type key) const {
-		return m_Data.cend() != m_Data.find(key);
-	}
-
-	/*Bool	Find(typename Param<TKey>::Type key, TValue& outValue) {
-		auto&& iter = m_Data.find(key);
-		if( iter == m_Data.end() ) {
-			return false;
-		}
-		
-		outValue = iter->second;
-		return true;
-	}*/
 
 	Bool	Find(typename Param<TKey>::Type key, TValue& outValue) const {
 		auto&& iter = m_Data.find(key);

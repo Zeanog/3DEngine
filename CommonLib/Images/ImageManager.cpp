@@ -6,9 +6,9 @@
 //#include "ImageLoader_JPG.h"
 
 ImageManager::ImageManager() {
-	m_Loaders[StaticString(".raw")] = new ImageLoader_RAW();
-	m_Loaders[StaticString(".tga")] = new ImageLoader_TGA();
-	m_Loaders[StaticString(".png")] = new ImageLoader_PNG();
+	m_Loaders.Add(StaticString(".raw"), new ImageLoader_RAW());
+	m_Loaders.Add(StaticString(".tga"), new ImageLoader_TGA());
+	m_Loaders.Add(StaticString(".png"), new ImageLoader_PNG());
 	//m_Loaders[StaticString(".jpg")] = new ImageLoader_JPG();
 }
 
