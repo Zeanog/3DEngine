@@ -46,16 +46,24 @@ Bool Shader_Vertex_GLSL::ReadFrom(const StaticString& path, const Char* header) 
 		return false;
 	}
 
-	m_ShaderChunks.Clear();
+	try {
+		auto numChunks = header && header[0] ? 3 : 2;
+		auto shaderChunks = STACK_ALLOC(const Char*, numChunks);
 
-	m_ShaderChunks.Add(m_Version.CStr());
-	if(header && header[0]) {
-		m_ShaderChunks.Add(header);
+		auto chunkIndex = 0;
+		shaderChunks[chunkIndex++] = (m_Version.CStr());
+		if (header && header[0]) {
+			shaderChunks[chunkIndex++] = header;
+		}
+		shaderChunks[chunkIndex++] = data;
+
+		glShaderSourceARB(m_Handle, numChunks, shaderChunks, NULL);
+		assert(!glGetError());
 	}
-	m_ShaderChunks.Add(data);
-
-	glShaderSourceARB(m_Handle, m_ShaderChunks.Length(), &m_ShaderChunks[0], NULL);
-	assert(!glGetError());
+	catch (...) {
+		assert(0);
+		return false;
+	}
 
 	glCompileShaderARB(m_Handle);
 	assert(!glGetError());
@@ -97,16 +105,23 @@ Bool Shader_Fragment_GLSL::ReadFrom(const StaticString& path, const Char* header
 		return false;
 	}
 
-	m_ShaderChunks.Clear();
+	try {
+		auto numChunks = header && header[0] ? 3 : 2;
+		auto shaderChunks = STACK_ALLOC(const Char*, numChunks);
 
-	m_ShaderChunks.Add(m_Version.CStr());
-	if (header && header[0]) {
-		m_ShaderChunks.Add(header);
+		auto chunkIndex = 0;
+		shaderChunks[chunkIndex++] = (m_Version.CStr());
+		if (header && header[0]) {
+			shaderChunks[chunkIndex++] = header;
+		}
+		shaderChunks[chunkIndex++] = data;
+
+		glShaderSourceARB(m_Handle, numChunks, shaderChunks, NULL);
+		assert(!glGetError());
+	} catch (...) {
+		assert(0);
+		return false;
 	}
-	m_ShaderChunks.Add(data);
-
-	glShaderSourceARB(m_Handle, m_ShaderChunks.Length(), &m_ShaderChunks[0], NULL);
-	assert(!glGetError());
 
 	glCompileShaderARB(m_Handle);
 	assert(!glGetError());

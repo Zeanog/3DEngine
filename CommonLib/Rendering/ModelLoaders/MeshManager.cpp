@@ -2,8 +2,7 @@
 #include "MeshLoader_FBX.h"
 
 MeshManager::MeshManager() {
-	m_Loaders[StaticString(".fbx")] = new MeshLoader_FBX();
-	//m_Loaders[StaticString(".mesh")] = new MeshLoader_Simple();
+	m_Loaders.Add(StaticString(".fbx"), new MeshLoader_FBX());
 }
 
 MeshManager::~MeshManager() {

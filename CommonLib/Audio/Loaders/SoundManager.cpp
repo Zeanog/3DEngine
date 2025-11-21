@@ -5,9 +5,9 @@
 #include "System/DebugConsole.h"
 
 SoundManager::SoundManager() {
-	m_Loaders[StaticString(".wav")] = new AudioLoader_RIFF();
-	m_Loaders[StaticString(".ogg")] = new AudioLoader_OggVorbis();
-	m_Loaders[StaticString(".mp3")] = new AudioLoader_MP3();
+	m_Loaders.Add(StaticString(".wav"), new AudioLoader_RIFF());
+	m_Loaders.Add(StaticString(".ogg"), new AudioLoader_OggVorbis());
+	m_Loaders.Add(StaticString(".mp3"), new AudioLoader_MP3());
 }
 
 SoundManager::~SoundManager() {

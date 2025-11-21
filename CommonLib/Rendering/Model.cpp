@@ -37,7 +37,7 @@ void Model::Render(ShaderProgram_GLSL& program) const {
 	m_Mesh->PreRender((VertexBuffer::VertexAttributes)(VertexBuffer::VertexAttributes::PositionAttrib | VertexBuffer::VertexAttributes::NormalAttrib | VertexBuffer::VertexAttributes::TexCoordsAttrib));
 
 	for (int ix = 0; ix < m_Mesh->NumMaterials(); ++ix) {
-		m_Mesh->RenderMaterial(ix);//TODO: Handle unique programs per material
+		m_Mesh->RenderMaterial(ix, m_RequiredChannels);
 	}
 
 	m_Mesh->PostRender();
