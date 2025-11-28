@@ -2,6 +2,7 @@
 
 #include "System/Typedefs.h"
 
+#include <string>
 #include <glm/vec3.hpp>
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
@@ -98,6 +99,12 @@ public:
 	}
 
 	static UInt32		NearestPowerOfTwo(UInt32 val);
-
 	static Int32		NearestPowerOfTwo(Int32 val);
+
+	static char		ToChar(int num);
+	static int		ToNumber(char ch);
+	static int		NumDigits(int val, int base);
+	static void		ConvertTo(int base, int inputNum, std::string& outNum);
+	static void		Convert(const char* pNumber, int srcBase, int dstBase, std::string& outConvertedNum);
+	static char*	Convert(const char* pNumber, int srcBase, int dstBase);
 };
