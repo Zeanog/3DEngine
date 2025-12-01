@@ -7,6 +7,8 @@ template<typename TVoiceInterface>
 class ASourceVoice : public AVoice {
 	INHERITEDCLASS_TYPEDEFS(ASourceVoice, AVoice)
 
+	DEFINE_MEMBER_EX(UInt64, FormatHash)
+
 protected:
 	TVoiceInterface* m_Voice{};
 
@@ -29,7 +31,7 @@ public:
 		m_Voice = vi;
 	}
 
-	virtual UInt32	NumChannels() const = 0;
+	virtual UInt16	NumChannels() const = 0;
 
 	virtual Float32 Volume() const {
 		Float32 volume{};
@@ -56,7 +58,7 @@ public:
 	template <typename... Voices>
 	Bool SetOutputTo(Voices... destVoices) {
 		static constexpr UINT32 NumDescriptors = sizeof...(Voices);
-		XAUDIO2_SEND_DESCRIPTOR descriptors[max(NumDescriptors, 1)];//Needed if we pass in no voices
+		auto descriptors = STACK_ALLOC(XAUDIO2_SEND_DESCRIPTOR, NumDescriptors);//Needed if we pass in no voices
 		XAUDIO2_VOICE_SENDS sends{ NumDescriptors, descriptors };
 
 		std::size_t i = 0;

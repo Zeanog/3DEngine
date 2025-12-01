@@ -55,10 +55,11 @@ Bool GetMaterialTexture(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat,
 
 		auto image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
 		if (!image) {//If path fails then try to rebuild it to our data path
-			File::RebuildFullDataPath(fileName);
-			image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
+			auto fullDataPath = File::RebuildFullDataPath(fileName);
+			image = Singleton<ImageManager>::GetInstance()->Get(fullDataPath);
 		}
-		return image && mat->UpdateChannel(channelName, image);
+		//TODO: Figure out an alternative if we can't find the image
+		return mat->UpdateChannel(channelName, image);
 	}
 	return false;
 }
@@ -133,7 +134,7 @@ MeshLoader_FBX::~MeshLoader_FBX() {
 	//Destroy(m_AnimationClips);
 }
 
-void MeshLoader_FBX::LoadComponents(const fbxsdk::FbxScene* pScene, FbxAnimLayer* pAnimLayer, const char* pFbxFileName, bool pSupportVBO)
+void MeshLoader_FBX::LoadComponents(const fbxsdk::FbxScene* pScene, FbxAnimLayer* pAnimLayer, bool pSupportVBO)
 {
 	LoadComponents(pScene->GetRootNode(), pAnimLayer, pSupportVBO);
 }
@@ -153,15 +154,11 @@ Bool MeshLoader_FBX::LoadComponents(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bo
 		{
 			VertexBuffer vb;//TODO: Would be nice to avoid this extra copy
 			IndexBuffer ib;//TODO: Would be nice to avoid this extra copy
-			List<Neo::Mesh::AMaterial*>	mats;//TODO: Would be nice to avoid this extra copy
-			Map<StaticString, Neo::Mesh::AMaterial*> matMap;//TODO: Would be nice to avoid this extra copy
 
-			LoadComponents(pNode, vb, m_VertexBuffer.NumVerts(), ib, matMap, mats);
+			LoadMesh(pNode, vb, m_VertexBuffer.NumVerts(), ib, m_MaterialMap, m_Materials);
 
 			m_VertexBuffer += vb;
 			m_IndexBuffer += ib;
-			m_MaterialMap += matMap;
-			m_Materials += mats;
 		}
 		else if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
 			/*FbxSkeleton* lSkeleton = (FbxSkeleton*)lNodeAttribute;
@@ -336,58 +333,7 @@ glm::mat4 MeshLoader_FBX::GetJointLocalTransform(const StaticString& jointName, 
 	return Convert(localMat, fxNode->EvaluateLocalTransform(t, FbxNode::eSourcePivot));
 }
 
-void MeshLoader_FBX::LoadMaterials(FbxMesh* pMesh, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
-	FbxProperty lProperty;
-	const Char* d = NULL;
-	Int32 lNbMat = pMesh->GetNode()->GetSrcObjectCount();
-
-	FOR(Int32, lMaterialIndex, 0, lNbMat, 1) {
-		auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(lMaterialIndex);
-		
-		if (!pMaterial)
-		{
-			continue;
-		}
-		auto name = pMaterial->GetName();
-		if(!name || !name[0]) {
-			continue;
-		}
-
-		Neo::Mesh::AMaterial* mat = new Neo::Mesh::Material();
-
-		mats.Add(mat);
-		matMap.Add(pMaterial->GetName(), mat);
-
-		mat->Index = 0;
-		mat->PolyCount = pMesh->GetPolygonCount();
-
-#if _DEBUG
-		List<StaticString>	propertyNames;//To allow us to see all the of the properties in the debugger
-#endif
-		for (auto&& prop = pMaterial->GetFirstProperty(); prop.IsValid(); prop = pMaterial->GetNextProperty(prop)) {
-			StaticString propName(prop.GetNameAsCStr());
-
-#if _DEBUG
-			propertyNames.Add(propName);
-#endif
-
-			if (!m_MaterialPropertyParsers.Contains(propName)) {
-				continue;
-			}
-			const auto& parser = m_MaterialPropertyParsers[propName];
-			parser.Parse(prop, mat);
-		}
-	}
-}
-
-void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
-	FbxMesh* pMesh = pNode->GetMesh();
-	if (!pMesh->GetNode()) {
-		return;
-	}
-
-	const int lPolygonCount = pMesh->GetPolygonCount();
-
+void MeshLoader_FBX::LoadGeometry(FbxMesh* pMesh, VertexBuffer& vb, IndexBuffer& ib, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
 	// Count the polygon count of each material
 	FbxLayerElementArrayTemplate<int>* lMaterialIndice = NULL;
 	FbxGeometryElement::EMappingMode lMaterialMappingMode = FbxGeometryElement::eNone;
@@ -396,40 +342,7 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 		lMaterialIndice = &pMesh->GetElementMaterial()->GetIndexArray();
 		int lMaterialIndiceCount = lMaterialIndice->GetCount();
 		lMaterialMappingMode = pMesh->GetElementMaterial()->GetMappingMode();
-		//if (lMaterialMappingMode == FbxGeometryElement::eByPolygon)
-		//{
-		//	assert(lMaterialIndiceCount == lPolygonCount);
-		//	if (lMaterialIndiceCount == lPolygonCount)
-		//	{
-		//		// Count the faces of each material
-		//		for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
-		//		{
-		//			const int lMaterialIndex = lMaterialIndice->GetAt(lPolygonIndex);
-		//			slots.EnsureSize(lMaterialIndex + 1);
-		//			if (!slots[lMaterialIndex]) {
-		//				slots[lMaterialIndex] = new Neo::Mesh::MaterialSlot_ColorChannel();
-		//			}
-		//			slots[lMaterialIndex]->PolyCount += 1;
-		//		}
-
-		//		// Record the offset (how many vertex)
-		//		const int lMaterialCount = slots.Length();
-		//		int lOffset = 0;
-		//		for (int lIndex = 0; lIndex < lMaterialCount; ++lIndex)
-		//		{
-		//			slots[lIndex]->Index = lOffset;
-		//			lOffset += slots[lIndex]->PolyCount * TRIANGLE_VERTEX_COUNT;
-		//			// This will be used as counter in the following procedures, reset to zero
-		//			slots[lIndex]->PolyCount = 0;
-		//		}
-		//		FBX_ASSERT(lOffset == lPolygonCount * TRIANGLE_VERTEX_COUNT);
-		//	}
-		//}
 	}
-
-	int lPolygonVertexCount = lPolygonCount * TRIANGLE_VERTEX_COUNT;
-
-	LoadMaterials(pMesh, matMap, mats);
 
 	FbxStringList lUVNames;
 	pMesh->GetUVSetNames(lUVNames);
@@ -440,24 +353,25 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 	lUVName = lUVNames[0];
 	//}
 
-	// Populate the array with vertex attribute, if by control point.
 	const FbxVector4* lControlPoints = pMesh->GetControlPoints();
 	FbxVector4 lCurrentVertex;
 	FbxVector4 lCurrentNormal;
 	FbxVector2 lCurrentUV;
 
-	vb.Resize(lPolygonVertexCount);
 	Vector<3>	pos;
 	Vector<3>	normal;
 	Vector<2>	uv;
 
-	fbxsdk::FbxLayerElement::EMappingMode lNormalMappingMode = pMesh->GetElementNormal(0)->GetMappingMode();
-
-	FbxAMatrix globalTMatrix = GetGlobalTransform(pNode);
+	FbxAMatrix globalTMatrix = GetGlobalTransform(pMesh->GetNode());
 	FbxAMatrix globalRMatrix = globalTMatrix;
 	globalRMatrix.SetT(FbxVector4(0.0f, 0.0f, 0.0f, 0.0f));
 
+	static Map<Int32, IndexRange>	materialInfos;//To minimize reallocations.  This makes this function non-thread-safe.
+	materialInfos.Clear();
+
 	int lVertexCount = 0;
+	const int lPolygonCount = pMesh->GetPolygonCount();
+	vb.Resize(lPolygonCount * TRIANGLE_VERTEX_COUNT);
 	for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
 	{
 		// The material for current face.
@@ -467,8 +381,11 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 			lMaterialIndex = lMaterialIndice->GetAt(lPolygonIndex);
 		}
 
-		// Where should I save the vertex attribute index, according to the material
-		const int lIndexOffset = mats[lMaterialIndex]->Index + (mats[lMaterialIndex]->PolyCount - 1) * TRIANGLE_VERTEX_COUNT;
+		if (!materialInfos.Contains(lMaterialIndex)) {
+			materialInfos.Add(lMaterialIndex, IndexRange());
+		}
+		auto& info = materialInfos[lMaterialIndex];
+		info.AddPolyIndex(lPolygonIndex);
 
 		for (int lVerticeIndex = 0; lVerticeIndex < TRIANGLE_VERTEX_COUNT; ++lVerticeIndex)
 		{
@@ -495,9 +412,62 @@ void MeshLoader_FBX::LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 app
 		}
 	}
 
-	for (UInt32 ix = 0; ix < mats.Length(); ++ix) {
-		mats[ix]->Index += appendingOffset;
+	LoadMaterials(pMesh, appendingOffset, materialInfos, matMap, mats);
+}
+
+void MeshLoader_FBX::LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, const Map<Int32, IndexRange>& materialIndices, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
+	FbxLayerElementMaterial* pLayerElementMaterial = pMesh->GetElementMaterial();
+	assert(pLayerElementMaterial);
+
+	assert(pMesh->GetNode()->GetMaterialCount() == materialIndices.Size());
+	
+	FOREACH (matRangeIter, materialIndices) {
+		auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(matRangeIter->first);	
+		if (!pMaterial)
+		{
+			continue;
+		}
+
+		auto name = pMaterial->GetName();
+		assert(name && name[0]);
+		Neo::Mesh::AMaterial* mat{};
+		if (!matMap.Contains(name)) {
+			mat = new Neo::Mesh::Material(name);
+			mats.Add(mat);
+			matMap.Add(name, mat);
+		}
+		else {
+			mat = matMap[name];
+		}
+
+		mat->Ranges.Add({ matRangeIter->second.StartPolyIndex + (Int32)appendingOffset, (UInt32)matRangeIter->second.PolyCount() });
+
+#if _DEBUG
+		List<StaticString>	propertyNames;//To allow us to see all the of the properties in the debugger
+#endif
+		for (auto&& prop = pMaterial->GetFirstProperty(); prop.IsValid(); prop = pMaterial->GetNextProperty(prop)) {
+			StaticString propName(prop.GetNameAsCStr());
+
+#if _DEBUG
+			propertyNames.Add(propName);
+#endif
+
+			if (!m_MaterialPropertyParsers.Contains(propName)) {
+				continue;
+			}
+			const auto& parser = m_MaterialPropertyParsers[propName];
+			parser.Parse(prop, mat);
+		}
 	}
+}
+
+void MeshLoader_FBX::LoadMesh(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
+	FbxMesh* pMesh = pNode->GetMesh();
+	if (!pMesh->GetNode()) {
+		return;
+	}
+
+	LoadGeometry(pMesh, vb, ib, appendingOffset, matMap, mats);
 }
 
 Bool MeshLoader_FBX::Load(const StaticString& fileName) {
@@ -548,7 +518,7 @@ Bool MeshLoader_FBX::Load(const StaticString& fileName) {
 	verify( lGeomConverter.SplitMeshesPerMaterial(m_Scene, /*replace*/false) );
 
 	// Bake the scene for one frame
-	LoadComponents(m_Scene, m_CurrentAnimLayer, fileName.CStr(), /*SupportVBO*/true);
+	LoadComponents(m_Scene, m_CurrentAnimLayer, /*SupportVBO*/true);
 
 	LoadSkeletonHierarchy(m_Scene->GetRootNode());
 

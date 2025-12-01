@@ -23,7 +23,7 @@ protected:
 		return (m_PrevCompressedData[byteIndex] & (1 << bitIndex)) != 0;
 	}
 
-	static Bool	ShouldNotify(const Byte* lhs, const Byte* rhs, UInt32 length) {
+	static Bool	ShouldNotifyOfChange(const Byte* lhs, const Byte* rhs, UInt32 length) {
 		return 0 != memcmp(lhs, rhs, length);
 	}
 
@@ -35,6 +35,24 @@ public:
 	KeyboardState() {
 		memset(m_CompressedData, 0, m_CompressedDataSize);
 		memset(m_PrevCompressedData, 0, m_PrevCompressedDataSize);
+	}
+
+	Bool	KeyWasDown() const {
+		for (auto ix = 0; ix < m_PrevCompressedDataSize; ++ix) {
+			if (m_PrevCompressedData[ix] != 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	Bool	KeyIsDown() const {
+		for (auto ix = 0; ix < m_CompressedDataSize; ++ix) {
+			if (m_CompressedData[ix] != 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	Bool	KeyIsDown(UInt32 vk) const {
@@ -78,60 +96,64 @@ public:
 			m_CompressedData[byteIndex] |= (keyDown) << bitIndex;
 		}
 
-		return ShouldNotify(m_CompressedData, m_PrevCompressedData, m_CompressedDataSize);
+		return ShouldNotifyOfChange(m_CompressedData, m_PrevCompressedData, m_CompressedDataSize);
 	}
 };
 
-class Keyboard : public ADevice {
-protected:
-	KeyboardState		m_State;
+namespace Neo {
+	class Keyboard : public ADevice {
+		INHERITEDCLASS_TYPEDEFS(Keyboard, ADevice)
 
-public:
-	Delegate<TYPELIST_1(KeyboardState)>			OnKeydown;
+	protected:
+		DEFINE_MEMBER_EX( KeyboardState, State )
 
-public:
-	virtual Bool	Init(HWND hWnd, LPDIRECTINPUT8 system) {
-		HRESULT hr = system->CreateDevice(GUID_SysKeyboard, &m_pDevice, NULL);
-		if (FAILED(hr)) {
-			return false;
-		}
-		
+	public:
+		Delegate<TYPELIST_1(KeyboardState)>			OnChanged;
 
-		m_pDevice->SetDataFormat(&c_dfDIKeyboard);
-		m_pDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
-		Acquire(); //fails with DIERR_INVALIDPARAM
-
-		return true;
-	}
-
-	virtual Bool	Acquire() const {
-		return SUCCEEDED(m_pDevice->Acquire());
-	}
-
-	virtual Bool	Unacquire() const {
-		return SUCCEEDED(m_pDevice->Unacquire());
-	}
-
-	virtual Bool	Poll() {
-		HRESULT hr = m_pDevice->Poll();
-		if (FAILED(hr)) {
-			return Acquire();
+	protected:
+		virtual void NotifyObserversOfChange() const override {
+			OnChanged(m_State);
 		}
 
-		Byte uncompressedData[KeyboardState::NumKeys];
-		hr = m_pDevice->GetDeviceState(KeyboardState::NumKeys, uncompressedData);
-		if (FAILED(hr)) {
-			return false;
+	public:
+		virtual Bool	Init(HWND hWnd, LPDIRECTINPUT8 system) {
+			HRESULT hr = system->CreateDevice(GUID_SysKeyboard, &m_pDevice, NULL);
+			if (FAILED(hr)) {
+				return false;
+			}
+
+
+			m_pDevice->SetDataFormat(&c_dfDIKeyboard);
+			m_pDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
+			Acquire(); //fails with DIERR_INVALIDPARAM
+
+			return true;
 		}
 
-		if (m_State.Compress(uncompressedData, KeyboardState::NumKeys)) {
-			NotifyObservers();
+		virtual Bool	Acquire() const {
+			return SUCCEEDED(m_pDevice->Acquire());
 		}
-		return true;
-	}
 
-protected:
-	virtual void NotifyObservers() const {
-		OnKeydown(m_State);
-	}
-};
+		virtual Bool	Unacquire() const {
+			return SUCCEEDED(m_pDevice->Unacquire());
+		}
+
+		virtual Bool	Poll() {
+			HRESULT hr = m_pDevice->Poll();
+			if (FAILED(hr)) {
+				return Acquire();
+			}
+
+			Byte uncompressedData[KeyboardState::NumKeys];
+			hr = m_pDevice->GetDeviceState(KeyboardState::NumKeys, uncompressedData);
+			if (FAILED(hr)) {
+				return false;
+			}
+
+			if (m_State.Compress(uncompressedData, KeyboardState::NumKeys)) {
+				NotifyObserversOfChange();
+			}
+			return true;
+		}
+	};
+} //namespace Neo

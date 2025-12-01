@@ -41,7 +41,11 @@ protected:
 		assert(asset);
 
 		AMeshLoader* loader{};
-		if(!m_Loaders.Find(StaticString(FilePath::GetExtension(fp)), loader) || !loader->Load(fp) ) {
+		if(!m_Loaders.Find(FilePath::GetExtension(fp), loader)) {
+			return false;
+		}
+
+		if (!loader->Load(fp)) {
 			return false;
 		}
 

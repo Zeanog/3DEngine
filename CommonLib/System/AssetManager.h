@@ -56,14 +56,6 @@ public:
 		return m_Container.end();
 	}
 
-	TConstIterator	Begin() const {
-		return m_Container.begin();
-	}
-
-	TConstIterator	End() const {
-		return m_Container.end();
-	}
-
 	TIterator	begin() {
 		return m_Container.begin();
 	}

@@ -4,31 +4,22 @@
 #include <xaudio2.h>
 #include <memory>
 
-class SourceVoice;
 class AAudioLoader;
 
-class Sound {
-protected:
-	std::unique_ptr<Byte>		m_Data;
+//namespace Neo {
+	class Sound {
+	protected:
+		UInt32						m_DataSize;
+		::std::unique_ptr<Byte>		m_Data;
 
-	XAUDIO2_BUFFER				m_Buffer{};
+		DEFINE_MEMBER_EX(UInt64, FormatHash)
+			DEFINE_MEMBER_EX(WAVEFORMATEXTENSIBLE, Format)
+			DEFINE_MEMBER_EX(Float32, Duration)
 
-	DEFINE_MEMBER_EX(WAVEFORMATEXTENSIBLE, Format)//TODO: Possibly cache the Hash value for this format
-	DEFINE_MEMBER_EX(Float32, Duration)
+	public:
+		virtual ~Sound();
 
-public:
-	~Sound();
-
-	void		SetContext(void* cxt) {
-		m_Buffer.pContext = cxt;
-	}
-
-	const XAUDIO2_BUFFER* Buffer() const {
-		return &m_Buffer;
-	}
-
-	void	StartOffset(UInt32 samplesOffset);
-	UInt32	StartOffset() const;
-
-	Bool	UploadData(AAudioLoader& loader);
-};
+		void	PopulateBuffer(XAUDIO2_BUFFER& buffer) const;
+		Bool	UploadData(AAudioLoader& loader);
+	};
+//}

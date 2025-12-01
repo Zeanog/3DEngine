@@ -23,28 +23,30 @@ Model::~Model() {
 }
 
 void Model::Render(ShaderProgram_GLSL& program) const {
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	for (auto ix = 0; ix < m_Mesh->NumMaterials(); ++ix) {
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
 
-	program.StartUsing();
+		program.StartUsing();
 
-	glm::mat4x4 localTransform(glm::identity<glm::mat4x4>());
-	localTransform = glm::translate(localTransform, m_Position);
-	localTransform = localTransform * glm::mat4x4(m_Rotation);
-	glMultMatrixf(glm::value_ptr(localTransform));
-	assert(!glGetError());
+		glm::mat4x4 localTransform(glm::identity<glm::mat4x4>());
+		localTransform = glm::translate(localTransform, m_Position);
+		localTransform = localTransform * glm::mat4x4(m_Rotation);
+		glMultMatrixf(glm::value_ptr(localTransform));
+		assert(!glGetError());
 
-	m_Mesh->PreRender((VertexBuffer::VertexAttributes)(VertexBuffer::VertexAttributes::PositionAttrib | VertexBuffer::VertexAttributes::NormalAttrib | VertexBuffer::VertexAttributes::TexCoordsAttrib));
+		m_Mesh->PreRender((VertexBuffer::VertexAttributes)(VertexBuffer::VertexAttributes::PositionAttrib | VertexBuffer::VertexAttributes::NormalAttrib | VertexBuffer::VertexAttributes::TexCoordsAttrib));
 
-	for (int ix = 0; ix < m_Mesh->NumMaterials(); ++ix) {
-		m_Mesh->RenderMaterial(ix, m_RequiredChannels);
+		//for (auto ix = 0; ix < m_Mesh->NumMaterials(); ++ix) {
+		m_Mesh->RenderMaterial(ix, program.RequiredChannels());
+		//}
+
+		m_Mesh->PostRender();
+
+		program.StopUsing();
+
+		glPopMatrix();
 	}
-
-	m_Mesh->PostRender();
-
-	program.StopUsing();
-
-	glPopMatrix();
 }
 
 void Model::RenderJoints(ShaderProgram_GLSL& program, Float32 deltaTime) {
@@ -74,7 +76,6 @@ Bool Model::UploadData(ModelLoader& loader) {
 	m_Mesh = loader.Mesh();
 	m_InvertedNormals = loader.InvertNormals();
 	m_ShaderProgram = loader.GetShaderProgram();
-	m_RequiredChannels = loader.GetRequiredChannels();
 	m_ShadowProgram = loader.GetShadowPrograms();
 	return true;
 }

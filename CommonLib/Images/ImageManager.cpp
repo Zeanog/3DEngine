@@ -45,10 +45,15 @@ void ImageManager::ReloadAll() {
 Bool ImageManager::Load(const StaticString& path, Neo::Image* image) {
 	assert(image);
 
-	Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
+	//Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
 
 	ImageLoader* loader{};
-	if (!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader) || !loader->Load(path)) {
+	if(!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader)) {
+		Singleton<DebugConsole>::GetInstance()->Write("No loader for '%s'!\n", path.CStr());
+		return false;
+	}
+
+	if (!loader->Load(path)) {
 		Singleton<DebugConsole>::GetInstance()->Write("Failed to load '%s'!\n", path.CStr());
 		return false;
 	}

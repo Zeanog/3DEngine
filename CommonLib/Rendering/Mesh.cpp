@@ -28,12 +28,18 @@ Bool Neo::Mesh::RenderMaterial(int index) const {
 	//One pass for each channel
 	for (UInt32 ix = 0; ix < matSlot->Channels.Length(); ++ix)
 	{
-		matSlot->Channels[ix]->Bind();//TODO: Need to get the correct shader program to use here
+		matSlot->Channels[ix]->Bind();
 
-		const UInt32*	indexStart = &m_IndexBuffer[matSlot->Index];
-		UInt32			indexCount = matSlot->PolyCount * 3;
-		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
-		assert(!glGetError());
+		for(UInt32 iy = 0; iy < matSlot->Ranges.Length(); ++iy) {
+			auto range = matSlot->Ranges[iy];
+			if(range.VertCount == 0) {
+				continue;
+			}
+			const UInt32*	indexStart = &m_IndexBuffer[range.StartIndex];
+			UInt32			indexCount = range.VertCount;
+			glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
+			assert(!glGetError());
+		}
 
 		matSlot->Channels[ix]->Unbind();
 	}
@@ -41,29 +47,29 @@ Bool Neo::Mesh::RenderMaterial(int index) const {
 }
 
 Bool Neo::Mesh::RenderMaterial(int index, const List<StaticString>& channels) const {
-	if (index < 0 || index >= (int)m_Materials.Length()) {
-		return false;
-	}
-
-	//TODO: Handle multiple textures per material
 	const AMaterial* matSlot = m_Materials[index];
 
-	for (UInt32 ix = 0; ix < channels.Length(); ++ix)
-	{
+	for (UInt32 ix = 0; ix < channels.Length(); ++ix) {
 		auto channel = matSlot->ChannelMap[channels[ix]];
 		channel->Bind();
 	}
 
-	const UInt32* indexStart = &m_IndexBuffer[matSlot->Index];
-	UInt32			indexCount = matSlot->PolyCount * 3;
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
-	assert(!glGetError());
+	for (UInt32 iy = 0; iy < matSlot->Ranges.Length(); ++iy) {
+		auto range = matSlot->Ranges[iy];
+		if (range.VertCount == 0) {
+			continue;
+		}
+		const UInt32*	indexStart = &m_IndexBuffer[range.StartIndex];
+		UInt32			indexCount = range.VertCount;
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
+		assert(!glGetError());
+	}
 
-	for (UInt32 ix = 0; ix < channels.Length(); ++ix)
-	{
+	for (UInt32 ix = 0; ix < channels.Length(); ++ix) {
 		auto channel = matSlot->ChannelMap[channels[ix]];
 		channel->Unbind();
 	}
+
 	return true;
 }
 

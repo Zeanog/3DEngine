@@ -3,9 +3,8 @@
 #include "System\Typedefs.h"
 #include "ASourceVoice.h"
 #include "SourceVoiceCallbacks.h"
+#include "Sound.h"
 #include "System\Functors\MultiFunctor.h"
-
-class Sound;
 
 class SourceVoice : public ASourceVoice<IXAudio2SourceVoice>{
 	INHERITEDCLASS_TYPEDEFS(SourceVoice, ASourceVoice<IXAudio2SourceVoice>)
@@ -17,31 +16,32 @@ protected:
 
 	virtual void		Destroy() override;
 
+	//TODO: Possibly add a List for queued sounds/buffers.  Would help with reloading correctly.  Not sure how important it is.
+
 public:
 	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format);
 
 	DEFINE_MEMBER_EX(WAVEFORMATEX, Format)
 
-	virtual UInt32	NumChannels() const override {
+	virtual UInt16	NumChannels() const override {
 		return m_Format.nChannels;
 	}
 
-	virtual Bool	Submit(const Sound& sound);
-	virtual Bool	Submit(const Sound* sound);
-	virtual Bool	Start(const Sound& sound);
-	virtual Bool	Start(const Sound* sound);
-	virtual Bool	Start();
+	virtual Bool	Submit(const XAUDIO2_BUFFER& buffer);
+	virtual Bool	Submit(const XAUDIO2_BUFFER* buffer);
+	virtual Bool	Start(const XAUDIO2_BUFFER& buffer, UInt32 operationSet = 0U);
+	virtual Bool	Start(const XAUDIO2_BUFFER* buffer, UInt32 operationSet = 0U);
 
-	virtual Bool	Start(const Sound& sound, UInt32 operationSet);
-	virtual Bool	Start(const Sound* sound, UInt32 operationSet);
+	virtual Bool	Start();
 	virtual Bool	Start(UInt32 operationSet);
 
-	virtual Bool	Stop() {
-		return Stop(XAUDIO2_COMMIT_NOW);
+	//flags can be set to XAUDIO2_PLAY_TAILS
+	virtual Bool	Stop(UInt32 flags = 0U) {
+		return Stop(flags, XAUDIO2_COMMIT_NOW);
 	}
 
-	virtual Bool	Stop( UInt32 operationSet ) {
-		return SUCCEEDED(m_Voice->Stop(0, operationSet));
+	virtual Bool	Stop( UInt32 flags, UInt32 operationSet ) {
+		return SUCCEEDED(m_Voice->Stop(flags, operationSet));
 	}
 
 	Bool	FlushBuffers() {

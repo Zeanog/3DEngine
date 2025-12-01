@@ -1,5 +1,4 @@
 #include "AudioSystem.h"
-
 #include "Sound.h"
 #include "MasteringVoice.h"
 #include "SourceVoice.h"
@@ -8,8 +7,7 @@
 #include "ReverbParameters.h"
 #include "EQParameters.h"
 #include "System/DataStructureLibrary.h"
-
-#include <cstdint>
+#include "Audio\Loaders\SoundManager.h"
 #include <limits>
 
 std::mutex AudioSystem::m_Mutex;
@@ -64,15 +62,21 @@ UInt64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
 	return val;
 }
 
-UInt64 AudioSystem::GenerateHash(UInt32 numChannels, UInt32 sampleRate) {
+UInt64 AudioSystem::GenerateHash(UInt16 numChannels, UInt16 sampleRate) {
 	static constexpr Byte numChannelShift = 56;
 	static constexpr Byte samplesPerSecShift = 32;
-	static constexpr auto byteBitMask = std::numeric_limits<Byte>::max();
+	static constexpr auto channelsBitMask = std::numeric_limits<UInt16>::max();
+	static constexpr auto sampleRateBitMask = std::numeric_limits<UInt16>::max();
 
-	auto val = (UInt64)numChannels << numChannelShift | (UInt64)sampleRate << samplesPerSecShift;
+	UInt64 val = ((UInt64)numChannels << numChannelShift) | ((UInt64)sampleRate << samplesPerSecShift);
 
-	assert(((val >> numChannelShift) & byteBitMask) == numChannels);
-	assert(((val >> samplesPerSecShift) & byteBitMask) == sampleRate);
+#if _DEBUG
+	auto channelsCheck = ((val >> numChannelShift) & channelsBitMask);
+	assert(channelsCheck == numChannels);
+
+	auto sampleRateCheck = ((val >> samplesPerSecShift) & sampleRateBitMask);
+	assert(sampleRateCheck == sampleRate);
+#endif
 
 	return val;
 }
@@ -87,7 +91,7 @@ const StaticString& AudioSystem::GetCategoryName(SubmixVoice* categoryVoice) con
 	return m_VoiceToCategoryNameMap[categoryVoice];
 }
 
-SubmixVoice* AudioSystem::AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate) {
+SubmixVoice* AudioSystem::AddCategory(const StaticString& name, UInt16 numChannels, UInt16 sampleRate) {
 	assert(!m_CategoryNameToVoiceMap.Contains(name));
 
 	auto voice = CreateSubmixVoice(numChannels, sampleRate);
@@ -109,7 +113,6 @@ SourceVoice* AudioSystem::Play(const Sound* snd, const StaticString& categoryNam
 	return voice;
 }
 
-#include "Audio\Loaders\SoundManager.h"
 Float32 AudioSystem::Play(const StaticString& filePath, const StaticString& categoryName, SourceVoice*& outVoice) {
 	auto snd = Singleton<SoundManager>::GetInstance()->Get(filePath);
 	if (!snd) {
@@ -229,9 +232,10 @@ MasteringVoice* AudioSystem::CreateMasteringVoice() {
 	return newVoice;
 }
 
+//TODO: There are multiple GenerateHash calls in here
 SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format) {
 	SourceVoice* voice{};
-	if (FindSourceVoice(format, voice)) {
+	if (FindOpenSourceVoice(format, voice)) {
 		voice->SetOutputTo(voiceCategory);
 		return voice;
 	}
@@ -244,7 +248,9 @@ SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const WAVEF
 
 SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const Sound* sound) {
 	SourceVoice* voice = GetSourceVoice(voiceCategory, sound->Format().Format);
-	voice->Submit(sound);
+	XAUDIO2_BUFFER	buffer{};
+	sound->PopulateBuffer(buffer);
+	voice->Submit(buffer);
 	return voice;
 }
 
@@ -252,29 +258,34 @@ SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const Sound
 	return GetSourceVoice(voiceCategory, &sound);
 }
 
-SubmixVoice* AudioSystem::CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate) {
+SubmixVoice* AudioSystem::CreateSubmixVoice(UInt16 numChannels, UInt16 sampleRate) {
 	SubmixVoice* newVoice = new SubmixVoice();
 	newVoice->Init(m_Audio2, numChannels, sampleRate);
 	m_Voices.Add(newVoice);
 	return newVoice;
 }
 
-Bool AudioSystem::FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const {
+Bool AudioSystem::FindOpenSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const {
+	UInt64 hash = GenerateHash(format);
+	return FindOpenSourceVoice(hash, outVoice);
+}
+
+Bool AudioSystem::FindOpenSourceVoice(UInt64 formatHash, SourceVoice*& outVoice) const {
 	outVoice = nullptr;
 
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
-	UInt64 hash = GenerateHash(format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
-	if (!m_FormatToVoiceListMap.Contains(hash)) {
+	if (!m_FormatToVoiceListMap.Contains(formatHash)) {
 		return false;
 	}
 
-	auto& voiceList = m_FormatToVoiceListMap[hash];
+	auto& voiceList = m_FormatToVoiceListMap[formatHash];
 	if (voiceList.Length() <= 0) {
 		return false;
 	}
 
-	FOREACH_CONST_REV(iter, voiceList) {
+	//TODO: Possibly implement a better voice reuse strategy - Only check last voice as if it's not free none will be
+	FOREACH_CONST_REV(iter, voiceList) {//Assumption: Voices at the end of the list are more likely to be free
 		auto v = *iter;
 		if (!v->IsPlaying()) {
 			outVoice = v;
@@ -288,7 +299,7 @@ Bool AudioSystem::FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outV
 Bool AudioSystem::AddSourceVoice(SourceVoice* voice) {
 	std::lock_guard<std::mutex> guard(m_Mutex);
 
-	auto hash = GenerateHash(voice->Format());//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
+	auto hash = voice->FormatHash();
 	if (!m_FormatToVoiceListMap.Contains(hash)) {
 		m_FormatToVoiceListMap.Add(hash, TVoiceList());
 	}
@@ -314,20 +325,30 @@ void AudioSystem::OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT
 }
 
 void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
-	std::lock_guard<std::mutex> guard(m_Mutex);
+	//assert(context);
+	//Neo::Sound* snd = (Neo::Sound*)context;
 
-	assert(context);
-	Sound* snd = (Sound*)context;
+	//auto hash = snd->FormatHash();
+	//{
+	//	std::lock_guard<std::mutex> guard(m_Mutex);
+
+	//	assert(m_FormatToVoiceListMap.Contains(hash));
+	//	auto& voiceList = m_FormatToVoiceListMap[hash];
+
+	//	assert(voice->IsPlaying());
+	//	voiceList.Sort([](SourceVoice* a, SourceVoice* b) {//Put playing voices to the front of the list
+	//		return a->IsPlaying() && !b->IsPlaying();
+	//	});
+	//}
 };
 
 void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 	assert(voice);
 	assert(context);
 	Sound* snd = (Sound*)context;
-	snd->StartOffset(0);//Reset starting position if restarted
 	voice->SetOutputTo();//Clear output voices to avoid audio glitches when reusing the voice
 
-	auto hash = GenerateHash(snd->Format().Format);//TODO: Possibly cache this hash, in Sound, to avoid recomputing it
+	auto hash = snd->FormatHash();
 
 	{
 		std::lock_guard<std::mutex> guard(m_Mutex);
@@ -336,9 +357,9 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 		auto& voiceList = m_FormatToVoiceListMap[hash];
 
 		if (!voice->IsPlaying()) {
-			//Place the voice to the back of the list so we can find open voices quickly
-			voiceList.Remove(voice);
-			voiceList.Add(voice);
+			voiceList.Sort([](SourceVoice* a, SourceVoice* b) {//Put non-playing voices to the end of the list
+				return a->IsPlaying() && !b->IsPlaying();
+			});
 		}
 	}
 };
@@ -353,7 +374,7 @@ void AudioSystem::ReloadAssets() {
 	auto playingVoices = Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->CheckOut();
 	playingVoices->Clear();
 
-	// This will lose any voices playing with an operationSet
+	//This will lose any voices playing with an operationSet.  Also we will lose any other queded buffers.
 	FOREACH(iterVoiceListMap, m_FormatToVoiceListMap) {
 		FOREACH(iterVoice, iterVoiceListMap->second) {
 				auto v = *iterVoice;
@@ -364,12 +385,14 @@ void AudioSystem::ReloadAssets() {
 				v->Stop();
 		}
 	}
-	Singleton<SoundManager>::GetInstance()->ReloadAll();//Reload All Sound Data
+	Singleton<SoundManager>::GetInstance()->ReloadAll();
 
 	FOREACH(iter, *playingVoices) {
 		auto info = *iter;
-		info.CurrentSound->StartOffset(info.CurrentOffset);
-		info.Voice->Start(info.CurrentSound);
+		XAUDIO2_BUFFER	buffer{};
+		info.CurrentSound->PopulateBuffer(buffer);
+		buffer.PlayBegin = (UInt32)info.CurrentOffset;
+		info.Voice->Start(buffer);
 	}
 
 	Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->Return(playingVoices);

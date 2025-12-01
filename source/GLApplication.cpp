@@ -88,15 +88,11 @@ bool GLApplication::Initialize(HWND hwnd, int width, int height)
 	if (GLEW_OK != err)
 		return false;
 
-	Singleton<InputSystem>::GetInstance()->Init(m_hWnd);
+	verify(Singleton<InputSystem>::GetInstance()->Init(m_hWnd));
+	Singleton<InputSystem>::GetInstance()->Mouse().OnChanged.AddListener(this, &TSelf::OnMouseChanged);
+	Singleton<InputSystem>::GetInstance()->Keyboard().OnChanged.AddListener(this, &TSelf::OnKeyboardChanged);
 
-	OnMouseChangedFunctor.AddListener(this, &TSelf::OnMouseChanged);
-	Singleton<InputSystem>::GetInstance()->GetMouse()->OnChanged.AddListener( OnMouseChangedFunctor );
-
-	OnKeyboardChangedFunctor.AddListener(this, &TSelf::OnKeyboardChanged);
-	Singleton<InputSystem>::GetInstance()->GetKeyboard()->OnKeydown.AddListener( OnKeyboardChangedFunctor );
-
-	verify( Singleton<AudioSystem>::GetInstance()->Init() );
+	verify(Singleton<AudioSystem>::GetInstance()->Init());
 
 	LoadAssets();
 
@@ -111,28 +107,47 @@ GLApplication::~GLApplication() {
 	CoUninitialize();
 }
 
-
 void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) {
 	if (keyboardState.KeyIsDown(DIK_W)) {
 		TranslateCamera(0.0f, 0.0f, 1.0f);
-	}
+	} 
 	else if (keyboardState.KeyIsDown(DIK_S)) {
 		TranslateCamera(0.0f, 0.0f, -1.0f);
 	}
 
+	/*if (keyboardState.KeyWasReleased(DIK_W)) {
+		TranslateCamera(0.0f, 0.0f, 0.0f);
+	}
+	else if (keyboardState.KeyWasReleased(DIK_S)) {
+		TranslateCamera(0.0f, 0.0f, 0.0f);
+	}*/
+
 	if (keyboardState.KeyIsDown(DIK_A)) {
 		TranslateCamera(1.0f, 0.0f, 0.0f);
-	}
+	} 
 	else if (keyboardState.KeyIsDown(DIK_D)) {
 		TranslateCamera(-1.0f, 0.0f, 0.0f);
 	}
 
-	if (keyboardState.KeyIsDown(DIK_SPACE)) {
-		TranslateCamera(0.0f, -1.0f, 0.0f);
+	/*if (keyboardState.KeyWasReleased(DIK_A)) {
+		TranslateCamera(1.0f, 0.0f, 0.0f);
 	}
-	else if (keyboardState.KeyIsDown(DIK_C)) {
+	if (keyboardState.KeyWasReleased(DIK_D)) {
+		TranslateCamera(0.0f, 0.0f, 0.0f);
+	}*/
+
+	if (keyboardState.KeyWasPressed(DIK_SPACE)) {
+		TranslateCamera(0.0f, -1.0f, 0.0f);
+	} else if (keyboardState.KeyWasPressed(DIK_C)) {
 		TranslateCamera(0.0f, 1.0f, 0.0f);
 	}
+
+	/*if (keyboardState.KeyWasReleased(DIK_SPACE)) {
+		TranslateCamera(0.0f, 0.0f, 0.0f);
+	}
+	if (keyboardState.KeyWasReleased(DIK_C)) {
+		TranslateCamera(0.0f, 0.0f, 0.0f);
+	}*/
 
 	if (keyboardState.KeyWasPressed(DIK_F1)) {
 		showDeferredRendering();
@@ -188,28 +203,71 @@ void GLApplication::SetSize(int w, int h)
 }
 
 void GLApplication::RotateCamera(Int64 deltaX, Int64 deltaY) {
-	m_Camera.Rotate(deltaY * m_DeltaTime * 1.0f, deltaX * m_DeltaTime * 1.0f, 0.0f);
+	m_Camera.Rotate(glm::vec3(deltaY, deltaX, 0.0f));
 }
 
 void GLApplication::TranslateCamera(Float32 x, Float32 y, Float32 z) {
-	m_Camera.Translate(glm::vec3(x, y, z) * m_DeltaTime * 5.0f);
+	m_Camera.Translate(glm::vec3(x, y, z) * m_DeltaTime);
 }
 
 void GLApplication::Update()
 {
 	m_PrevTick = m_CurrentTime;
 	m_CurrentTime = (decltype(m_CurrentTime))GetTickCount64();
-	UInt64 delta = m_CurrentTime - m_PrevTick;
+	auto delta = m_CurrentTime - m_PrevTick;
+	if(delta <= 0) {
+		return;//No time has passed
+	}
+
 	Float32 time = MathUtils::MilliSec2Sec(delta);
 
-	m_DeltaTime = MathUtils::Min(time, 1.0f / 30.0f);
+	m_DeltaTime = MathUtils::Min(time, 1.0f / 30.0f);//Cap delta time to avoid issues on breakpoints
+	assert(m_DeltaTime > 0.0f);
 
 	Singleton<InputSystem>::GetInstance()->Poll();
+	auto& keyboardState = Singleton<InputSystem>::GetInstance()->Keyboard().State();
+	if (keyboardState.KeyIsDown() && keyboardState.KeyWasDown()) {
+		//Call translate on the camera.  Maybe have a way of toggling the ability to request info like this
+		if (keyboardState.KeyIsDown(DIK_W)) {
+			TranslateCamera(0.0f, 0.0f, 1.0f);
+		}
+		else if (keyboardState.KeyIsDown(DIK_S)) {
+			TranslateCamera(0.0f, 0.0f, -1.0f);
+		}
+
+		/*if (keyboardState.KeyWasReleased(DIK_W)) {
+			TranslateCamera(0.0f, 0.0f, 0.0f);
+		}
+		else if (keyboardState.KeyWasReleased(DIK_S)) {
+			TranslateCamera(0.0f, 0.0f, 0.0f);
+		}*/
+
+		if (keyboardState.KeyIsDown(DIK_A)) {
+			TranslateCamera(1.0f, 0.0f, 0.0f);
+		}
+		else if (keyboardState.KeyIsDown(DIK_D)) {
+			TranslateCamera(-1.0f, 0.0f, 0.0f);
+		}
+
+		/*if (keyboardState.KeyWasReleased(DIK_A)) {
+			TranslateCamera(1.0f, 0.0f, 0.0f);
+		}
+		if (keyboardState.KeyWasReleased(DIK_D)) {
+			TranslateCamera(0.0f, 0.0f, 0.0f);
+		}*/
+
+		if (keyboardState.KeyWasPressed(DIK_SPACE)) {
+			TranslateCamera(0.0f, -1.0f, 0.0f);
+		}
+		else if (keyboardState.KeyWasPressed(DIK_C)) {
+			TranslateCamera(0.0f, 1.0f, 0.0f);
+		}
+	}
 
 	m_Camera.Update(m_DeltaTime);
 
-	if (m_PrevModels.Length() >= 1) {
-		m_PrevModels[0]->Rotate(m_DeltaTime, m_DeltaTime, 0);
+	if (m_PrevTypeModels.Length() >= 1) {
+		m_PrevTypeModels[0]->Rotate(m_DeltaTime, m_DeltaTime, 0);
 	}
 
 	//Just for debugging
@@ -238,8 +296,8 @@ void GLApplication::Update()
 		m_Models[1]->Rotation(glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[1]->Rotation());
 	}
 
-	for (UInt32 i = 0; i < m_PrevModels.Length(); ++i) {
-		m_Bounds += m_PrevModels[i]->GetBounds();
+	for (UInt32 i = 0; i < m_PrevTypeModels.Length(); ++i) {
+		m_Bounds += m_PrevTypeModels[i]->GetBounds();
 	}
 	
 	for (UInt32 i = 0; i < m_Models.Length(); ++i) {
@@ -250,8 +308,10 @@ void GLApplication::Update()
 #define CAST_SHADOWS 1
 
 void GLApplication::RenderModels(ShaderProgram_GLSL& program) {
-	for (UInt32 i = 0; i < m_PrevModels.Length(); ++i) {
-		m_PrevModels[i]->render(program);
+	//Can we just start using the program here?
+
+	for (UInt32 i = 0; i < m_PrevTypeModels.Length(); ++i) {
+		m_PrevTypeModels[i]->render(program);
 	}
 
 	for (UInt32 i = 0; i < m_Models.Length(); ++i) {
@@ -336,8 +396,8 @@ void GLApplication::Render()
 	else if (m_state == 1)
 	{
 		m_deferredRendering->showTexture("tDiffuse", 512, 384, 0, 0);
-		m_deferredRendering->showTexture("tPositions", 512, 384, 512, 0);
-		m_deferredRendering->showTexture("tNormals", 512, 384, 0, 384);
+		m_deferredRendering->showTexture("tPositionMap", 512, 384, 512, 0);
+		m_deferredRendering->showTexture("tNormalMap", 512, 384, 0, 384);
 	
 		//DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 		SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
@@ -392,9 +452,9 @@ void GLApplication::LoadAssets()
 	m_multipleRenderTarget = new FrameBufferObject(m_windowWidth, m_windowHeight);
 	m_multipleRenderTarget->Bind();
 	m_multipleRenderTarget->AddTarget("tDiffuse", GL_COLOR_ATTACHMENT0_EXT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-	m_multipleRenderTarget->AddTarget("tPositions", GL_COLOR_ATTACHMENT1_EXT, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT);
-	m_multipleRenderTarget->AddTarget("tNormals", GL_COLOR_ATTACHMENT2_EXT, GL_RGBA16F_ARB, GL_RGBA, GL_FLOAT);
-	m_multipleRenderTarget->AddTarget("Depth", GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_COMPONENT24);
+	m_multipleRenderTarget->AddTarget("tPositionMap", GL_COLOR_ATTACHMENT1_EXT, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT);
+	m_multipleRenderTarget->AddTarget("tNormalMap", GL_COLOR_ATTACHMENT2_EXT, GL_RGBA16F_ARB, GL_RGBA, GL_FLOAT);
+	//m_multipleRenderTarget->AddTarget("tDepthMap", GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_COMPONENT24);
 	m_multipleRenderTarget->Unbind();
 
 	m_deferredRendering = new DeferredRendering(m_windowWidth, m_windowHeight, m_multipleRenderTarget);
@@ -410,7 +470,7 @@ void GLApplication::LoadAssets()
 	AModel* m = NULL;
 
 	m = new SphereModel(1, 64);
-	m_PrevModels.Add(m);
+	m_PrevTypeModels.Add(m);
 	m->LoadImage(StaticString("data/125881.tga"));
 	m->Position(2, 2.5f, 0);
 
@@ -421,12 +481,12 @@ void GLApplication::LoadAssets()
 	m->setRotation( 0.0f, 0.0f, 0.0f );*/
 
 	m = new PlaneModel(5);
-	m_PrevModels.Add(m);
+	m_PrevTypeModels.Add(m);
 	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(0, 0, 0);
 
 	m = new PlaneModel(5);
-	m_PrevModels.Add(m);
+	m_PrevTypeModels.Add(m);
 	m->LoadImage(StaticString("data/DragonsDogma.tga"));
 	m->Position(7, 2.5, 0);
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
@@ -471,7 +531,7 @@ void GLApplication::ReleaseAssets()
 	DeletePtr(m_multipleRenderTarget);
 	DeletePtr(m_deferredRendering);
 
-	Destroy(m_PrevModels);
+	Destroy(m_PrevTypeModels);
 	Destroy(m_Lights);
 
 	Singleton<ImageManager>::GetInstance()->Shutdown();

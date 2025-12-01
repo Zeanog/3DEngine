@@ -8,19 +8,19 @@ class SubmixVoice : public ASourceVoice<IXAudio2SubmixVoice> {
 	friend class AudioSystem;
 
 protected:
-	UInt32		m_NumChannels{};
-	UInt32		m_SampleRate{};
+	UInt16		m_NumChannels{};
+	UInt16		m_SampleRate{};
 
 public:
 	SubmixVoice();
 
-	virtual Bool	Init(IXAudio2* audio, UInt32 numChannels, UInt32 sampleRate);
+	virtual Bool	Init(IXAudio2* audio, UInt16 numChannels, UInt16 sampleRate);
 
-	virtual UInt32	NumChannels() const override {
+	virtual UInt16	NumChannels() const override {
 		return m_NumChannels;
 	}
 
-	UInt32	SampleRate() const {
+	UInt16	SampleRate() const {
 		return m_SampleRate;
 	}
 };

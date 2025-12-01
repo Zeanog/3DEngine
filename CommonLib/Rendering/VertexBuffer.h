@@ -18,7 +18,8 @@ public:
 	enum VertexAttributes : UInt32 {
 		PositionAttrib = 1 << 0,
 		NormalAttrib = 1 << 1,
-		TexCoordsAttrib = 1 << 2
+		TexCoordsAttrib = 1 << 2,
+		NumAttributes = 3
 	};
 
 protected:

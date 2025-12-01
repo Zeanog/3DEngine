@@ -3,6 +3,7 @@
 #include "AudioLoader_OggVorbis.h"
 #include "AudioLoader_MP3.h"
 #include "System/DebugConsole.h"
+#include "System/File.h"
 
 SoundManager::SoundManager() {
 	m_Loaders.Add(StaticString(".wav"), new AudioLoader_RIFF());
@@ -39,10 +40,15 @@ void SoundManager::ReloadAll() {
 Bool SoundManager::Load(const StaticString& path, Sound* asset) {
 	assert(asset);
 
-	Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
+	//Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
 
 	AAudioLoader* loader{};
-	if (!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader) || !loader->Load(path)) {
+	if(!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader)) {
+		Singleton<DebugConsole>::GetInstance()->Write("No loader for '%s'!\n", path.CStr());
+		return false;
+	}
+
+	if (!loader->Load(path)) {
 		Singleton<DebugConsole>::GetInstance()->Write("Failed to load '%s'!\n", path.CStr());
 		return false;
 

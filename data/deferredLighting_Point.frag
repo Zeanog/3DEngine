@@ -1,7 +1,7 @@
 
 uniform sampler2D tDiffuse;
-uniform sampler2D tPositions;
-uniform sampler2D tNormals;
+uniform sampler2D tPositionMap;
+uniform sampler2D tNormalMap;
 uniform sampler2D tShadowMap;
 
 uniform vec3	vLightPos;
@@ -23,8 +23,8 @@ float readShadowMap(vec3 vertexPos_ModelSpace)
 void main( void )
 {
 	vec4 image = texture2D( tDiffuse, gl_TexCoord[0].xy );
-	vec4 position = texture2D( tPositions, gl_TexCoord[0].xy );
-	vec3 normal = texture2D( tNormals, gl_TexCoord[0].xy ).xyz;
+	vec4 position = texture2D( tPositionMap, gl_TexCoord[0].xy );
+	vec3 normal = texture2D( tNormalMap, gl_TexCoord[0].xy ).xyz;
 
 	vec3 vec2Light = vLightPos - position.xyz;
 	vec3 dir2Light = normalize(vec2Light);

@@ -51,8 +51,8 @@ void DeferredRendering::PostRender() {
 void DeferredRendering::Render( const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera, const ALight* light ) 
 {
 	const RenderTarget* diffuse = m_pSrcFBO->LinkTargetTo(StaticString("tDiffuse"), program, 0);
-	const RenderTarget* positions = m_pSrcFBO->LinkTargetTo(StaticString("tPositions"), program, 1);
-	const RenderTarget* normals = m_pSrcFBO->LinkTargetTo(StaticString("tNormals"), program, 2);
+	const RenderTarget* positions = m_pSrcFBO->LinkTargetTo(StaticString("tPositionMap"), program, 1);
+	const RenderTarget* normals = m_pSrcFBO->LinkTargetTo(StaticString("tNormalMap"), program, 2);
 
 	const RenderTarget* shadow = light->LinkTo(program, bounds, camera);
 

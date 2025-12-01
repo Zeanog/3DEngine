@@ -24,7 +24,6 @@ protected:
 	StaticString		m_MeshFilePath;
 
 	ShaderProgram_GLSL* m_ShaderProgram{};
-	List<StaticString>	m_RequiredChannels;//These are the textures to be provided to the shader
 
 	ShaderProgram_GLSL* m_ShadowProgram{};
 
@@ -54,9 +53,6 @@ public:
 	}
 	const ShaderProgram_GLSL* GetShadowPrograms() {
 		return m_ShadowProgram;
-	}
-	List<StaticString>&& GetRequiredChannels() {
-		return std::move(m_RequiredChannels);
 	}
 
 	virtual Bool	Load(const Char* fileName);

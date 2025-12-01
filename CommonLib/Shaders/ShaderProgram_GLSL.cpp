@@ -9,7 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 ShaderProgram_GLSL::ShaderProgram_GLSL() {
-
 }
 
 Bool	ShaderProgram_GLSL::Create(const StaticString& vsPath, const StaticString& fsPath, const Char* header) {
@@ -33,6 +32,9 @@ Bool	ShaderProgram_GLSL::Create(const StaticString& vsPath, const StaticString& 
 	assert(!glGetError());
 
 	glLinkProgramARB(m_Handle);
+	assert(!glGetError());
+
+	verify(EnumerateUniforms(m_RequiredChannels, 1U, GL_SAMPLER_2D));
 
 	return true;
 }

@@ -47,10 +47,8 @@ protected:
 protected:
 	MasteringVoice* CreateMasteringVoice();
 
-	static UInt64		GenerateHash(const WAVEFORMATEX& format);
-	static UInt64		GenerateHash(UInt32 numChannels, UInt32 sampleRate);
-
-	Bool				FindSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
+	Bool				FindOpenSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
+	Bool				FindOpenSourceVoice(UInt64 formatHash, SourceVoice*& outVoice) const;
 	Bool				AddSourceVoice(SourceVoice* voice);
 
 	void				OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT result);
@@ -64,7 +62,7 @@ protected:
 	SourceVoice*		GetSourceVoice(SubmixVoice* voiceCategory, const Sound* sound);
 	SourceVoice*		GetSourceVoice(SubmixVoice* voiceCategory, const Sound& sound);
 
-	SubmixVoice*		CreateSubmixVoice(UInt32 numChannels, UInt32 sampleRate);
+	SubmixVoice*		CreateSubmixVoice(UInt16 numChannels, UInt16 sampleRate);
 
 	Bool				CommitChanges(UInt32 operationSet) {
 		return SUCCEEDED(m_Audio2->CommitChanges(operationSet));
@@ -74,7 +72,10 @@ public:
 	virtual Bool	Init();
 	virtual void	Destroy();
 
-	SubmixVoice* AddCategory(const StaticString& name, UInt32 numChannels, UInt32 sampleRate);
+	static UInt64	GenerateHash(const WAVEFORMATEX& format);
+	static UInt64	GenerateHash(UInt16 numChannels, UInt16 sampleRate);
+
+	SubmixVoice* AddCategory(const StaticString& name, UInt16 numChannels, UInt16 sampleRate);
 
 	SourceVoice* Play(const Sound& snd, const StaticString& categoryName);
 	SourceVoice* Play(const Sound* snd, const StaticString& categoryName);
