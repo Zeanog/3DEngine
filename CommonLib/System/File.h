@@ -226,3 +226,69 @@ protected:
 		Seek( pos, SEEK_SET );
 	}
 };
+
+class FilePath {
+public:
+	static const Char* GetExtension(const String& str) {
+		Int32 index = str.FindLastOf('.');
+		if (index < 0) {
+			return NULL;
+		}
+
+		return &(str.CStr()[index]);
+	}
+
+	static Bool	HasExtension(const String& str, const Char* ext) {
+		const Char* lhs = GetExtension(str);
+		return !String::StrICmp(lhs, ext);
+	}
+
+	static const Char* GetExtension(const StaticString& str) {
+		Int32 index = str.FindLastOf('.');
+		if (index < 0) {
+			return NULL;
+		}
+
+		return &(str.CStr()[index]);
+	}
+
+	static const Char* GetExtension(const Char* str) {
+		Int32 index = String::FindLastOf(str, '.');
+		if (index < 0) {
+			return NULL;
+		}
+
+		return &(str[index]);
+	}
+
+	static void		SetExtension(String& str, const Char* newExtension) {
+		Int32 index = str.FindLastOf('.');
+		if (index < 0) {
+			return;
+		}
+
+		UInt32 length = str.Length() - index;
+		Char* extPtr = str.CStr() + index;
+		for (UInt32 ix = 0; ix < length; ++ix) {
+			extPtr[ix] = newExtension[ix];
+		}
+	}
+
+	static Bool	HasExtension(const StaticString& str, const Char* ext) {
+		const Char* lhs = GetExtension(str);
+		return !String::StrICmp(lhs, ext);
+	}
+
+	static const Char* GetFileName(const StaticString& fullPath) {
+		Int32 index = fullPath.FindLastOf(File::Delimiters[0]);
+		if (index < 0) {
+			index = fullPath.FindLastOf(File::Delimiters[1]);
+		}
+		if (index < 0) {
+			return fullPath.CStr();
+		}
+		return &(fullPath.CStr()[index + 1]);
+	}
+
+	static const Char* GetLocalPath(const StaticString& fullPath);
+};

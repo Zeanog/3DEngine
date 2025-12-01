@@ -300,6 +300,12 @@
     <ClInclude Include="Audio\Loaders\SoundManager.h">
       <Filter>Audio\Loaders</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\CameraInterpolator.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\FlyingCamera.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">

@@ -43,28 +43,49 @@ namespace Neo {
 				}
 			};
 
-			Int32	Index = -1;
-			UInt32	PolyCount = 0;
+			struct PolyRange {
+				Int32	StartIndex = -1;
+				UInt32	VertCount = 0;
+
+				PolyRange() {
+				}
+				PolyRange(Int32 start, UInt32 numPolys) {
+					StartIndex = start;
+					VertCount = numPolys * 3;
+				}
+			};
+
+			StaticString	Name;
+			List<PolyRange>	Ranges;
 
 			Map<StaticString, Channel*>	ChannelMap;
 			List<Channel*>				Channels;
 
-			AMaterial() {
+			AMaterial(const Char* name) {
+				Name = name;
 			}
 
-			AMaterial(Int32 i, UInt32 polyCount) : AMaterial() {
-				Index = i;
-				PolyCount = polyCount;
+			AMaterial(const Char* name, Int32 i, UInt32 numPolys) : AMaterial(name) {
+				Ranges[0].StartIndex = i;
+				Ranges[0].VertCount = numPolys * 3;
 			}
 
 			Bool	Equals(const AMaterial& rhs) const {
-				if (Index != rhs.Index) {
+				if( Ranges.Length() != rhs.Ranges.Length()) {
 					return false;
 				}
 
-				if (PolyCount != rhs.PolyCount) {
-					return false;
+				for (UInt32 ix = 0; ix < Ranges.Length(); ++ix) {
+					auto lhsRange = Ranges[ix];
+					auto rhsRange = rhs.Ranges[ix];
+					if (lhsRange.StartIndex != rhsRange.StartIndex) {
+						return false;
+					}
+					if (lhsRange.VertCount != rhsRange.VertCount) {
+						return false;
+					}
 				}
+				
 
 				if (Channels.Length() != rhs.Channels.Length()) {
 					return false;
@@ -108,7 +129,7 @@ namespace Neo {
 						AddChannel(channelName);
 					}
 					auto channel = ChannelMap[channelName];
-					assert(channel && !channel->Texture);//For now only allow one update
+					assert(channel && (!channel->Texture || channel->Texture == texture));//For now only allow one update
 					channel->Texture = texture;
 					return true;
 				}
@@ -147,15 +168,14 @@ namespace Neo {
 		public:
 			Float32			Shininess{};//TODO: Dont think this should be here.  Basically a specular channel
 
-			Material() {
+			Material(const Char* name) : TSuper(name) {
 			}
 
-			Material(Int32 i, Int32 polyCount) : TSuper(i, polyCount) {
+			Material(const Char* name, Int32 i, Int32 polyCount) : TSuper(name, i, polyCount) {
 			}
 
 			Material&	operator=(const Material& rhs) {
-				Index = rhs.Index;
-				PolyCount = rhs.PolyCount;
+				Ranges = rhs.Ranges;
 				ChannelMap = rhs.ChannelMap;
 				Channels = rhs.Channels;
 				return *this;

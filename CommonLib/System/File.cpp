@@ -35,7 +35,7 @@ const Char* File::RebuildFullPath(const Char* path, const Char* removePath, cons
 }
 
 const Char* File::RebuildFullPath(String& path, const Char* newWorkingDirPath) {
-	return RebuildFullPath(path, File::WorkingDirectory.CStr(), newWorkingDirPath);
+	return RebuildFullPath(path, "", newWorkingDirPath);
 }
 
 const Char* File::RebuildFullPath(const Char* path, const Char* newWorkingDirPath) {
@@ -72,4 +72,23 @@ Bool File::ReadContents(List<Byte>& outContents) {
 
 	assert(!ReportedError());
 	return true;
+}
+
+#include "StackString.h"
+#include <windows.h>
+const Char* FilePath::GetLocalPath(const StaticString& fullPath) {
+	try {
+		STACK_STRING(systemPath, MAX_PATH);
+
+		Int32 systemPathLength = GetCurrentDirectory(systemPath.Length(), systemPath.CStr());
+		auto index = fullPath.FindIndexOf(systemPath.CStr());
+		if (index < 0) {
+			return GetFileName(fullPath);
+		}
+		assert(!index);//Index better be at start
+		return &fullPath.CStr()[index + systemPathLength + 1];
+	}
+	catch (...) {
+		return	nullptr;
+	}
 }

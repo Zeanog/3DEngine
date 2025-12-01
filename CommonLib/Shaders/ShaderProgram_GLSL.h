@@ -16,9 +16,8 @@ public:
 protected:
 	const Shader_Vertex_GLSL*		m_pVertexShader{}; // Vertex shader handle
 	const Shader_Fragment_GLSL*		m_pFragmentShader{}; // Fragment shader handle
-	GLhandleARB						m_Handle = -1; // Shader handle
-
-	DEFINE_MEMBER_EX(Bool, IsInUse)
+	GLhandleARB						m_Handle{}; // Shader handle
+	List<StaticString>				m_RequiredChannels{};
 
 public:
 	ShaderProgram_GLSL();
@@ -27,7 +26,14 @@ public:
 	}
 
 	Bool	IsValid() const {
-		return m_pVertexShader && m_pFragmentShader && m_Handle != -1;
+		return !!m_pVertexShader && !!m_pFragmentShader && m_Handle != 0;
+	}
+
+	Bool	IsInUse() const {
+		assert(m_Handle);
+		GLint currentProgramId;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgramId);
+		return (decltype(m_Handle))currentProgramId == m_Handle;
 	}
 
 	Bool	Create(const StaticString& vsPath, const StaticString& fsPath, const Char* header);
@@ -58,23 +64,27 @@ public:
 	}
 
 	void	StartUsing() {
+		assert(m_Handle);
+
 		glUseProgramObjectARB( m_Handle );
 		int error = glGetError();
 		if (error) {
 			const Char* str = glErrorString(error);
 			int ix = 0;
 		}
-		IsInUse(true);
 	}
 
 	void	StopUsing() {
 		glUseProgramObjectARB( 0 );
 		assert(!glGetError());
-		IsInUse(false);
 	}
 
 	operator GLhandleARB() {
 		return m_Handle;
+	}
+
+	const List<StaticString>& RequiredChannels() const {
+		return m_RequiredChannels;
 	}
 
 	template<typename... TGLenums>
@@ -82,16 +92,16 @@ public:
 		static constexpr UInt32 NumEnums = sizeof...(TGLenums);
 
 		try {
-			Int32 maxNameLength = -1;
+			Int32 maxNameLength{};
 			glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
-			assert(numPrefixCharsToStrip < (UInt32)maxNameLength);
+			assert((Int32)numPrefixCharsToStrip < maxNameLength);
 
-			Char* nameBuffer = STACK_ALLOC(Char, maxNameLength + 1);//Include NULL character
-			Int32	nameLength = -1;
-			Int32	size = -1;
-			GLenum	type;
+			Char*	nameBuffer = STACK_ALLOC(Char, maxNameLength + 1);//Include NULL character
+			Int32	nameLength{};
+			Int32	size{};
+			GLenum	type{};
 
-			Int32 numUniforms = -1;
+			Int32	numUniforms{};
 			glGetProgramiv(m_Handle, GL_ACTIVE_UNIFORMS, &numUniforms);
 
 			for (auto ix = 0; ix < numUniforms; ++ix) {

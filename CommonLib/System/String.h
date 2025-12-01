@@ -93,6 +93,9 @@ public:
 	}
 
 	static Int32 FindIndexOf(const Char* str, const Char* lookingFor) {
+		if(!lookingFor || !lookingFor[0]) {
+			return -1;
+		}
 		auto matchPtr = strstr(str, lookingFor);
 		return matchPtr != nullptr ? matchPtr - str : -1;
 	}
@@ -116,7 +119,7 @@ public:
 		 return !strcpy_s(dst, size, src);
 	}
 
-	static const Char* Format(const char* format, va_list& args) {
+	static Char* Format(const char* format, va_list& args) {
 		static const int NumBuffers = 5;
 		static const int MaxBufferSize = 256;
 		static int currentIndex = 0;
@@ -129,7 +132,7 @@ public:
 		return currentBuffer;
 	}
 
-	static const Char*	Format( const char* format, ... ) {
+	static Char*	Format( const char* format, ... ) {
 		va_list args;
 		va_start(args, format);
 		auto str = Format(format, args);

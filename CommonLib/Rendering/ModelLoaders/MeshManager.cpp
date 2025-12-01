@@ -10,13 +10,6 @@ MeshManager::~MeshManager() {
 }
 
 Neo::Mesh* MeshManager::Get(const StaticString& path) {
-	//STACK_STRING(fullPath, 256 + relativePath.Length());
-	//
-	//	Int32 fullPathLength = GetCurrentDirectory(fullPath.Length(), fullPath.CStr());
-	//	String::StrCpy(fullPath.CStr() + fullPathLength, fullPath.Length(), "/");
-	//	++fullPathLength;
-	//	String::StrCpy(fullPath.CStr() + fullPathLength, fullPath.Length(), relativePath.CStr());
-
 	Neo::Mesh* asset{};
 	if (m_Assets.Find(path, asset)) {
 		return asset;

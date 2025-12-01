@@ -42,8 +42,6 @@ void	ModelLoader::ParseShaderProgram(const rapidjson::Value& value) {
 		m_ShaderProgram = new ShaderProgram_GLSL();
 	}
 	ParseProgram(value, *m_ShaderProgram);
-	m_ShaderProgram->EnumerateUniforms(m_RequiredChannels, 1U, GL_SAMPLER_2D);
-	//May need to manually add some channels here later
 }
 
 void	ModelLoader::ParseShadowProgram(const rapidjson::Value& value) {
@@ -51,7 +49,6 @@ void	ModelLoader::ParseShadowProgram(const rapidjson::Value& value) {
 		m_ShadowProgram = new ShaderProgram_GLSL();
 	}
 	ParseProgram(value, *m_ShadowProgram);
-
 }
 
 Map<StaticString, ModelLoader::TFieldParser> ModelLoader::m_FieldParsers;
@@ -103,7 +100,6 @@ void	ModelLoader::Clear() {
 	m_MeshFilePath = "";
 	m_InvertNormals = false;
 	m_ShaderProgram = nullptr;
-	m_RequiredChannels.Clear();
 
 	m_ShadowProgram = nullptr;
 }

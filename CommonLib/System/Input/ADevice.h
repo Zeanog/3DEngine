@@ -17,7 +17,7 @@ protected:
 	LPDIRECTINPUTDEVICE8  m_pDevice;
 
 protected:
-	virtual void NotifyObservers() const = 0;
+	virtual void NotifyObserversOfChange() const = 0;
 
 public:
 	virtual ~ADevice() {

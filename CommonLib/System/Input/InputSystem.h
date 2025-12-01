@@ -12,8 +12,8 @@ class InputSystem {
 protected:
 	LPDIRECTINPUT8	m_pSystem{};
 
-	Keyboard		m_Keyboard;
-	Mouse			m_Mouse;
+	Neo::Keyboard	m_Keyboard{};
+	Neo::Mouse		m_Mouse{};
 
 public:
 	Bool		Init(HWND hWnd) {
@@ -39,14 +39,6 @@ public:
 		
 	}
 
-	Keyboard*	GetKeyboard() {
-		return &m_Keyboard;
-	}
-
-	Mouse*	GetMouse() {
-		return &m_Mouse;
-	}
-
 	Bool	Poll() {
 		if (!m_Keyboard.Poll()) {
 			m_Keyboard.Acquire();
@@ -57,5 +49,13 @@ public:
 		}
 
 		return true;
+	}
+
+	Neo::Keyboard&		Keyboard() {
+		return m_Keyboard;
+	}
+
+	Neo::Mouse&			Mouse() {
+		return m_Mouse;
 	}
 };

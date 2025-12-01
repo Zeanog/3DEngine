@@ -69,7 +69,6 @@ protected:
 	Bool			 m_InvertedNormals{};
 
 	const ShaderProgram_GLSL* m_ShaderProgram{};
-	List<StaticString>	m_RequiredChannels;
 
 	const ShaderProgram_GLSL* m_ShadowProgram{};
 

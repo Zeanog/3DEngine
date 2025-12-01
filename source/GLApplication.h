@@ -6,7 +6,7 @@
 #include "DeferredRendering/DeferredRendering.h"
 #include "Rendering/FrameBufferObject.h"
 
-#include "Rendering/Camera.h"
+#include "Rendering/CameraInterpolator.h"
 #include "System/Input/InputSystem.h"
 #include "System/DebugConsole.h"
 #include "Images/ImageManager.h"
@@ -20,14 +20,12 @@ class GLApplication {
 	CLASS_TYPEDEFS(GLApplication)
 
 protected:
-	Functor<void, TYPELIST_1(Mouse::State)>		OnMouseChangedFunctor;
-	void	OnMouseChanged(Param<Mouse::State>::Type mouseState) {
-		if (mouseState.Btns[0].IsSet() && (mouseState.DeltaX != 0 || mouseState.DeltaY != 0)) {
+	void	OnMouseChanged(Param<Neo::Mouse::State>::Type mouseState) {
+		if (mouseState.Btns[0].IsSet() /*&& (mouseState.DeltaX != 0 || mouseState.DeltaY != 0)*/) {
 			RotateCamera(mouseState.DeltaX, mouseState.DeltaY);
 		}
 	}
 
-	Functor<void, TYPELIST_1(KeyboardState)>		OnKeyboardChangedFunctor;
 	void	OnKeyboardChanged(Param<KeyboardState>::Type keyboardState);
 
 public:
@@ -58,19 +56,19 @@ protected:
 		RenderModels(m_ShadowMapGenerationProgram);
 	}
 
-	CameraInterpolator				m_Camera;
+	CameraInterpolator		m_Camera;
 
 	// Fields
-	List<AModel*> m_PrevModels{};
-	Neo::Bounds	m_Bounds{};
-	List<Model*> m_Models{};
+	List<AModel*>		m_PrevTypeModels{};
+	Neo::Bounds			m_Bounds{};
+	List<Model*>		m_Models{};
 
 	Functor<void>		OnRenderShadows;
 
 	DeferredRendering* m_deferredRendering{};
 	FrameBufferObject* m_multipleRenderTarget{};
 
-	List<ALight*>	m_Lights{};
+	List<ALight*>		m_Lights{};
 	ShaderProgram_GLSL 	m_RenderModelProgram;
 
 	ShaderProgram_GLSL 	m_LightingProgram_Directional;
@@ -89,6 +87,6 @@ protected:
 
 	float				m_DeltaTime{};
 	UInt64				m_CurrentTime{};
-	UInt64				m_PrevTick{};
+	decltype(m_CurrentTime)	m_PrevTick{};
 	unsigned char		m_state{}; // 0 - Normal render, 1 - Show render targets
 };

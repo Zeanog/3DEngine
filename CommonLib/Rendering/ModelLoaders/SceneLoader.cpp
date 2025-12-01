@@ -39,10 +39,10 @@ void SceneLoader::ParseAudioChannels(const rapidjson::Value& value) {
 		auto sampleRateIter = memberIter->value.FindMember("sampleRate");
 		assert(sampleRateIter != memberIter->value.MemberEnd());
 
-		UInt32 numChannels{};
+		UInt16 numChannels{};
 		Singleton<ValueParser<decltype(numChannels)>>::GetInstance()->Get(numChannelsIter->value, numChannels);
 
-		UInt32 sampleRate{};
+		UInt16 sampleRate{};
 		Singleton<ValueParser<decltype(sampleRate)>>::GetInstance()->Get(sampleRateIter->value, sampleRate);
 
 		Singleton<AudioSystem>::GetInstance()->AddCategory(channelName, numChannels, sampleRate);

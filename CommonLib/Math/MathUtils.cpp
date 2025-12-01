@@ -60,26 +60,30 @@ Int32 MathUtils::NearestPowerOfTwo(Int32 val) {
 	return (Int32)powf(2, pos);
 }
 
-char	MathUtils::ToChar(int num) {
-	if (num <= 9)
-		return (char)(num + '0');
-	else
-		return (char)((num - 10) + 'A');
+Char	MathUtils::ToChar(int num) {
+	if (num <= 9) {
+		return (Char)(num + '0');
+	}
+	else {
+		return (Char)((num - 10) + 'A');
+	}
 }
 
-int     MathUtils::ToNumber(char ch) {
+Int32     MathUtils::ToNumber(Char ch) {
 	if (ch <= '9') {
 		return ch - '0';
+	} else if(ch >= 'a' && ch <= 'z') {
+		return (ch - 'a') + 10;
 	}
 
 	return (ch - 'A') + 10;
 }
 
-int		MathUtils::NumDigits(int val, int newBase) {
-	return (int)(log2(val) / log2(newBase)) + 1;
+Int32		MathUtils::NumDigits(Int32 val, Int32 base) {
+	return (int)(log2(val) / log2(base)) + 1;
 }
 
-void	MathUtils::ConvertTo(int dstBase, int inputNum, std::string& outDstNum) {
+void	MathUtils::ConvertTo(Int32 dstBase, Int32 inputNum, std::string& outDstNum) {
 	int numDigits = NumDigits(inputNum, dstBase);
 
 	outDstNum.resize(numDigits);
@@ -89,8 +93,8 @@ void	MathUtils::ConvertTo(int dstBase, int inputNum, std::string& outDstNum) {
 	}
 }
 
-void MathUtils::Convert(const char* str, int srcBase, int dstBase, std::string& outNum) {
-	if (!str) {
+void MathUtils::Convert(const Char* str, Int32 srcBase, Int32 dstBase, std::string& outNum) {
+	if (!str || !str[0]) {
 		outNum = "";
 		return;
 	}
@@ -99,7 +103,7 @@ void MathUtils::Convert(const char* str, int srcBase, int dstBase, std::string& 
 	int index = 0;
 	while (true) {
 		char ch = str[index++];
-		if (ch == '\0') {
+		if (ch == '\0') {//Null terminator
 			break;
 		}
 
@@ -110,17 +114,16 @@ void MathUtils::Convert(const char* str, int srcBase, int dstBase, std::string& 
 	ConvertTo(dstBase, val, outNum);
 }
 
-char* MathUtils::Convert(const char* pNumber, int srcBase, int dstBase)
-{
-	static constexpr int numBuffers = 5;
-	static constexpr int bufferLength = 256;
-	static char	buffers[numBuffers][bufferLength];
-	static int	currentBufferIndex = -1;
+Char* MathUtils::Convert(const Char* pNumber, Int32 srcBase, Int32 dstBase) {
+	static constexpr Int32 numBuffers = 5;
+	static constexpr Int32 bufferLength = 256;
+	static Char	buffers[numBuffers][bufferLength];
+	static Int32	currentBufferIndex = -1;
 
 	currentBufferIndex = (currentBufferIndex + 1) % numBuffers;
-	char* buffer = buffers[currentBufferIndex];
+	Char* buffer = buffers[currentBufferIndex];
 
-	static std::string convertedNum;
+	static std::string convertedNum;//This makes this non thread-safe
 	Convert(pNumber, srcBase, dstBase, convertedNum);
 	auto error = strcpy_s(buffer, bufferLength, convertedNum.c_str());
 	return buffer;

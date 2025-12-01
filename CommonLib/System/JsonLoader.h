@@ -436,6 +436,38 @@ public:
 };
 
 template<>
+class ValueParser<Int16> : public AValueParser<Int16> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+		SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue	TValue;
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsInt());
+		outValue = (TValue)value.GetInt();
+	}
+};
+
+template<>
+class ValueParser<UInt16> : public AValueParser<UInt16> {
+	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
+		SINGLETON_DECLARATIONS(TSelf) {
+	}
+
+public:
+	typedef TSuper::TValue	TValue;
+
+public:
+	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
+		assert(value.IsUint());
+		outValue = (TValue)value.GetUint();
+	}
+};
+
+template<>
 class ValueParser<Int32> : public AValueParser<Int32> {
 	INHERITEDCLASS_TYPEDEFS(ValueParser, AValueParser)
 	SINGLETON_DECLARATIONS(TSelf) {

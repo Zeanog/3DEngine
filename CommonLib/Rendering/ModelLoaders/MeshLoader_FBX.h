@@ -20,7 +20,7 @@ protected:
 	VertexBuffer	m_VertexBuffer;
 	IndexBuffer		m_IndexBuffer;
 	List<Neo::Mesh::AMaterial*>	m_Materials;
-	Map<StaticString, Neo::Mesh::AMaterial*>	m_MaterialMap;
+	Map<StaticString, Neo::Mesh::AMaterial* >	m_MaterialMap;
 
 	List<JointInfo>			m_Joints;
 
@@ -72,6 +72,25 @@ class MeshLoader_FBX : public AMeshLoader {
 public:
 	const int TRIANGLE_VERTEX_COUNT = 3;
 
+	struct IndexRange {
+		Int32	EndPolyIndex = -1;
+		Int32	StartPolyIndex = 0;
+
+		UInt32	PolyCount() const {
+			return UInt32(EndPolyIndex - StartPolyIndex + 1);
+		}
+
+		void	AddPolyIndex(Int32 index) {
+			if (index < StartPolyIndex) {
+				StartPolyIndex = index;
+			}
+
+			if (index > EndPolyIndex) {
+				EndPolyIndex = index;
+			}
+		}
+	};
+
 protected:
 	static FbxManager* g_SdkManager;
 	FbxScene* m_Scene;
@@ -90,13 +109,14 @@ protected:
 	Map<StaticString, MaterialPropertyParsingInfo> m_MaterialPropertyParsers;
 
 protected:
-	void	LoadComponents(const fbxsdk::FbxScene* pScene, FbxAnimLayer* pAnimLayer, const char* pFbxFileName, bool pSupportVBO);
+	void	LoadComponents(const fbxsdk::FbxScene* pScene, FbxAnimLayer* pAnimLayer, bool pSupportVBO);
 	Bool	LoadComponents(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bool pSupportVBO);
-	void	LoadComponents(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, Map<StaticString, Neo::Mesh::AMaterial* >& matMap, List<Neo::Mesh::AMaterial*>& mats);
+	void	LoadMesh(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, Map<StaticString, Neo::Mesh::AMaterial* >& matMap, List<Neo::Mesh::AMaterial*>& mats);
 	void	LoadAnimations(fbxsdk::FbxScene* pScene);
 	void	LoadSkeletonHierarchy(FbxNode* rootnode);
 	void	LoadSkeletonHierarchyre(FbxNode* node, int depth, int index, int parentindex);
-	void	LoadMaterials(FbxMesh* pMesh, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
+	void	LoadGeometry(FbxMesh* pMesh, VertexBuffer& vb, IndexBuffer& ib, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
+	void	LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, const Map<Int32, IndexRange>& materialIndices, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
 
 public:
 	static void	CreateGlobals();
