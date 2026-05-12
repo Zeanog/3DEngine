@@ -50,11 +50,11 @@ void DeferredRendering::PostRender() {
 */
 void DeferredRendering::Render( const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera, const ALight* light ) 
 {
-	const RenderTarget* diffuse = m_pSrcFBO->LinkTargetTo(StaticString("tDiffuse"), program, 0);
-	const RenderTarget* positions = m_pSrcFBO->LinkTargetTo(StaticString("tPositionMap"), program, 1);
-	const RenderTarget* normals = m_pSrcFBO->LinkTargetTo(StaticString("tNormalMap"), program, 2);
+	auto diffuse = m_pSrcFBO->LinkTargetTo(StaticString("tDiffuse"), program, 0);
+	auto positions = m_pSrcFBO->LinkTargetTo(StaticString("tPositionMap"), program, 1);
+	auto normals = m_pSrcFBO->LinkTargetTo(StaticString("tNormalMap"), program, 2);
 
-	const RenderTarget* shadow = light->LinkTo(program, bounds, camera);
+	auto shadow = light->LinkTo(program, bounds, camera);
 
 	glBegin(GL_QUADS);
 		glTexCoord2f( 0.0f, 0.0f );
@@ -81,8 +81,9 @@ void DeferredRendering::Render( const ShaderProgram_GLSL& program, const Neo::Bo
 }
 
 void DeferredRendering::showTexture(const StaticString& texName, float fSizeX, float fSizeY, float x, float y) const {
-	if ((*m_pSrcFBO)[texName] != NULL) {
+	/*if ((*m_pSrcFBO)[texName] != NULL) {
 		m_pSrcFBO->showTexture(texName, fSizeX, fSizeY, x, y);
 		return;
-	}
+	}*/
+	m_pSrcFBO->showTexture(texName, fSizeX, fSizeY, x, y);
 }

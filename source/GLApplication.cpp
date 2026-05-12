@@ -288,12 +288,13 @@ void GLApplication::Update()
 	t[3] = glm::vec4((*iter)->Position(), 1.0f);
 	(*iter)->Transform(t);
 
+	auto rotMat = glm::eulerAngleXYZ(0.0f, m_DeltaTime, 0.0f);
 	if (m_Models.Length() >= 1) {
-		m_Models[0]->Rotation( glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[0]->Rotation());
+		m_Models[0]->Rotate(rotMat);
 	}
 
 	if (m_Models.Length() >= 2) {
-		m_Models[1]->Rotation(glm::quat(glm::vec3(0, m_DeltaTime, 0)) * m_Models[1]->Rotation());
+		m_Models[1]->Rotate(rotMat);
 	}
 
 	for (UInt32 i = 0; i < m_PrevTypeModels.Length(); ++i) {
@@ -308,8 +309,6 @@ void GLApplication::Update()
 #define CAST_SHADOWS 1
 
 void GLApplication::RenderModels(ShaderProgram_GLSL& program) {
-	//Can we just start using the program here?
-
 	for (UInt32 i = 0; i < m_PrevTypeModels.Length(); ++i) {
 		m_PrevTypeModels[i]->render(program);
 	}
@@ -348,7 +347,7 @@ void GLApplication::Render()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	m_Camera.LinkTransform();
+	m_Camera.LinkTransform();//TODO: I think this causing our lighting issues.  Need to verify.
 
 	m_multipleRenderTarget->SetAsTarget();
 	RenderModels(m_RenderModelProgram);
@@ -427,7 +426,7 @@ void GLApplication::Release()
 #include "Rendering/ModelLoaders/MeshManager.h"
 #include "Audio/SourceVoice.h"
 #include "System/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
-#include "System/JsonLoader.h"
+#include "System/JsonValueParsers.h"
 #include "Rendering/ModelLoaders/ModelManager.h"
 #include "Rendering/ModelLoaders/SceneLoader.h"
 
@@ -505,11 +504,8 @@ void GLApplication::LoadAssets()
 #endif
 	//m_Lights.push_back(light);
 
-	Light_Spot* spotLight = new Light_Spot(glm::vec3(2.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(45.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
-	spotLight->ConstantAttenuation(2.0f);
-	spotLight->LinearAttenuation(0.01f);
-	spotLight->QuadraticAttenuation(0.01f);
-	spotLight->Exponent(2);
+	Light_Spot* spotLight = new Light_Spot(glm::vec3(2.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(0.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
+	spotLight->Distance(30.0f);
 #if CAST_SHADOWS
 	spotLight->CastsShadows(true);
 #endif

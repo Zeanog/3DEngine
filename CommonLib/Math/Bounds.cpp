@@ -59,3 +59,13 @@ void Neo::Bounds::Render(ShaderProgram_GLSL& program, const glm::vec3& offset) c
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
+
+
+
+Neo::Bounds& Neo::Bounds::operator+=(const VertexArrayObject<glm::vec3>& vao) {
+	for (UInt32 ix = 0; ix < vao.Length(); ++ix) {
+		operator+=(vao[ix]);
+	}
+
+	return *this;
+}

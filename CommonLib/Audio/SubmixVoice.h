@@ -3,7 +3,7 @@
 #include "ASourceVoice.h"
 
 class SubmixVoice : public ASourceVoice<IXAudio2SubmixVoice> {
-	INHERITEDCLASS_TYPEDEFS(SubmixVoice, ASourceVoice<IXAudio2SubmixVoice>)
+	INHERITED_CLASS_TYPEDEFS(SubmixVoice, ASourceVoice<IXAudio2SubmixVoice>)
 
 	friend class AudioSystem;
 

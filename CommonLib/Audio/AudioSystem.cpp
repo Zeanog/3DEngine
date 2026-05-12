@@ -9,6 +9,8 @@
 #include "System/DataStructureLibrary.h"
 #include "Audio\Loaders\SoundManager.h"
 #include <limits>
+#include <System/DebugConsole.h>
+#include <System/Win32/Error.h>
 
 std::mutex AudioSystem::m_Mutex;
 
@@ -20,9 +22,9 @@ Bool AudioSystem::Init() {
 
 	m_MasteringVoice = CreateMasteringVoice();
 
-	m_FxNameToInfoMap.Add("Reverb", { ReverbParameters::InstantiateFX, ReverbParameters::UpdateParams });
-	m_FxNameToInfoMap.Add("Echo", { EchoParameters::InstantiateFX, EchoParameters::UpdateParams });
-	m_FxNameToInfoMap.Add("EQ", { EQParameters::InstantiateFX, EQParameters::UpdateParams });
+	m_FxNameToInfoMap.Add("Reverb", { ReverbParameters::CreateParams, ReverbParameters::UpdateParams<SubmixVoice> });
+	m_FxNameToInfoMap.Add("Echo", { EchoParameters::CreateParams, EchoParameters::UpdateParams<SubmixVoice> });
+	m_FxNameToInfoMap.Add("EQ", { EQParameters::CreateParams, EQParameters::UpdateParams<SubmixVoice> });
 	return true;
 }
 
@@ -65,16 +67,15 @@ UInt64 AudioSystem::GenerateHash(const WAVEFORMATEX& format) {
 UInt64 AudioSystem::GenerateHash(UInt16 numChannels, UInt16 sampleRate) {
 	static constexpr Byte numChannelShift = 56;
 	static constexpr Byte samplesPerSecShift = 32;
-	static constexpr auto channelsBitMask = std::numeric_limits<UInt16>::max();
-	static constexpr auto sampleRateBitMask = std::numeric_limits<UInt16>::max();
+	static constexpr auto uint16BitMask = std::numeric_limits<UInt16>::max();
 
 	UInt64 val = ((UInt64)numChannels << numChannelShift) | ((UInt64)sampleRate << samplesPerSecShift);
 
 #if _DEBUG
-	auto channelsCheck = ((val >> numChannelShift) & channelsBitMask);
+	auto channelsCheck = ((val >> numChannelShift) & uint16BitMask);
 	assert(channelsCheck == numChannels);
 
-	auto sampleRateCheck = ((val >> samplesPerSecShift) & sampleRateBitMask);
+	auto sampleRateCheck = ((val >> samplesPerSecShift) & uint16BitMask);
 	assert(sampleRateCheck == sampleRate);
 #endif
 
@@ -119,7 +120,6 @@ Float32 AudioSystem::Play(const StaticString& filePath, const StaticString& cate
 		return 0.0f;
 	}
 	outVoice = GetSourceVoice(GetCategoryVoice(categoryName), snd);
-	//voice->Volume(1.0f);//TODO: Set volume back to full
 	verify(outVoice->Start());
 	return snd->Duration();
 }
@@ -130,7 +130,6 @@ Float32 AudioSystem::Submit(const StaticString& filePath, const StaticString& ca
 		return 0.0f;
 	}
 	outVoice = GetSourceVoice(GetCategoryVoice(categoryName), snd);
-	//voice->Volume(1.0f);//TODO: Set volume back to full
 	return snd->Duration();
 }
 
@@ -232,15 +231,15 @@ MasteringVoice* AudioSystem::CreateMasteringVoice() {
 	return newVoice;
 }
 
-//TODO: There are multiple GenerateHash calls in here
 SourceVoice* AudioSystem::GetSourceVoice(SubmixVoice* voiceCategory, const WAVEFORMATEX& format) {
 	SourceVoice* voice{};
-	if (FindOpenSourceVoice(format, voice)) {
+	auto formatHash = GenerateHash(format);//Used to minimize our GenerateHash calls
+	if (FindOpenSourceVoice(formatHash, voice)) {
 		voice->SetOutputTo(voiceCategory);
 		return voice;
 	}
 
-	voice = new SourceVoice(m_Audio2, format);
+	voice = new SourceVoice(m_Audio2, format, formatHash);
 	verify(AddSourceVoice(voice));
 	voice->SetOutputTo(voiceCategory);
 	return voice;
@@ -322,6 +321,8 @@ void AudioSystem::OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT
 	Sound* snd = (Sound*)context;
 
 	assert(0);
+
+	Singleton<DebugConsole>::GetInstance()->Write("Voice Error(%d): %s\n", result, GetErrorMessage(result));
 }
 
 void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
@@ -366,21 +367,21 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 
 void AudioSystem::ReloadAssets() {
 	struct PlayingVoiceInfo {
-		SourceVoice* Voice;
-		UInt64		CurrentOffset;
-		Sound*		CurrentSound;
+		SourceVoice*	Voice;
+		UInt64			CurrentOffset;
+		Sound*			CurrentSound;
 	};
 
 	auto playingVoices = Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->CheckOut();
 	playingVoices->Clear();
 
-	//This will lose any voices playing with an operationSet.  Also we will lose any other queded buffers.
+	//This will lose operationSets of any voices playing.  Also we will lose any other queueded buffers.
 	FOREACH(iterVoiceListMap, m_FormatToVoiceListMap) {
 		FOREACH(iterVoice, iterVoiceListMap->second) {
 				auto v = *iterVoice;
 				if (v->IsPlaying()) {
 					auto playingSnd = v->PlayingSound();
-					playingVoices->Add({v, v->SamplesPlayed(), v->PlayingSound()});
+					playingVoices->Add({v, v->SamplesPlayed(), playingSnd});
 				}
 				v->Stop();
 		}
@@ -388,22 +389,22 @@ void AudioSystem::ReloadAssets() {
 	Singleton<SoundManager>::GetInstance()->ReloadAll();
 
 	FOREACH(iter, *playingVoices) {
-		auto info = *iter;
+		auto info = &(*iter);
 		XAUDIO2_BUFFER	buffer{};
-		info.CurrentSound->PopulateBuffer(buffer);
-		buffer.PlayBegin = (UInt32)info.CurrentOffset;
-		info.Voice->Start(buffer);
+		info->CurrentSound->PopulateBuffer(buffer);//TODO: If this made a copy of the audio data reloading would be a lot easier since we wouldn't have to worry about the sound's data being freed while it's still playing.
+		buffer.PlayBegin = (UInt32)info->CurrentOffset;
+		info->Voice->Start(buffer);
 	}
 
 	Singleton<DataStructureLibrary<List<PlayingVoiceInfo>>>::GetInstance()->Return(playingVoices);
 }
 
-UInt32	AudioSystem::LoadEffects(const StaticString& path, const StaticString& categoryName) {
-	return LoadEffects(path, GetCategoryVoice(categoryName));
+UInt32	AudioSystem::LoadEffectsChain(const StaticString& path, const StaticString& categoryName) {
+	return LoadEffectsChain(path, GetCategoryVoice(categoryName));
 }
 
-#include "System/JsonLoader.h"
-UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category) {//TODO: Possibly accept SourceVoices also
+#include "System/JsonValueParsers.h"
+UInt32	AudioSystem::LoadEffectsChain(const StaticString& path, SubmixVoice* category) {//TODO: Possibly accept SourceVoices also
 	try {
 		rapidjson::Document	doc;
 		if (!rapidjson::LoadFrom(path, doc)) {
@@ -423,7 +424,7 @@ UInt32	AudioSystem::LoadEffects(const StaticString& path, SubmixVoice* category)
 
 		FOREACH(fxIter, doc) {
 			assert(fxIter->IsObject());
-			auto& typeIter = fxIter->FindMember("Type");
+			auto&& typeIter = fxIter->FindMember("Type");//Linear Search
 			assert(index < numFx);
 
 			fxInfoList[index] = &m_FxNameToInfoMap[typeIter->value.GetString()];

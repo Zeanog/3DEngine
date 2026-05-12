@@ -268,14 +268,19 @@ public:
 		}
 
 		UInt32 length = str.Length() - index;
-		Char* extPtr = str.CStr() + index;
+		Char* extPtr = str.Str() + index;
 		for (UInt32 ix = 0; ix < length; ++ix) {
 			extPtr[ix] = newExtension[ix];
 		}
 	}
 
 	static Bool	HasExtension(const StaticString& str, const Char* ext) {
-		const Char* lhs = GetExtension(str);
+		auto strLen = str.Length();
+		auto extLen = String::StrLen(ext);
+
+		const Char* lhs = &str.CStr()[strLen - extLen];
+
+		//const Char* lhs = GetExtension(str);
 		return !String::StrICmp(lhs, ext);
 	}
 
@@ -283,10 +288,11 @@ public:
 		Int32 index = fullPath.FindLastOf(File::Delimiters[0]);
 		if (index < 0) {
 			index = fullPath.FindLastOf(File::Delimiters[1]);
+			if (index < 0) {
+				return fullPath.CStr();
+			}
 		}
-		if (index < 0) {
-			return fullPath.CStr();
-		}
+		
 		return &(fullPath.CStr()[index + 1]);
 	}
 

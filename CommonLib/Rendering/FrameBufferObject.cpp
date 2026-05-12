@@ -24,11 +24,11 @@ void RenderTexture::Unlink() const {
 /**
 *	Create the FBO render texture initializing all the stuff that we need
 */
-FrameBufferObject::FrameBufferObject(int _dWidth, int _dHeight)
+FrameBufferObject::FrameBufferObject(int width, int height)
 {	
 	// Save extensions
-	m_Width  = _dWidth;
-	m_Height = _dHeight;
+	m_Width  = width;
+	m_Height = height;
 
 	// Generate the OGL resources for what we need
 	glGenFramebuffersEXT(1, &m_hFBO);
@@ -53,7 +53,7 @@ void FrameBufferObject::SetAsTarget() {
 	// Bind our FBO and set the viewport to the proper size
 	Bind();
 	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0,0,m_Width, m_Height);
+	glViewport(0, 0, m_Width, m_Height);
 
 	// Clear the render targets
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -68,13 +68,13 @@ void FrameBufferObject::SetAsTarget() {
 /**
 *	Stop rendering to this texture.
 */
-void FrameBufferObject::UnsetAsTarget(){
-	Unbind();
+void FrameBufferObject::UnsetAsTarget() {
 	glPopAttrib();
+	Unbind();
 }
 
-const RenderTarget* FrameBufferObject::LinkTargetTo(const StaticString& key, const ShaderProgram_GLSL& program, GLenum textureUnitIndex) const {
-	const RenderTarget* rt = (*this)[key];
+const IRenderTarget* FrameBufferObject::LinkTargetTo(const StaticString& key, const ShaderProgram_GLSL& program, GLenum textureUnitIndex) const {
+	const IRenderTarget* rt = (*this)[key];
 	rt->LinkTo(textureUnitIndex);
 	verify(program.LinkUniform(key.CStr(), (int)textureUnitIndex));
 	return rt;
@@ -84,14 +84,14 @@ const RenderTarget* FrameBufferObject::LinkTargetTo(const StaticString& key, con
 *	Show the texture to screen. It is just for debug purposes.
 */
 void FrameBufferObject::showTexture(const StaticString& texName, float fSizeX, float fSizeY, float x, float y) const {
-	const RenderTarget* rt = (*this)[texName];
+	const IRenderTarget* rt = (*this)[texName];
 	assert(rt);
 
 	//Projection setup
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,m_Width,0,m_Height,0.1f,2);	
+	glOrtho(0.0f, m_Width, 0.0f, m_Height, 0.1f, 2.0f);	
 
 	//Model setup
 	glMatrixMode(GL_MODELVIEW);
@@ -106,15 +106,15 @@ void FrameBufferObject::showTexture(const StaticString& texName, float fSizeX, f
 	// Render the quad
 	glTranslatef(x,-y,-1.0);
 
-	glColor3f(1,1,1);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glBegin(GL_QUADS);
-	glTexCoord2f( 0, 1 );
+	glTexCoord2f( 0.0f, 1.0f);
 	glVertex3f(    0.0f,  (float) m_Height, 0.0f);
-	glTexCoord2f( 0, 0 );
+	glTexCoord2f( 0.0f, 0.0f);
 	glVertex3f(    0.0f,   m_Height-fSizeY, 0.0f);
-	glTexCoord2f( 1, 0 );
+	glTexCoord2f( 1.0f, 0.0f);
 	glVertex3f(   fSizeX,  m_Height-fSizeY, 0.0f);
-	glTexCoord2f( 1, 1 );
+	glTexCoord2f( 1.0f, 1.0f);
 	glVertex3f(   fSizeX, (float) m_Height, 0.0f);
 	glEnd();
 
@@ -128,13 +128,14 @@ void FrameBufferObject::showTexture(const StaticString& texName, float fSizeX, f
 }
 
 void FrameBufferObject_Depth::SetAsTarget() {
-	Bind();
-	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0, 0, m_Width, m_Height);
+	TSuper::SetAsTarget();
+	//Bind();
+	//glPushAttrib(GL_VIEWPORT_BIT);
+	//glViewport(0, 0, m_Width, m_Height);
 
-	// Clear the render target
-	glClear(GL_DEPTH_BUFFER_BIT);
+	//// Clear the render target
+	//glClear(GL_DEPTH_BUFFER_BIT);
 
-	// Specify that we need no colours
-	glDrawBuffer(GL_NONE);
+	//// Specify that we need no colours
+	//glDrawBuffer(GL_NONE);
 }

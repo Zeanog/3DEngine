@@ -1,6 +1,20 @@
 {
-	"mesh": "Data\\Zombie.fbx",
-	"invertNormals": true,
+	"def": {
+		"mesh": "Data\\Idle.fbx",
+		"skeleton": "mixamorig:",
+		"anims": {
+			"Data\\Idle.fbx": {
+				"mixamo.com": {
+					"Idle": "0:-1"
+				}
+			},
+			"Data\\Drunk Walk.fbx": {
+				"mixamo.com": {
+					"DrunkWalk": "0:-1"
+				}
+			}
+		}
+	},
 	"shaderProgram": {
 		"vert": "data\\deferredShading.vert",
 		"frag": "data\\deferredShading.frag"

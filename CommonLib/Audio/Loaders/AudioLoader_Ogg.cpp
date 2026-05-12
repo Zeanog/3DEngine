@@ -1,8 +1,8 @@
-#include "AudioLoader_OggVorbis.h"
+#include "AudioLoader_Ogg.h"
 #include <vorbis\vorbisfile.h>
 #include <xaudio2.h>
 
-Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
+Bool AudioLoader_Ogg::Load(const Char* fileName) {
     m_AudioDataSize = 0;
     m_AudioData.reset(nullptr);//Clear the pointer;
 
@@ -22,8 +22,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
     m_Format.Format.cbSize = sizeof(m_Format) - sizeof(m_Format.Format);
 
     m_Format.Samples.wValidBitsPerSample = m_Format.Format.wBitsPerSample;
-    //TODO: Handle more channel configurations
-    m_Format.dwChannelMask = (m_Format.Format.nChannels == 1) ? SPEAKER_FRONT_CENTER : (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT);
+	m_Format.dwChannelMask = GetChannelMask(m_Format.Format.nChannels);
     m_Format.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 
     long total_sections = ov_streams(&oggFile);
@@ -48,6 +47,7 @@ Bool AudioLoader_OggVorbis::Load(const Char* fileName) {
         }
         bytes_read_total += bytes_read;
     }
+	assert(bytes_read_total == m_AudioDataSize);
 
     ov_clear(&oggFile);
 

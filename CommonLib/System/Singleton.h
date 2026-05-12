@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Typedefs.h"
-
-template< typename TClass >
+template< class TClass >
 class Singleton {
 public:
-	static TClass*	GetInstance() {
+	static constexpr TClass*	GetInstance() {
 		static TClass instance;
 		return &instance;
 	}

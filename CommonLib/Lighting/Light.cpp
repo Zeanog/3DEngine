@@ -86,13 +86,13 @@ glm::mat4 Light_Directional::Transform() const {
 	return MathUtils::CreateAxisAlong(m_Direction, glm::up<glm::vec3>());
 }
 
-const RenderTarget* Light_Directional::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
+const IRenderTarget* Light_Directional::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
 	verify(program.LinkUniform("vLightDir", m_Direction * glm::inverse(camera.Rotation())));
 	if(!CastsShadows()) {
 		return NULL;
 	}
 
-	return LinkShadowMapTo(program, bounds, camera);
+	return LinkShadowMapTo(3, program, bounds, camera);
 }
 
 glm::mat4 biasMatrix(
@@ -101,14 +101,16 @@ glm::mat4 biasMatrix(
 	0.0, 0.0, 0.5, 0.0,
 	0.5, 0.5, 0.5, 1.0
 );
-const RenderTarget* Light_Directional::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
+const IRenderTarget* Light_Directional::LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
 	glm::mat4 depthViewMatrix = glm::lookAt(bounds.GetCenter() - m_Direction * 10.0f, bounds.GetCenter(), glm::up<glm::vec3>());
 	glm::mat4 mvp = biasMatrix * m_CachedProjectionMatrix * depthViewMatrix;
-	
-	mvp = mvp * glm::inverse(camera.ToMat4x4());
+	glm::mat4 cameraMat;
+
+	camera.ToMat4x4(cameraMat);
+	mvp = mvp * glm::inverse(cameraMat);
 	
 	verify( program.LinkUniform("mDepthMVP", mvp) );
-	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
+	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, location);
 }
 
 void Light_Directional::DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform)
@@ -158,7 +160,7 @@ Light_Point::~Light_Point() {
 	Singleton<PointLightPool>::GetInstance()->Remove( this );
 }
 
-const RenderTarget* Light_Point::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
+const IRenderTarget* Light_Point::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
 	verify(program.LinkUniform("vLightPos", m_Origin * glm::inverse(camera.Rotation())));
 	verify(program.LinkUniform("fConstantAttenuation", m_ConstantAttenuation));
 	verify(program.LinkUniform("fLinearAttenuation", m_LinearAttenuation));
@@ -168,12 +170,12 @@ const RenderTarget* Light_Point::LinkTo(const ShaderProgram_GLSL& program, const
 		return NULL;
 	}
 
-	return LinkShadowMapTo(program, bounds, camera);
+	return LinkShadowMapTo(3, program, bounds, camera);
 }
 
-const RenderTarget* Light_Point::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
+const IRenderTarget* Light_Point::LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
 	//program.LinkUniform("mDepthMVP", MathUtils::CreateAxisAlong());
-	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
+	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, location);
 }
 
 void Light_Spot::PreShadowRender() {
@@ -186,12 +188,19 @@ void Light_Spot::PreShadowRender() {
 	glPushMatrix();
 	glLoadIdentity();
 
-	//glOrtho(-10.0, 10.0, -10.0, 10.0, 1.0f, 25.0);
-	//gluPerspective(MathUtils::Radians2Deg(m_FOV), m_AspectRatio, 1, 25.0);
-	gluPerspective(60.0f, m_AspectRatio, 1, 25.0);
-	//glFrustum(-10, 10, -10, 10, 0.1f, 25.0f);
+	/*m_ProjectionMatrix = glm::perspective(
+		glm::radians(FOV()),
+		m_AspectRatio,
+		0.1f,
+		5.0f
+	);*/
 
-	glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_ProjectionMatrix));
+	////glOrtho(-10.0, 10.0, -10.0, 10.0, 1.0f, 25.0);
+	////gluPerspective(MathUtils::Radians2Deg(m_FOV), m_AspectRatio, 1, 25.0);
+	//gluPerspective(60.0f, m_AspectRatio, 1, 25.0);
+	////glFrustum(-10, 10, -10, 10, 0.1f, 25.0f);
+
+	//glGetFloatv(GL_PROJECTION_MATRIX, glm::value_ptr(m_ProjectionMatrix));
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -220,7 +229,8 @@ void Light_Spot::RenderShadows(const Functor<void>& perLightShadowRenderHandler,
 
 		(*iter)->PreShadowRender();
 
-		glm::mat4 m = (*iter)->AsCameraTransform();
+		//glm::mat4 m = (*iter)->AsCameraTransform();
+		glm::mat4 m = glm::lookAt((*iter)->Position(), (*iter)->Position() + (*iter)->Direction() * (*iter)->Distance(), glm::up<glm::vec3>());
 		glMultMatrixf(glm::value_ptr(m));
 
 		(*iter)->SetShadowMapAsTarget();
@@ -243,43 +253,36 @@ Light_Spot::~Light_Spot() {
 	Singleton<SpotLightPool>::GetInstance()->Remove( this );
 }
 
-const RenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	verify(program.LinkUniform("fConstantAttenuation", m_ConstantAttenuation));
-	verify(program.LinkUniform("fLinearAttenuation", m_LinearAttenuation));
-	verify(program.LinkUniform("fQuadraticAttenuation", m_QuadraticAttenuation));
-	verify(program.LinkUniform("fExponent", m_Exponent));
+const IRenderTarget* Light_Spot::LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
 	verify(program.LinkUniform("fLightCosCutoff", m_CosCutoff));
 
 	glm::vec3 offset(Position() + camera.Position());
 	offset = offset * glm::inverse(camera.Rotation());
 	verify(program.LinkUniform("vLightPos", offset));
-	verify(program.LinkUniform("vLightDirection", Direction() * glm::inverse(camera.Rotation())));
+	verify(program.LinkUniform("vLightDirection", Direction()));
 	verify(program.LinkUniform("vEyePos", -camera.Position()));
 	
 	if (!CastsShadows()) {
 		return NULL;
 	}
 
-	return LinkShadowMapTo(program, bounds, camera);
+	return LinkShadowMapTo(3, program, bounds, camera);
 }
 
-const RenderTarget* Light_Spot::LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
-	glm::mat4 depthViewMatrix =  m_Transform * glm::mat4(glm::inverse(camera.ToMat4x4()));
-	//glm::mat4 depthViewMatrix = glm::lookAt(Position(), Direction() * 30.0f, glm::up<glm::vec3>());
-
-	glm::mat4 mvp = biasMatrix * m_ProjectionMatrix * depthViewMatrix;
-	//mvp = mvp * glm::inverse(camera.ToMat4x4());
+const IRenderTarget* Light_Spot::LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const {
+	glm::mat4 spotView = glm::lookAt(Position(), Position() + Direction(), glm::up<glm::vec3>());
+	glm::mat4 spotProj = glm::perspective(FOV(), AspectRatio(), 0.1f, m_Distance);
+	glm::mat4 mvp = spotProj * spotView;
 
 	verify(program.LinkUniform("mDepthMVP", mvp));
-	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, 3);
+	return m_ShadowFBO->LinkTargetTo("tShadowMap", program, location);
 }
 
-glm::mat4 Light_Spot::AsCameraTransform() const {
+const glm::mat4& Light_Spot::AsCameraTransform() const {
 	return m_Transform;
 }
 
-void Light_Spot::DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform)
-{
+void Light_Spot::DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 

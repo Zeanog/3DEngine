@@ -38,6 +38,21 @@ namespace glm {
 	}
 };
 
+template<typename TValue, typename TIndex>
+constexpr TValue SetBit(TIndex bitIndex) {
+	return (TValue)(1 << bitIndex);
+}
+
+template<typename TValue, typename TIndex>
+constexpr Bool BitIsSet(TValue val, TIndex bitIndex) {
+	return ((val >> bitIndex) & 0x1) != 0;
+}
+
+template<typename TValue>
+constexpr Bool BitsAreSet(TValue val, TValue bits) {
+	return (val & bits) == bits;
+}
+
 class MathUtils {
 public:
 	static Float32		PI;
@@ -49,13 +64,13 @@ public:
 	static glm::mat4x4	CreateAxisAlong( const glm::vec3& eye, const glm::vec3& focalPt, const glm::vec3& up );
 	static glm::mat4x4	CreateAxisAlong( const glm::vec3& forward, const glm::vec3& up );
 	
-	static Float32	Sqrt( Float32 val );
+	static Float32		Sqrt( Float32 val );
 
 	static constexpr Float32	MilliSec2Sec(UInt64 millsec) {
 		return millsec / 1000.0f;
 	}
 
-	static Float32	MilliSec2Sec(UInt32 millsec) {
+	static constexpr Float32	MilliSec2Sec(UInt32 millsec) {
 		return millsec / 1000.0f;
 	}
 
@@ -76,17 +91,17 @@ public:
 	}
 
 	template<typename _TValue>
-	static _TValue	Min(_TValue lhs, _TValue rhs) {
+	static constexpr _TValue	Min(_TValue lhs, _TValue rhs) {
 		return lhs < rhs ? lhs : rhs;
 	}
 
 	template<typename _TValue>
-	static _TValue	Max(_TValue lhs, _TValue rhs) {
+	static constexpr _TValue	Max(_TValue lhs, _TValue rhs) {
 		return lhs > rhs ? lhs : rhs;
 	}
 
 	template<typename _TValue>
-	static _TValue	Abs(_TValue val ) {
+	static constexpr _TValue	Abs(_TValue val ) {
 		return val < 0 ? -val : val;
 	}
 
@@ -98,13 +113,12 @@ public:
 		return val && (val & (val - 1)) == 0;
 	}
 
-	static UInt32		NearestPowerOfTwo(UInt32 val);
-	static Int32		NearestPowerOfTwo(Int32 val);
+	static UInt32	NearestPowerOfTwo(UInt32 val);
 
-	static char		ToChar(int num);
-	static int		ToNumber(char ch);
-	static int		NumDigits(int val, int base);
-	static void		ConvertTo(int base, int inputNum, std::string& outNum);
-	static void		Convert(const char* pNumber, int srcBase, int dstBase, std::string& outConvertedNum);
-	static char*	Convert(const char* pNumber, int srcBase, int dstBase);
+	static char		ToChar(Int32 num);
+	static UInt32	ToNumber(Char ch);
+	static UInt32	NumDigits(Int32 val, Int32 base);
+	static void		ConvertTo(Int32 base, Int32 inputNum, std::string& outNum);
+	static void		Convert(const Char* pNumber, Int32 srcBase, Int32 dstBase, std::string& outConvertedNum);
+	static char*	Convert(const Char* pNumber, Int32 srcBase, Int32 dstBase);
 };

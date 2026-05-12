@@ -79,9 +79,13 @@ public:
 		assert(!glGetError());
 	}
 
-	operator GLhandleARB() {
+	operator GLhandleARB() const {
 		return m_Handle;
 	}
+
+	/*GLhandleARB Handle() const {
+		return m_Handle;
+	}*/
 
 	const List<StaticString>& RequiredChannels() const {
 		return m_RequiredChannels;

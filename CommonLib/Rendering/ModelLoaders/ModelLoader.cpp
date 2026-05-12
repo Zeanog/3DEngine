@@ -3,11 +3,11 @@
 #include "System/File.h"
 #include "Rendering/ModelLoaders/MeshManager.h"
 #include "System/Reflector.h"
-#include "System/JsonLoader.h"
+#include "System/JsonValueParsers.h"
 #include "Shaders/ShaderProgramManager.h"
 
-void	ModelLoader::ParseMesh(const rapidjson::Value& value) {
-	Parse(value, m_MeshFilePath);
+void	ModelLoader::ParseDef(const rapidjson::Value& value) {
+	Singleton<ValueParser<ModelDef>>::GetInstance()->Get(value, m_Def);
 }
 
 void ModelLoader::ParseInvertedNormals(const rapidjson::Value& value) {
@@ -17,8 +17,8 @@ void ModelLoader::ParseInvertedNormals(const rapidjson::Value& value) {
 void ModelLoader::ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL& inoutProgram) {
 	assert(value.IsObject());
 
-	static StaticString s_Vert("vert");
-	static StaticString s_Frag("frag");
+	static const StaticString s_Vert("vert");
+	static const StaticString s_Frag("frag");
 	StaticString vertProgFilePath;
 	StaticString fragProgFilePath;
 
@@ -58,9 +58,9 @@ void ModelLoader::BuildFieldParsers() {
 		return;
 	}
 
-	TFieldParser pm;
-	pm.AddListener(this, &TSelf::ParseMesh);
-	m_FieldParsers.Add("mesh", pm);
+	TFieldParser pd;
+	pd.AddListener(this, &TSelf::ParseDef);
+	m_FieldParsers.Add("def", pd);
 
 	TFieldParser pin;
 	pin.AddListener(this, &TSelf::ParseInvertedNormals);
@@ -97,7 +97,7 @@ Bool	ModelLoader::Load(const Char* fileName) {
 }
 
 void	ModelLoader::Clear() {
-	m_MeshFilePath = "";
+	//m_MeshFilePath = "";
 	m_InvertNormals = false;
 	m_ShaderProgram = nullptr;
 
@@ -105,5 +105,6 @@ void	ModelLoader::Clear() {
 }
 
 Neo::Mesh* ModelLoader::Mesh() const {
-	return Singleton<MeshManager>::GetInstance()->Get(m_MeshFilePath);
+	Neo::Mesh* mesh = Singleton<MeshManager>::GetInstance()->Get(m_Def);
+	return mesh;
 }

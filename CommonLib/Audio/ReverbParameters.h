@@ -1,14 +1,14 @@
 #pragma once
 
 #include "AParameters.h"
-
+#include "System/Singleton.h"
 #include <guiddef.h>
 #include <xaudio2fx.h>
 
 template<>
-class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : public AReflector {
-	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
-	SINGLETON_DECLARATIONS(TSelf) {
+class Reflector<XAUDIO2FX_REVERB_PARAMETERS> : public AReflectorJson {
+	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
+	SINGLETON_DECLARATIONS(Reflector) {
 		REGISTER_MEMBER(TReflected, WetDryMix);
 		REGISTER_MEMBER(TReflected, ReflectionsDelay);
 		REGISTER_MEMBER(TReflected, ReverbDelay);
@@ -41,10 +41,13 @@ public:
 /////////////////////////////////////////////
 
 struct ReverbParameters : public AParameters<XAUDIO2FX_REVERB_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(ReverbParameters, AParameters)
+	INHERITED_CLASS_TYPEDEFS(ReverbParameters, AParameters)
 
 public:
-	static constexpr void	SetToDefault(XAUDIO2FX_REVERB_PARAMETERS& params) {
+	typedef TSuper::TParameters	TParameters;
+
+public:
+	static constexpr void	SetToDefault(TParameters& params) {
 		params.WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
 		params.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
 		params.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
@@ -70,6 +73,28 @@ public:
 		params.DisableLateField = FALSE;  // enable late reverb tail
 	}
 
-	static IUnknown* InstantiateFX();
-	static Bool UpdateParams(class SubmixVoice* category, UInt32 fxIndex, const rapidjson::Value& value);
+	static IUnknown* CreateParams();
+
+	template<typename TVoice>
+	static Bool UpdateParams(TVoice* voice, UInt32 fxIndex, const rapidjson::Value& value) {
+		TParameters params;
+		SetToDefault(params);
+		if (!UpdateFrom(value, params)) {
+			assert(0);
+			return false;
+		}
+
+		//Using decltype so we can change the type of params without having to change the sizeof argument.
+		if (!voice->SetEffectParameters(fxIndex, &params, sizeof(decltype(params)))) {
+			assert(0);
+			return false;
+		}
+
+		if (!voice->EnableEffect(fxIndex)) {
+			assert(0);
+			return false;
+		}
+
+		return true;
+	}
 };

@@ -10,7 +10,7 @@
 #include "System/Color.h"
 #include "Math/Bounds.h"
 
-class AMeshLoader;
+class IMeshLoader;
 class Joint;
 
 namespace Neo {
@@ -163,7 +163,7 @@ namespace Neo {
 		};
 
 		class Material : public AMaterial {
-			INHERITEDCLASS_TYPEDEFS(Material, AMaterial)
+			INHERITED_CLASS_TYPEDEFS(Material, AMaterial)
 
 		public:
 			Float32			Shininess{};//TODO: Dont think this should be here.  Basically a specular channel
@@ -183,22 +183,53 @@ namespace Neo {
 		};
 
 	protected:
-		VertexBuffer	m_VertexBuffer;
-		IndexBuffer		m_IndexBuffer;
+		Neo::VertexBuffer	m_VertexBuffer;
+		Neo::IndexBuffer	m_IndexBuffer;
 
 		List<AMaterial*>	m_Materials;
 
-		Skeleton		m_Skeleton;
+		Neo::Skeleton		m_Skeleton;
 
-		List<StaticString> m_AnimNames;
-		Map<StaticString, AnimationClip*>	m_AnimationClips;
+		List<AnimationClip*>	m_AnimationClips;
 
-		Bounds			m_Bounds;
+		Bounds				m_Bounds;
 
 	public:
+		Neo::VertexBuffer& VertexBuffer() {
+			return m_VertexBuffer;
+		}
+
+		const Neo::VertexBuffer& VertextBuffer() const {
+			return m_VertexBuffer;
+		}
+
+		Neo::IndexBuffer& IndexBuffer() {
+			return m_IndexBuffer;
+		}
+
+		const Neo::IndexBuffer& IndexBuffer() const {
+			return m_IndexBuffer;
+		}
+
+		List<AMaterial*>& Materials() {
+			return m_Materials;
+		}
+
+		const List<AMaterial*>& Materials() const {
+			return m_Materials;
+		}
+
+		List<AnimationClip*>& AnimationClips() {
+			return m_AnimationClips;
+		}
+
+		Neo::Skeleton& Skeleton() {
+			return m_Skeleton;
+		}
+
 		Mesh();
 
-		Mesh(const VertexBuffer& vb, const IndexBuffer& ib);
+		Mesh(const Neo::VertexBuffer& vb, const Neo::IndexBuffer& ib);
 
 		virtual ~Mesh() {
 			for (UInt32 ix = 0; ix < m_Materials.Length(); ++ix) {
@@ -212,16 +243,11 @@ namespace Neo {
 		}
 
 		UInt32 NumClips() const {
-			return m_AnimationClips.Size();
+			return m_AnimationClips.Length();
 		}
 
 		const AnimationClip* GetClip(int index) const {
-			auto& name = m_AnimNames[index];
-			return m_AnimationClips[name];
-		}
-
-		const AnimationClip* GetClip(const StaticString& name) const {
-			return m_AnimationClips[name];
+			return m_AnimationClips[index];
 		}
 
 		void	PreRender(VertexBuffer::VertexAttributes attribs) const;
@@ -236,94 +262,6 @@ namespace Neo {
 		Bool	RenderJoints() const;
 		Bool	RenderJoints(const AnimKeyFrame* pKeyFrame) const;
 
-		Bool	UploadData(const AMeshLoader& loader);
-
-		/*Bool	ReadFrom(const Char* path) {
-			File file;
-
-			if (!file.Open(path, "rb")) {
-				return false;
-			}
-
-			UInt32 fileLength = file.Length();
-			const Char* encodedJson = STACK_ALLOC(Char, fileLength);
-			file.Read(encodedJson, fileLength);
-
-			json_value* root = json_parse(encodedJson, fileLength);
-			Bool validRead = ReadFrom(root);
-			json_value_free(root);
-			root = NULL;
-			return validRead;
-		}
-
-		Bool	ReadFrom(const String& path) {
-			return ReadFrom(path.CStr());
-		}
-
-		Bool	ReadFrom(const StaticString& path) {
-			return ReadFrom(path.CStr());
-		}
-
-		Bool	ReadFrom(json_value* root) {
-			json_value* obj = root;
-
-			if (root->type == json_type::json_string) {
-				File file;
-
-				file.Open(root->u.string.ptr, "rb");
-
-				UInt32 dataLength = file.Length();
-				Char* encodedJson = STACK_ALLOC(Char, dataLength + 1);
-				file.Read(encodedJson, dataLength);
-				file.Close();
-
-				obj = json_parse(encodedJson, dataLength);
-			}
-			
-			if (obj->type != json_type::json_object) {
-				if (obj != root) {
-					json_value_free(obj);
-				}
-				return false;
-			}
-
-			IndexBuffer* ib = NULL;
-			for (int ix = 0; ix < obj->u.object.length; ++ix) {
-				if (!String::StrICmp(obj->u.object.values[ix].name, "vertexBuffer")) {
-					if (!m_VertexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
-						if (obj != root) {
-							json_value_free(obj);
-						}
-						return false;
-					}
-				}
-
-				if (!String::StrICmp(obj->u.object.values[ix].name, "indexBuffer")) {
-					if (!m_IndexBuffer.ReadFrom(obj->u.object.values[ix].value)) {
-						if (obj != root) {
-							json_value_free(obj);
-						}
-						return false;
-					}
-				}
-			}
-
-			if (obj != root) {
-				json_value_free(obj);
-			}
-			return true;
-		}*/
-
-		/*Bool	WriteTo(json_value* root) {
-			if( !m_VertexBuffer.WriteTo(root) ) {
-				return false;
-			}
-
-			if( !m_IndexBuffer.WriteTo(root) ) {
-				return false;
-			}
-
-			return true;
-		}*/
+		Bool	UploadData(const IMeshLoader& loader);
 	};
 };

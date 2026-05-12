@@ -8,10 +8,6 @@ uniform vec3	vLightPos;
 uniform vec3	vLightDirection;
 uniform float	fLightCosCutoff;
 
-uniform float   fConstantAttenuation;
-uniform float   fLinearAttenuation;
-uniform float   fQuadraticAttenuation;
-uniform float   fExponent;
 uniform vec3	vEyePos;
 
 uniform mat4    mDepthMVP;
@@ -40,17 +36,12 @@ void main( void )
 	float intensity = 0.0;
 	if( normal.w > 0 ) {
 		vec3 spotToLight = vLightPos - position.xyz;
-		vec3 spotToLightDir = normalize(spotToLight);
-
-		vec3 lightToSpotDir = -spotToLightDir;
+		vec3 lightToSpotDir = -normalize(spotToLight);
 
 		if( dot(vLightDirection, lightToSpotDir) > fLightCosCutoff ) {
 			intensity = max( dot(normal.xyz, -vLightDirection), 0.0 );
-			if( intensity > 0.0 ) {
-				float distance = length(spotToLight);
-				//intensity *= 1.0 / (fConstantAttenuation + fLinearAttenuation * distance + fQuadraticAttenuation * (distance * distance));
-			}
-			intensity *= readShadowMap(position.xyz);
+			
+			//intensity *= readShadowMap(position.xyz);
 		}
 	} else {
 		intensity = 1.0;

@@ -2,7 +2,6 @@
 varying vec4		position;
 varying vec3		normal;
 uniform sampler2D	tDiffuse;
-//uniform sampler2D	tNormalMap;
 
 void main( void )
 {

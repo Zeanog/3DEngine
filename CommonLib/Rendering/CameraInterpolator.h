@@ -3,7 +3,7 @@
 #include "Rendering/Camera.h"
 
 class CameraInterpolator : public ACameraDecorator {
-	INHERITEDCLASS_TYPEDEFS(CameraInterpolator, ACameraDecorator)
+	INHERITED_CLASS_TYPEDEFS(CameraInterpolator, ACameraDecorator)
 
 protected:
 	TRotation		m_TargetRotation{};
@@ -21,12 +21,15 @@ public:
 	}
 
 	virtual void						Update(Float32 deltaTime) override {
-		m_Decoratee->Position(m_Decoratee->Position() + (m_TargetPosition - m_Decoratee->Position()) * deltaTime * m_TranslationSpeed);
+		if (m_TargetPosition != m_Decoratee->Position()) {
+			m_Decoratee->Position(m_Decoratee->Position() + (m_TargetPosition - m_Decoratee->Position()) * deltaTime * m_TranslationSpeed);
+		}
 
-		TRotation deltaRot = (m_TargetRotation * glm::inverse(m_Decoratee->Rotation()));
-		deltaRot = glm::mix(glm::identity<TRotation>(), deltaRot, deltaTime * m_RotationSpeed);
-
-		m_Decoratee->Rotate(deltaRot);
+		if (m_TargetRotation != m_Decoratee->Rotation()) {
+			TRotation deltaRot = (m_TargetRotation * glm::inverse(m_Decoratee->Rotation()));
+			deltaRot = glm::mix(glm::identity<TRotation>(), deltaRot, deltaTime * m_RotationSpeed);
+			m_Decoratee->Rotate(deltaRot);
+		}
 	}
 
 	virtual void						Position(typename Param<TPosition>::Type pos) override {

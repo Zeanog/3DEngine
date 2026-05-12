@@ -27,6 +27,13 @@ protected:
 	typename TContainer	m_Data;
 
 public:
+	AMap() {}
+	AMap(std::initializer_list<typename TContainer::value_type> initList) {
+		for (const auto& pair : initList) {
+			m_Data.insert(pair);
+		}
+	}
+
 	TIterator	Begin() {
 		return m_Data.begin();
 	}
@@ -112,11 +119,13 @@ public:
 
 template< typename _TKey, typename _TValue >
 class Map : public AMap<_TKey, _TValue> {
-	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue))
+	INHERITED_CLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue))
 
 protected:
 
 public:
+	Map() {}
+	Map(std::initializer_list<typename TSuper::TContainer::value_type> initList) : TSuper(initList) {}
 };
 
 template< typename _TKey, typename _TValue >
@@ -137,7 +146,7 @@ public:
 
 //template< typename _TKey, typename _TValue >
 //class Map<_TKey, _TValue*> : public AMap<_TKey, _TValue*> {
-//	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue*))
+//	INHERITED_CLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, _TValue*))
 //
 //protected:
 //
@@ -149,7 +158,7 @@ public:
 //
 //template< typename _TKey, typename _TValue >
 //class Map<_TKey, const _TValue*> : public AMap<_TKey, const _TValue*> {
-//	INHERITEDCLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, const _TValue*))
+//	INHERITED_CLASS_TYPEDEFS(Map, TEMPLATE_2(AMap, _TKey, const _TValue*))
 //
 //protected:
 //

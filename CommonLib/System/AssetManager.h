@@ -56,22 +56,6 @@ public:
 		return m_Container.end();
 	}
 
-	TIterator	begin() {
-		return m_Container.begin();
-	}
-
-	TIterator	end() {
-		return m_Container.end();
-	}
-
-	TConstIterator	begin() const {
-		return m_Container.Begin();
-	}
-
-	TConstIterator	end() const {
-		return m_Container.End();
-	}
-
 	void	Clear() {
 		m_Container.Clear();
 	}

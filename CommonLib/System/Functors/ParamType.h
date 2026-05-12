@@ -11,18 +11,18 @@ template< typename _TData >
 class Param {
 protected:
 	template< typename _TData, bool _LessThanEqualBusSize >
-	class ParamTypeHelper {
+	class Helper {
 	public:
 		typedef _TData		Type;
 	};
 
 	template< typename _TData >
-	class ParamTypeHelper<_TData, false> {
+	class Helper<_TData, false> {
 	public:
 		typedef const _TData& Type;
 	};
 
 public:
 	typedef _TData TData;
-	typedef typename ParamTypeHelper<TData, sizeof(TData) <= BUS_BYTE_SIZE>::Type	Type;
+	typedef typename Helper<TData, sizeof(TData) <= BUS_BYTE_SIZE && !std::is_class<TData>::value>::Type	Type;
 };

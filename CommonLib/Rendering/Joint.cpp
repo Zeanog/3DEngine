@@ -33,8 +33,8 @@ void Joint::Render( const glm::mat4& transform, float radius, UInt32 meshPrecisi
 
 Joint* Neo::Skeleton::FindJoint(const StaticString& name) {
 	FOREACH(joint, m_Joints) {
-		if ((*joint)->Name() == name) {
-			return (*joint);
+		if (joint->Name() == name) {
+			return &(*joint);
 		}
 	}
 
@@ -43,28 +43,12 @@ Joint* Neo::Skeleton::FindJoint(const StaticString& name) {
 
 const Joint* Neo::Skeleton::FindJoint(const StaticString& name) const {
 	FOREACH_CONST(joint, m_Joints) {
-		if ((*joint)->Name() == name) {
-			return (*joint);
+		if (joint->Name() == name) {
+			return &(*joint);
 		}
 	}
 
 	return NULL;
-}
-
-Bool Neo::Skeleton::UploadData(const AMeshLoader& loader) {
-	const List<AMeshLoader::JointInfo>& joints = loader.Joints();
-	const AMeshLoader::JointInfo*	jointInfo;
-	Joint* joint = NULL;
-	Joint* parentJoint = NULL;
-
-	for (UInt32 ix = 0; ix < joints.Length(); ++ix) {
-		jointInfo = &(joints[ix]);
-		joint = new Joint();
-		joint->Name( jointInfo->Name );
-		joint->Parent( jointInfo->ParentIndex );
-		m_Joints.Add(joint);
-	}
-	return true;
 }
 
 const glm::mat4& AnimKeyFrame::GetLocalTransform(int index) const {

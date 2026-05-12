@@ -5,14 +5,12 @@
 
 template<typename TVoiceInterface>
 class ASourceVoice : public AVoice {
-	INHERITEDCLASS_TYPEDEFS(ASourceVoice, AVoice)
+	ABSTRACT_INHERITED_CLASS_TYPEDEFS(ASourceVoice, AVoice) {}
 
 	DEFINE_MEMBER_EX(UInt64, FormatHash)
 
 protected:
 	TVoiceInterface* m_Voice{};
-
-	ASourceVoice() {} //Hide constructor to make it like an abstract class
 
 public:
 	virtual void Destroy() override {
@@ -41,8 +39,7 @@ public:
 	}
 
 	virtual Bool Volume(Float32 newVolume) const {
-		assert(m_Voice);
-		return SUCCEEDED(m_Voice->SetVolume(newVolume, XAUDIO2_COMMIT_NOW));
+		return Volume(newVolume, XAUDIO2_COMMIT_NOW);
 	}
 
 	virtual Bool			Volume(Float32 newVolume, UInt32 operationSet) const {
@@ -52,19 +49,18 @@ public:
 
 	virtual Bool SetOutputVoices(const XAUDIO2_VOICE_SENDS* destVoices) {
 		assert(m_Voice);
+		assert(destVoices);
 		return SUCCEEDED(m_Voice->SetOutputVoices(destVoices));
 	}
 
 	template <typename... Voices>
 	Bool SetOutputTo(Voices... destVoices) {
 		static constexpr UINT32 NumDescriptors = sizeof...(Voices);
-		auto descriptors = STACK_ALLOC(XAUDIO2_SEND_DESCRIPTOR, NumDescriptors);//Needed if we pass in no voices
+		XAUDIO2_SEND_DESCRIPTOR descriptors[max(1, NumDescriptors)];//Needed if we pass in no voices
 		XAUDIO2_VOICE_SENDS sends{ NumDescriptors, descriptors };
 
 		std::size_t i = 0;
-		std::initializer_list<int>{
-			(descriptors[i++] = { 0, destVoices->Voice() }, 0)...
-		};
+		((descriptors[i++] = XAUDIO2_SEND_DESCRIPTOR{ 0, destVoices->Voice() }), ...);
 
 		return SetOutputVoices(&sends);
 	}

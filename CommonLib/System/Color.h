@@ -9,13 +9,17 @@ public:
 	static const UInt32	NumComponents = 4;
 
 protected:
-	TData	m_Components[NumComponents];
+	TData	m_Components[NumComponents]{};
 
 public:
 	AColor() {
 	}
 
 	AColor( const AColor& color ) {
+		assert(NumComponents == color.NumComponents);
+		for ( UInt32 i = 0; i < NumComponents; ++i ) {
+			m_Components[i] = color.m_Components[i];
+		}
 	}
 
 	AColor( TData red, TData green, TData blue, TData alpha ) {
@@ -98,7 +102,7 @@ class Color;
 
 template<>
 class Color<Byte> : public AColor<Byte> {
-	INHERITEDCLASS_TYPEDEFS( Color, AColor<Byte> )
+	INHERITED_CLASS_TYPEDEFS( Color, AColor<Byte> )
 
 public:
 	static TSelf	White;
@@ -123,7 +127,7 @@ public:
 
 template<>
 class Color<Float32> : public AColor<Float32> {
-	INHERITEDCLASS_TYPEDEFS( Color, AColor<Float32> )
+	INHERITED_CLASS_TYPEDEFS( Color, AColor<Float32> )
 
 public:
 	static TSelf	White;

@@ -143,7 +143,7 @@ public:
 
 template< typename _TData >
 class LinkedList : public ALinkedList<_TData> {
-	INHERITEDCLASS_TYPEDEFS(LinkedList, ALinkedList<_TData>);
+	INHERITED_CLASS_TYPEDEFS(LinkedList, ALinkedList<_TData>);
 
 public:
 public:

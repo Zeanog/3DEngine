@@ -4,6 +4,7 @@
 #include "Math/Vector.h"
 #include "System/List.h"
 #include "glm/glm.hpp"
+#include "Rendering/VertexBufferObject.h"
 
 class ShaderProgram_GLSL;
 
@@ -62,6 +63,8 @@ namespace Neo {
 
 			return *this;
 		}
+
+		Bounds& operator+=(const VertexArrayObject<glm::vec3>& vao);
 
 		Bounds& operator+=(const Vector<3>& pt) {
 			for (int ix = 0; ix < 3; ++ix) {

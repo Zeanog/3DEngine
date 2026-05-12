@@ -311,7 +311,7 @@ public:
 
 	virtual void Set(const rapidjson::Value& src, Byte* dest, UInt64 size) const override {
 		assert(dest);
-		//assert(sizeof(TValue) == size);
+		assert(src.Size() == size);
 		//TODO: Possibly use size to validate
 		TValue& val = *(TValue*)dest;
 		Get(src, val);
@@ -331,7 +331,7 @@ public:
 
 public:
 	virtual void Get(const rapidjson::Value& value, TValue& outValue) const override {
-		auto parser = Singleton<ValueParser<_TMapValue>>::GetInstance();
+		auto parser = Singleton<ValueParser<TMapValue>>::GetInstance();
 
 		FOREACH_MEMBER(iter, value) {
 			TMapValue elem{};
@@ -341,11 +341,10 @@ public:
 	}
 
 	virtual void Set(const TValue& value, rapidjson::Value& outValue) const override {
-		auto parser = Singleton<ValueParser<_TMapValue>>::GetInstance();
+		auto parser = Singleton<ValueParser<TMapValue>>::GetInstance();
 		outValue.SetObject();
 		FOREACH_CONST(iter, value) {
-			rapidjson::Value mapKey;
-			mapKey.SetString(iter->first.CStr(), iter->first.Length());
+			rapidjson::Value mapKey(iter->first.CStr(), iter->first.Length());
 			rapidjson::Value mapValue;
 			parser->Set(iter->second, mapValue);
 			outValue.AddMember(mapKey, mapValue, rapidjson::Document().GetAllocator());

@@ -8,7 +8,7 @@ class AAudioLoader;
 
 class SoundManager {
 	CLASS_TYPEDEFS(SoundManager)
-	SINGLETON_DECLARATIONS(TSelf);
+	SINGLETON_DECLARATIONS(SoundManager);
 
 public:
 	typedef AssetManager<Sound>	TContainer;

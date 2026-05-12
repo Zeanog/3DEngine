@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #if _WIN32
-const Char*	GetErrorMessage(UInt32 errorCode) {
+const Char*	GetErrorMessage(DWORD errorCode) {
 	static const int numBuffers = 5;
 	static const int bufferSize = 256;
 	static Char	buffers[numBuffers][bufferSize];
@@ -13,12 +13,16 @@ const Char*	GetErrorMessage(UInt32 errorCode) {
 	currentBufferIndex = (currentBufferIndex + 1) % numBuffers;
 	Char* buffer = buffers[currentBufferIndex];
 
-	size_t size = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	size_t size = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)buffer, bufferSize, NULL);
 	if (size <= 0) {
 		snprintf(buffer, bufferSize, "Unknown error code: %u", GetLastError());
 	}
 
 	return buffer;
+}
+
+const Char* GetErrorMessage(HRESULT result) {
+	return GetErrorMessage((DWORD)result);
 }
 #endif

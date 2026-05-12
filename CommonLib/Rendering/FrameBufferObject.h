@@ -12,13 +12,22 @@
 
 class ShaderProgram_GLSL;
 
-class RenderTarget {
-	CLASS_TYPEDEFS(RenderTarget);
-
-public:
+class IRenderTarget {
+	CLASS_TYPEDEFS(IRenderTarget)
 
 protected:
 	GLuint			m_hTarget; // The diffuse render target
+
+public:
+	virtual void			Bind() const = 0;
+	virtual void			Unbind() const = 0;
+	virtual void			LinkTo(GLenum textureUnitIndex) const = 0;
+	virtual void			Unlink() const = 0;
+	virtual Bool			IsLinked() const = 0;
+};
+
+class RenderTarget : public IRenderTarget {
+	INHERITED_CLASS_TYPEDEFS(RenderTarget, IRenderTarget)
 
 public:
 	RenderTarget() {
@@ -51,8 +60,7 @@ public:
 			}
 		}
 
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_hTarget);
-		assert(!glGetError());
+		Bind();
 
 		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, storageType, width, height);
 		assert(!glGetError());
@@ -60,60 +68,52 @@ public:
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, attachmentId, GL_RENDERBUFFER_EXT, m_hTarget);
 		assert(!glGetError());
 
+		Unbind();
+
 		return true;
 	}
 
-	virtual void			Bind() const {
+	virtual void			Bind() const override {
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_hTarget);
+		assert(!glGetError());
 	}
 
-	virtual void			Unbind() const {
+	virtual void			Unbind() const override {
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+		assert(!glGetError());
 	}
 
-	virtual void			LinkTo(GLenum textureUnitIndex) const {
+	virtual void			LinkTo(GLenum textureUnitIndex) const override {
 	}
 
-	virtual void			Unlink() const {
+	virtual void			Unlink() const override {
 	}
 
-	virtual Bool			IsLinked() const {
+	virtual Bool			IsLinked() const override {
 		return false;
 	}
 };
 
-class RenderTexture : public RenderTarget {
-	INHERITEDCLASS_TYPEDEFS(RenderTexture, RenderTarget);
+class RenderTexture : public IRenderTarget {
+	INHERITED_CLASS_TYPEDEFS(RenderTexture, IRenderTarget)
 
 protected:
-	UInt32			m_hTexture; // The OpenGL texture for the diffuse render target
 	mutable GLenum	m_LinkedTextureUnit;
 
 public:
 	RenderTexture() {
-		m_hTexture = 0;
 		m_LinkedTextureUnit = -1;
 	}
 
 	virtual ~RenderTexture() {
-		if (m_hTexture) {
-			glDeleteTextures(1, &m_hTexture);
-			m_hTexture = 0;
+		if (m_hTarget) {
+			glDeleteTextures(1, &m_hTarget);
+			m_hTarget = 0;
 		}
-	}
-
-	UInt32		hTexture() const {
-		return m_hTexture;
-	}
-
-	void		hTexture(UInt32 h) {
-		m_hTexture = h;
 	}
 
 	virtual Bool			Create(int width, int height, GLuint attachmentId, GLuint storageType, GLenum format, GLenum type) {
-		if (!TSuper::Create(width, height, attachmentId, storageType)) {
-			return false;
-		}
-
-		glGenTextures(1, &m_hTexture);
+		glGenTextures(1, &m_hTarget);
 		assert(!glGetError());
 
 		Bind();
@@ -126,7 +126,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentId, GL_TEXTURE_2D, m_hTexture, 0);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentId, GL_TEXTURE_2D, m_hTarget, 0);
 		assert(!glGetError());
 
 		Unbind();
@@ -135,7 +135,7 @@ public:
 	}
 
 	virtual void			Bind() const override {
-		glBindTexture(GL_TEXTURE_2D, m_hTexture);
+		glBindTexture(GL_TEXTURE_2D, m_hTarget);
 		assert(!glGetError());
 	}
 
@@ -144,28 +144,20 @@ public:
 		assert(!glGetError());
 	}
 
-	virtual void			LinkTo(GLenum textureUnitIndex) const;
-	virtual void			Unlink() const;
-	virtual Bool			IsLinked() const {
+	virtual void			LinkTo(GLenum textureUnitIndex) const override;
+	virtual void			Unlink() const override;
+	virtual Bool			IsLinked() const override {
 		return m_LinkedTextureUnit >= 0;
 	}
-
-protected:
-	using TSuper::Create;
 };
 
-/**
-*	A Frame Buffer Object is used by OpenGL to render into a texture. Specifically this implementation assumes that the
-*	rendered model will provide diffuse, position and normal at the same time in a MRT fashion
-*/
-class FrameBufferObject
-{
-	CLASS_TYPEDEFS(FrameBufferObject);
+class FrameBufferObject {
+	CLASS_TYPEDEFS(FrameBufferObject)
 
 public:
 	// Ctors/Dtors
 	FrameBufferObject(int width, int height);
-	~FrameBufferObject();
+	virtual ~FrameBufferObject();
 
 	// Methods
 	virtual void	SetAsTarget();
@@ -180,18 +172,18 @@ public:
 		return m_Height;
 	}
 
-	RenderTarget*	operator[](const StaticString& key) {
+	IRenderTarget*	operator[](const StaticString& key) {
 		GLuint attachmentId = m_KeyToAttachmentMap[key];
 		return m_AttachmentTargetMap[attachmentId];
 	}
 
-	const RenderTarget*	operator[](const StaticString& key) const {
+	const IRenderTarget*	operator[](const StaticString& key) const {
 		GLuint attachmentId = m_KeyToAttachmentMap[key];
 		return m_AttachmentTargetMap[attachmentId];
 	}
 
 	Bool		BindTexture(const StaticString& key) const {
-		const RenderTarget* rt = (*this)[key];
+		const IRenderTarget* rt = (*this)[key];
 		if (!rt) {
 			return false;
 		}
@@ -200,7 +192,7 @@ public:
 	}
 
 	Bool		UnbindTexture(const StaticString& key) const {
-		const RenderTarget* rt = (*this)[key];
+		const IRenderTarget* rt = (*this)[key];
 		if (!rt) {
 			return false;
 		}
@@ -208,7 +200,7 @@ public:
 		return true;
 	}
 
-	void		AddTarget(const StaticString& key, GLuint attachmentId, GLuint storageType, GLenum format, GLenum type) {
+	Bool		AddTarget(const StaticString& key, GLuint attachmentId, GLuint storageType, GLenum format, GLenum type) {
 		RenderTexture* rt = new RenderTexture();
 		rt->Create(m_Width, m_Height, attachmentId, storageType, format, type);
 
@@ -217,11 +209,10 @@ public:
 		m_AttachmentTargetMap.Add(attachmentId, rt);
 
 		GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
-			throw new std::exception("Can't initialize an FBO render texture. FBO initialization failed.");
+		return status == GL_FRAMEBUFFER_COMPLETE_EXT;
 	}
 
-	void		AddTarget(const StaticString& key, GLuint attachmentId, GLuint storageType) {
+	Bool		AddTarget(const StaticString& key, GLuint attachmentId, GLuint storageType) {
 		RenderTarget* rt = new RenderTarget();
 		rt->Create(m_Width, m_Height, attachmentId, storageType);
 
@@ -229,11 +220,10 @@ public:
 		m_AttachmentTargetMap.Add(attachmentId, rt);
 
 		GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
-			throw new std::exception("Can't initialize an FBO render texture. FBO initialization failed.");
+		return status == GL_FRAMEBUFFER_COMPLETE_EXT;
 	}
 
-	const RenderTarget*			LinkTargetTo(const StaticString& key, const ShaderProgram_GLSL& program, GLenum textureUnitIndex) const;
+	const IRenderTarget*			LinkTargetTo(const StaticString& key, const ShaderProgram_GLSL& program, GLenum textureUnitIndex) const;
 
 	void		Bind() const {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_hFBO);
@@ -246,7 +236,7 @@ public:
 protected:
 	Map<StaticString, GLuint>		m_KeyToAttachmentMap;
 	List<GLuint>					m_TextureAttachments;
-	Map<GLuint, RenderTarget*>		m_AttachmentTargetMap;
+	Map<GLuint, IRenderTarget*>		m_AttachmentTargetMap;
 
 	// Variables
 	GLuint			m_hFBO;
@@ -256,7 +246,7 @@ protected:
 };
 
 class FrameBufferObject_Depth : public FrameBufferObject {
-	INHERITEDCLASS_TYPEDEFS(FrameBufferObject_Depth, FrameBufferObject);
+	INHERITED_CLASS_TYPEDEFS(FrameBufferObject_Depth, FrameBufferObject)
 
 public:
 	FrameBufferObject_Depth(int width, int height) : TSuper(width, height) {}

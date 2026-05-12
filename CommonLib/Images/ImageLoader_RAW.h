@@ -6,7 +6,7 @@
 #include <vector>
 
 class ImageLoader_RAW : public ImageLoader {
-	INHERITEDCLASS_TYPEDEFS( ImageLoader_RAW, ImageLoader );
+	INHERITED_CLASS_TYPEDEFS( ImageLoader_RAW, ImageLoader );
 
 public:
 	typedef std::vector<Byte>	TContainer;

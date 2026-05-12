@@ -4,13 +4,15 @@
 #include "Rendering/Mesh.h"
 #include "Rendering/ModelLoaders/MeshLoader_FBX.h"
 #include "System/Singleton.h"
+#include "ModelLoader.h"
 
 class MeshManager {
+	CLASS_TYPEDEFS(MeshManager)
 	SINGLETON_DECLARATIONS(MeshManager);
 
 public:
 	typedef AssetManager<Neo::Mesh>	TContainer;
-	typedef Map<StaticString, AMeshLoader*>	THandlerContainer;
+	typedef Map<StaticString, IMeshLoader*>	THandlerContainer;
 
 protected:
 	TContainer			m_Assets;
@@ -24,32 +26,20 @@ public:
 		m_Assets.Shutdown();
 	}
 
-	Neo::Mesh*	Get(const Char* path) {
-		return Get(StaticString(path));
-	}
-
-	Neo::Mesh*	Get(const String& path) {
-		return Get(path.CStr());
-	}
-
-	Neo::Mesh*	Get(const StaticString& path);
+	Neo::Mesh*	Get(const ModelDef& def);
 
 	void	ReloadAll();
 
 protected:
-	Bool	LoadModel(const StaticString& fp, Neo::Mesh* asset) {
+	Bool	LoadMesh(const ModelDef& def, Neo::Mesh* asset) {
 		assert(asset);
 
-		AMeshLoader* loader{};
-		if(!m_Loaders.Find(FilePath::GetExtension(fp), loader)) {
+		IMeshLoader* loader{};
+		if(!m_Loaders.Find(FilePath::GetExtension(def.Mesh), loader)) {
 			return false;
 		}
 
-		if (!loader->Load(fp)) {
-			return false;
-		}
-
-		if( !asset->UploadData(*loader) ) {
+		if (!loader->Load(def, *asset)) {
 			return false;
 		}
 

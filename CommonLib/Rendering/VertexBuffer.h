@@ -2,133 +2,129 @@
 
 #include "System/Typedefs.h" 
 #include "Math/Vector.h"
+#include "Math/glm/vec3.hpp"
+#include "Math/glm/vec2.hpp"
 #include "System/List.h"
+#include "System/Map.h"
 #include "System/StackString.h"
+#include "Math/MathUtils.h"
+#include "Rendering/VertexBufferObject.h"
 
-#include "System/File.h"
+#define DEFINE_LIST_INTERFACES(name, list)	\
+void				Add##name( const decltype(list)::TData& n ) {		\
+	list.Add(n);										\
+}														\
+decltype(list)::TData& name(UInt32 index) {								\
+	return list[index];									\
+}														\
+const decltype(list)::TData& name(UInt32 index) const {					\
+	return list[index];									\
+}														\
+const decltype(list)& name##s() const {					\
+	return list;										\
+}
 
-class VertexBuffer {
-	CLASS_TYPEDEFS( VertexBuffer )
+#define DEFINE_MAP_INTERFACES(name, map)		\
+void				Add##name( decltype(map)::TKey key, const decltype(map)::TValue& n ) {		\
+	map.Add(key, n);									\
+}														\
+decltype(map)::TValue& name(decltype(map)::TKey key) {	\
+	return map[key];									\
+}														\
+const decltype(map)::TValue& name(decltype(map)::TKey key) const {					\
+	return map[key];									\
+}														\
+const decltype(map)& name##s() const {					\
+	return map;											\
+}														\
+decltype(map)& name##s() {								\
+	return map;											\
+}
 
-public:
-	typedef Vector<3>	TPosition;
-	typedef Vector<2>	TTextureCoordinate;
-	typedef Vector<3>	TNormal;
-	
-	enum VertexAttributes : UInt32 {
-		PositionAttrib = 1 << 0,
-		NormalAttrib = 1 << 1,
-		TexCoordsAttrib = 1 << 2,
-		NumAttributes = 3
-	};
+namespace fbxsdk {
+	class FbxStringList;
+}
 
-protected:
-	UInt32						m_Handle = 0;
+namespace Neo {
+	class VertexBuffer {
+		CLASS_TYPEDEFS(VertexBuffer)
 
-	List<TPosition>				m_Positions;
-	List<TNormal>				m_Normals;
-	List<TNormal>				m_Tangents;
-	List<TNormal>				m_Bitangent;
-	List<TTextureCoordinate>	m_TextureCoordinates;
+	public:
+		typedef glm::vec3	TPosition;
+		typedef glm::vec2	TTextureCoordinate;
+		typedef glm::vec3	TNormal;
 
-public:
-	VertexBuffer();
+		enum VertexAttributes : UInt32 {
+			PositionAttrib = SetBit<UInt32>(0U),
+			NormalAttrib = SetBit<UInt32>(1U),
+			TangentAttrib = SetBit<UInt32>(2U),
+			BiTangentAttrib = SetBit<UInt32>(3U),
+			TexCoordsAttrib0 = SetBit<UInt32>(4U),
+			TexCoordsAttrib1 = SetBit<UInt32>(5U),
+			TexCoordsAttrib2 = SetBit<UInt32>(6U),
+		};
 
-	Bool	Bind(VertexAttributes attribs) const;
-	void	Unbind() const;
+	protected:
+		UInt32							m_Handle{};
 
-	UInt32			NumVerts() const {
-		return m_Positions.Length();
-	}
+		VertexArrayObject<TPosition>	m_Positions;
+		Map<StaticString, VertexArrayObject<TTextureCoordinate>>	m_TextureCoordinates;
+		VertexArrayObject<TNormal>		m_Normals;
+		VertexArrayObject<TNormal>		m_Tangents;
+		VertexArrayObject<TNormal>		m_BiTangents;
 
-	void			AddPosition( const TPosition& pos ) {
-		m_Positions.Add( pos );
-	}
+	public:
+		VertexBuffer();
 
-	TPosition&		Position( UInt32 index ) {
-		return m_Positions[index];
-	}
+		Bool	Bind(VertexAttributes attribs) const;
+		void	Unbind() const;
 
-	const List<TPosition>&	Positions() const {
-		return m_Positions;
-	}
-
-	const TPosition&		Position( UInt32 index ) const {
-		return m_Positions[index];
-	}
-
-	void			AddTextureCoordinate( const TTextureCoordinate& tc ) {
-		m_TextureCoordinates.Add( tc );
-	}
-
-	TTextureCoordinate&		TextureCoordinate( UInt32 index ) {
-		return m_TextureCoordinates[index];
-	}
-
-	const TTextureCoordinate&		TextureCoordinate( UInt32 index ) const {
-		return m_TextureCoordinates[index];
-	}
-
-	void			AddNormal( const TNormal& n ) {
-		m_Normals.Add( n );
-	}
-
-	TNormal&		Normal( UInt32 index ) {
-		return m_Normals[index];
-	}
-
-	const TNormal&		Normal( UInt32 index ) const {
-		return m_Normals[index];
-	}
-
-	TSelf&	operator=( const TSelf& rhs ) {
-		m_Positions = rhs.m_Positions;
-		m_Normals = rhs.m_Normals;
-		m_TextureCoordinates = rhs.m_TextureCoordinates;
-		return *this;
-	}
-
-	void	Clear() {
-		m_Positions.Clear();
-		m_Normals.Clear();
-		m_TextureCoordinates.Clear();
-	}
-
-	void	Resize(UInt32 size) {
-		m_Positions.Resize(size);
-		m_Normals.Resize(size);
-		m_TextureCoordinates.Resize(size);
-	}
-
-	TSelf&	operator+=(const TSelf& rhs) {
-		m_Positions += rhs.m_Positions;
-		m_Normals += rhs.m_Normals;
-		m_TextureCoordinates += rhs.m_TextureCoordinates;
-		return *this;
-	}
-
-	/*virtual Bool	ReadFrom(json_value* root) {
-		if (root->type != json_type::json_object) {
-			return false;
+		UInt32			NumVerts() const {
+			return m_Positions.Length();
 		}
 
-		for (UInt32 ix = 0; ix < root->u.object.length; ++ix) {
-			if(!String::StrICmp(root->u.object.values[ix].name, "positions")) {
-				JsonSerializer<decltype(m_Positions)>::ReadFrom(root->u.object.values[ix].value, m_Positions);
-			} else if (!String::StrICmp(root->u.object.values[ix].name, "normals")) {
-				JsonSerializer<decltype(m_Normals)>::ReadFrom(root->u.object.values[ix].value, m_Normals);
-			} else if (!String::StrICmp(root->u.object.values[ix].name, "texCoords")) {
-				JsonSerializer<decltype(m_TextureCoordinates)>::ReadFrom(root->u.object.values[ix].value, m_TextureCoordinates);
+		DEFINE_LIST_INTERFACES(Position, m_Positions)
+		DEFINE_LIST_INTERFACES(Normal, m_Normals)
+		DEFINE_LIST_INTERFACES(Tangent, m_Tangents)
+		DEFINE_LIST_INTERFACES(BiTangent, m_BiTangents)
+		DEFINE_MAP_INTERFACES(TextureCoordinate, m_TextureCoordinates)
+
+		TSelf& operator=(const TSelf& rhs) {
+			m_Positions = rhs.m_Positions;
+			m_Normals = rhs.m_Normals;
+			m_Tangents = rhs.m_Tangents;
+			m_BiTangents = rhs.m_BiTangents;
+			m_TextureCoordinates = rhs.m_TextureCoordinates;
+			return *this;
+		}
+
+		void	Clear() {
+			m_Positions.Clear();
+			m_Normals.Clear();
+			m_Tangents.Clear();
+			m_BiTangents.Clear();
+			m_TextureCoordinates.Clear();
+		}
+
+		void	Resize(UInt32 size) {
+			m_Positions.Resize(size);
+			m_Normals.Resize(size);
+			//m_Tangents.Resize(size);
+			//m_BiTangents.Resize(size);
+			FOREACH(iter, m_TextureCoordinates) {
+				iter->second.Resize(size);
 			}
 		}
 
-		return true;
-	}*/
+		void	Resize(Int32 size, const fbxsdk::FbxStringList& texCoordGroups);
 
-	/*virtual Bool	WriteTo( File& file ) const {
-		UInt32 size = m_Positions.Length();
-		file.Write( size );
-
-		return file.Write( &m_Positions[0], m_Positions.Length() );
-	}*/
-};
+		TSelf& operator+=(const TSelf& rhs) {
+			m_Positions += rhs.m_Positions;
+			m_Normals += rhs.m_Normals;
+			m_Tangents += rhs.m_Tangents;
+			m_BiTangents += rhs.m_BiTangents;
+			m_TextureCoordinates += rhs.m_TextureCoordinates;
+			return *this;
+		}
+	};
+}
