@@ -21,6 +21,7 @@ class AudioSystem {
 		SINGLETON_DECLARATIONS(AudioSystem) {
 	}
 
+	//TODO: Possibly have a cap on number of source voices per format
 	typedef LinkedList<SourceVoice*>	TVoiceList;
 	typedef Map<UInt64, TVoiceList>		TFormatToVoiceListMap;
 
@@ -45,7 +46,7 @@ protected:
 	static std::mutex						m_Mutex;
 
 protected:
-	MasteringVoice* CreateMasteringVoice();
+	MasteringVoice*		CreateMasteringVoice();
 
 	Bool				FindOpenSourceVoice(const WAVEFORMATEX& format, SourceVoice*& outVoice) const;
 	Bool				FindOpenSourceVoice(UInt64 formatHash, SourceVoice*& outVoice) const;
@@ -104,14 +105,14 @@ public:
 
 	template<typename TParameters>
 	Bool	GetEffectParameters(const StaticString& categoryName, UInt32 index, TParameters& params) {
-		return GetEffectParameters(GetCategory(categoryName), index, params);
+		return GetEffectParameters(GetCategoryVoice(categoryName), index, params);
 	}
 
-	template<typename TParameters>
-	Bool	GetEffectParameters(SubmixVoice* category, UInt32 index, TParameters& outParams) {
+	template<typename TVoice, typename TParameters>
+	Bool	GetEffectParameters(TVoice* voice, UInt32 index, TParameters& outParams) {
 		UInt32 outSize{};
-		assert(category);
-		auto result = category->GetEffectParameters(index, &outParams, outSize);
+		assert(voice);
+		auto result = voice->GetEffectParameters(index, &outParams, outSize);
 		assert(outParams.SizeOf() == outSize);
 		return result;
 	}
@@ -121,6 +122,6 @@ public:
 
 	void	ReloadAssets();
 
-	UInt32	LoadEffects(const StaticString& path, const StaticString& categoryName);
-	UInt32	LoadEffects(const StaticString& path, SubmixVoice* category);
+	UInt32	LoadEffectsChain(const StaticString& path, const StaticString& categoryName);
+	UInt32	LoadEffectsChain(const StaticString& path, SubmixVoice* category);
 };

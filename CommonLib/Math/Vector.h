@@ -131,7 +131,7 @@ class Vector;
 
 template<>
 class Vector<2> : public AVector< 2, Vector<2> > {
-	INHERITEDCLASS_TYPEDEFS( Vector, AVector );
+	INHERITED_CLASS_TYPEDEFS( Vector, AVector );
 
 public:
 
@@ -156,7 +156,7 @@ public:
 
 template<>
 class Vector<3> : public AVector< 3, Vector<3> > {
-	INHERITEDCLASS_TYPEDEFS( Vector, AVector );
+	INHERITED_CLASS_TYPEDEFS( Vector, AVector );
 
 public:
 
@@ -207,7 +207,7 @@ inline Vector<3> operator-(const Vector<3> &lhs, const Vector<3> &rhs)
 
 template<>
 class Vector<4> : public AVector< 4, Vector<4> > {
-	INHERITEDCLASS_TYPEDEFS( Vector, AVector );
+	INHERITED_CLASS_TYPEDEFS( Vector, AVector );
 
 public:
 

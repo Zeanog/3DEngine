@@ -20,7 +20,7 @@ public:
 	virtual Bool	ReadFrom( const StaticString& path ) = 0;
 	virtual Bool	ReadFrom(const StaticString& path, const Char* header ) = 0;
 
-	operator GLhandleARB() {
+	operator GLhandleARB() const {
 		return m_Handle;
 	}
 
@@ -37,7 +37,7 @@ protected:
 };
 
 class Shader_Vertex_GLSL : public Shader_GLSL {
-	INHERITEDCLASS_TYPEDEFS(Shader_Vertex_GLSL, Shader_GLSL)
+	INHERITED_CLASS_TYPEDEFS(Shader_Vertex_GLSL, Shader_GLSL)
 
 public:
 
@@ -52,7 +52,7 @@ public:
 };
 
 class Shader_Fragment_GLSL : public Shader_GLSL {
-	INHERITEDCLASS_TYPEDEFS(Shader_Fragment_GLSL, Shader_GLSL)
+	INHERITED_CLASS_TYPEDEFS(Shader_Fragment_GLSL, Shader_GLSL)
 
 public:
 

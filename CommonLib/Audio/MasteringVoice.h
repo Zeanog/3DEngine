@@ -4,7 +4,7 @@
 #include <xaudio2.h>
 
 class MasteringVoice : public AVoice {
-	INHERITEDCLASS_TYPEDEFS(MasteringVoice, AVoice)
+	INHERITED_CLASS_TYPEDEFS(MasteringVoice, AVoice)
 
 	friend class AudioSystem;
 

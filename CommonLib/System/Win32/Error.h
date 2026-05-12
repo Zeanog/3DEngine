@@ -1,5 +1,9 @@
 #pragma once
 
-#include "../../System/Typedefs.h"
+#include "System/Typedefs.h"
 
-const Char*	GetErrorMessage(UInt32 errorCode);
+#if _WIN32
+#include <Windows.h>
+const Char*	GetErrorMessage(DWORD errorCode);
+const Char* GetErrorMessage(HRESULT errorCode);
+#endif

@@ -6,7 +6,7 @@
 
 template< typename _TReturn, class _TList = TNull >
 class AFunctor : public IFunctorImpl<_TReturn, _TList> {
-	INHERITEDCLASS_TYPEDEFS(AFunctor, TEMPLATE_2(IFunctorImpl, _TReturn, _TList))
+	INHERITED_CLASS_TYPEDEFS(AFunctor, TEMPLATE_2(IFunctorImpl, _TReturn, _TList))
 
 public:
 	typedef IFunctorImpl<_TReturn, _TList>		TImpl;
@@ -90,7 +90,7 @@ class Functor;
 
 template< typename _TReturn >
 class Functor<_TReturn, TNull> : public AFunctor<_TReturn, TNull> {
-	INHERITEDCLASS_TYPEDEFS( Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TNull))
+	INHERITED_CLASS_TYPEDEFS( Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TNull))
 
 public:
 	enum TSame : bool {
@@ -140,7 +140,7 @@ public:
 
 template< typename _TReturn, typename _TParam1 >
 class Functor<_TReturn, TYPELIST_1(_TParam1)> : public AFunctor<_TReturn, TYPELIST_1(_TParam1)> {
-	INHERITEDCLASS_TYPEDEFS(Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TYPELIST_1(_TParam1)))
+	INHERITED_CLASS_TYPEDEFS(Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TYPELIST_1(_TParam1)))
 
 public:
 	Functor() {
@@ -184,7 +184,7 @@ public:
 
 template< typename _TReturn, typename _TParam1, typename _TParam2 >
 class Functor<_TReturn, TYPELIST_2(_TParam1, _TParam2)> : public AFunctor<_TReturn, TYPELIST_2(_TParam1, _TParam2)> {
-	INHERITEDCLASS_TYPEDEFS(Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TYPELIST_2(_TParam1, _TParam2)))
+	INHERITED_CLASS_TYPEDEFS(Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TYPELIST_2(_TParam1, _TParam2)))
 
 public:
 	Functor() {
@@ -228,7 +228,7 @@ public:
 
 template< typename _TReturn, typename _TParam1, typename _TParam2, typename _TParam3 >
 class Functor<_TReturn, TYPELIST_3(_TParam1, _TParam2, _TParam3)> : public AFunctor<_TReturn, TYPELIST_3(_TParam1, _TParam2, _TParam3)> {
-	INHERITEDCLASS_TYPEDEFS(Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TYPELIST_3(_TParam1, _TParam2, _TParam3)))
+	INHERITED_CLASS_TYPEDEFS(Functor, TEMPLATE_2(IFunctorImpl, _TReturn, TYPELIST_3(_TParam1, _TParam2, _TParam3)))
 
 public:
 	Functor() {

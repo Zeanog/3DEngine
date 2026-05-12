@@ -18,7 +18,8 @@ void Camera::Update(Float32 deltaTime) {
 }
 
 void Camera::LinkTransform() const {
-	glMultMatrixf(glm::value_ptr(ToMat4x4()));
+	auto transform = glm::mat4x4(m_Rotation);
+	glMultMatrixf(glm::value_ptr(transform));
 }
 
 void Camera::Translate(const TPosition& delta) {
@@ -47,14 +48,11 @@ void Camera::RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosit
 	Translate(pt);
 }
 
-glm::vec3 Camera::Forward() const {
-	return glm::forward<glm::vec3>() * Rotation();
+void Camera::Forward(TPosition& outVec) const {
+	outVec = glm::forward<TPosition>() * Rotation();
 }
 
-glm::mat4x4 Camera::ToMat4x4() const {
-
-	glm::mat4x4 t = glm::mat4x4(m_Rotation);
-	t = glm::translate(t, m_Position);
-
-	return t;
+void Camera::ToMat4x4(glm::mat4x4& outMat) const {
+	outMat = glm::mat4x4(m_Rotation);
+	outMat = glm::translate(outMat, m_Position);
 }

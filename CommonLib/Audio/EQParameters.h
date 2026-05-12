@@ -1,14 +1,14 @@
 #pragma once
 
 #include "AParameters.h"
-
 #include <guiddef.h>
 #include <xapofx.h>
 
 template<>
-class Reflector<FXEQ_PARAMETERS> : public AReflector {
-	INHERITEDCLASS_TYPEDEFS(Reflector, AReflector)
-	SINGLETON_DECLARATIONS(TSelf) {
+class Reflector<FXEQ_PARAMETERS> : public AReflectorJson {
+	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
+public:
+	SINGLETON_DECLARATIONS(Reflector) {
 		REGISTER_MEMBER(TReflected, FrequencyCenter0);
 		REGISTER_MEMBER(TReflected, Gain0);
 		REGISTER_MEMBER(TReflected, Bandwidth0);
@@ -30,10 +30,13 @@ public:
 /////////////////////////////////////////////
 
 struct EQParameters : public AParameters<FXEQ_PARAMETERS> {
-	INHERITEDCLASS_TYPEDEFS(EQParameters, AParameters)
+	INHERITED_CLASS_TYPEDEFS(EQParameters, AParameters)
 
 public:
-	static constexpr void	SetToDefault(FXEQ_PARAMETERS& params) {
+	typedef TSuper::TParameters	TParameters;
+
+public:
+	static constexpr void	SetToDefault(TParameters& params) {
 		params.FrequencyCenter0 = FXEQ_DEFAULT_FREQUENCY_CENTER_0;
 		params.Gain0 = FXEQ_DEFAULT_GAIN;
 		params.Bandwidth0 = FXEQ_DEFAULT_BANDWIDTH;
@@ -48,6 +51,27 @@ public:
 		params.Bandwidth3 = FXEQ_DEFAULT_BANDWIDTH;
 	}
 
-	static IUnknown* InstantiateFX();
-	static Bool UpdateParams(class SubmixVoice* category, UInt32 fxIndex, const rapidjson::Value& value);
+	static IUnknown* CreateParams();
+
+	template<typename TVoice>
+	static Bool UpdateParams(TVoice* voice, UInt32 fxIndex, const rapidjson::Value& value) {
+		TParameters params;
+		SetToDefault(params);
+		if (!UpdateFrom(value, params)) {
+			assert(0);
+			return false;
+		}
+
+		if (!voice->SetEffectParameters(fxIndex, &params, sizeof(decltype(params)))) {
+			assert(0);
+			return false;
+		}
+
+		if (!voice->EnableEffect(fxIndex)) {
+			assert(0);
+			return false;
+		}
+
+		return true;
+	}
 };

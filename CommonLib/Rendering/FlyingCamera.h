@@ -3,7 +3,7 @@
 #include "Rendering/Camera.h"
 
 class FlyingCamera : public ACameraDecorator {
-	INHERITEDCLASS_TYPEDEFS(FlyingCamera, ACameraDecorator)
+	INHERITED_CLASS_TYPEDEFS(FlyingCamera, ACameraDecorator)
 
 protected:
 	DEFINE_MEMBER_EX(glm::vec3, TranslationSpeed)//Reasonable Value Magnitude: 10

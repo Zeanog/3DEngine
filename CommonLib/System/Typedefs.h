@@ -23,38 +23,58 @@ typedef bool			Bool;
 typedef float			Float32;
 typedef double			Float64;
 
+#include <type_traits>
 template<typename TData>
-class TypeInfo {
+class ATypeInfo {
+protected:
+	ATypeInfo() {}
+
+public:
+	typedef TData TDecorated;
+	enum : Bool {
+		IsClass = std::is_class<TData>::value,
+		IsPointer = std::is_pointer<TData>::value,
+		IsUnion = std::is_union<TData>::value
+	};
+
+	template<typename TTo>
+	constexpr Bool	CanConvertTo() const {
+		return std::is_convertible<TData, TTo>::value;
+	}
+};
+
+template<typename TData>
+class TypeInfo : public ATypeInfo<TData> {
 public:
 	typedef TData	TUndecorated;
 };
 
 template<typename TData>
-class TypeInfo<const TData> {
+class TypeInfo<const TData> : public ATypeInfo<const TData> {
 public:
 	typedef TData	TUndecorated;
 };
 
 template<typename TData>
-class TypeInfo<TData&> {
+class TypeInfo<TData&> : public ATypeInfo<TData&> {
 public:
 	typedef TData	TUndecorated;
 };
 
 template<typename TData>
-class TypeInfo<const TData&> {
+class TypeInfo<const TData&> : public ATypeInfo<const TData&> {
 public:
 	typedef TData	TUndecorated;
 };
 
 template<typename TData>
-class TypeInfo<TData*> {
+class TypeInfo<TData*> : public ATypeInfo<TData*> {
 public:
 	typedef TData	TUndecorated;
 };
 
 template<typename TData>
-class TypeInfo<const TData*> {
+class TypeInfo<const TData*> : public ATypeInfo<const TData*> {
 public:
 	typedef TData	TUndecorated;
 };
@@ -121,11 +141,23 @@ public:								\
 	typedef classType	TSelf;		\
 private:
 
-#define INHERITEDCLASS_TYPEDEFS( classType, superClass )		\
-CLASS_TYPEDEFS( classType )										\
-public:															\
-typedef superClass		TSuper;									\
+#define ABSTRACT_CLASS_TYPEDEFS( classType )	\
+	CLASS_TYPEDEFS( classType )					\
+protected:										\
+	classType()
+
+#define INHERITED_CLASS_TYPEDEFS( classType, superClass )	\
+	CLASS_TYPEDEFS( classType )								\
+public:														\
+	typedef superClass		TSuper;							\
 private:
+
+#define ABSTRACT_INHERITED_CLASS_TYPEDEFS( classType, superClass )	\
+	CLASS_TYPEDEFS( classType )								\
+public:														\
+	typedef superClass		TSuper;							\
+protected:													\
+	classType()
 
 #define TEMPLATE_2( classType, T1, T2 )	classType<T1, T2>
 #define TEMPLATE_3( classType, T1, T2, T3 )	classType<T1, T2, T3>
@@ -214,4 +246,4 @@ public:										\
 DEFINE_GETSET_EX( propName, m_##propName )	\
 private:
 
-#define DEFINE_GETSET( propName )	DEFINE_GETSET_EX(name, m_##propName)
+#define DEFINE_GETSET( propName )	DEFINE_GETSET_EX(propName, m_##propName)

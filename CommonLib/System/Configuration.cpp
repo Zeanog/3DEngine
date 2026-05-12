@@ -1,45 +1,54 @@
 #include "System/Configuration.h"
 #include "System/StackString.h"
 #include <windows.h>
-#include <cstring>
 
 Bool ConfigurationSection::LoadFrom(const Char* sectionName, const Char* fileName) {
-	STACK_STRING(sectionKeys, 1024);
-	STACK_STRING(sectionVal, 64);
-	GetPrivateProfileString(sectionName, NULL, "", sectionKeys.CStr(), sectionKeys.Allocated(), fileName);
+	try {
+		STACK_STRING(sectionKeys, 1024);
+		STACK_STRING(sectionVal, 64);
+		GetPrivateProfileString(sectionName, NULL, "", sectionKeys.Str(), sectionKeys.Allocated(), fileName);
 
-	const Char* curKey = sectionKeys.CStr();
-	while (curKey && curKey[0]) {
-		int l = String::StrLen(curKey);
+		const Char* curKey = sectionKeys.CStr();
+		while (curKey && curKey[0]) {
+			int l = String::StrLen(curKey);
 
-		GetPrivateProfileString(sectionName, curKey, "", sectionVal.CStr(), sectionVal.Allocated(), fileName);
+			GetPrivateProfileString(sectionName, curKey, "", sectionVal.Str(), sectionVal.Allocated(), fileName);
 
-		m_KeyValues.Add(curKey, sectionVal.CStr());
+			m_KeyValues.Add(curKey, sectionVal.CStr());
 
-		curKey += (l + 1);
+			curKey += (l + 1);
+		}
+
+		return true;
 	}
-
-	return true;
+	catch (...) {
+		return false;
+	}
 }
 
 Bool Configuration::LoadFrom(const Char* relativeFilePath) {
 	m_FilePath = relativeFilePath;
 
-	STACK_STRING(sectionNames, 1024);
-	GetPrivateProfileString(NULL, NULL, "", sectionNames.CStr(), sectionNames.Allocated(), m_FilePath.CStr());
-	
-	const Char* curSec = sectionNames.CStr();
-	while( curSec && curSec[0] ) {
-		int l = String::StrLen(curSec);
+	try {
+		STACK_STRING(sectionNames, 1024);
+		GetPrivateProfileString(NULL, NULL, "", sectionNames.Str(), sectionNames.Allocated(), m_FilePath.CStr());
 
-		ConfigurationSection section;
-		section.LoadFrom(curSec, m_FilePath.CStr());
-		m_Sections.Add(curSec, section);
+		const Char* curSec = sectionNames.CStr();
+		while (curSec && curSec[0]) {
+			int l = String::StrLen(curSec);
 
-		curSec += (l + 1);
+			ConfigurationSection section;
+			section.LoadFrom(curSec, m_FilePath.CStr());
+			m_Sections.Add(curSec, section);
+
+			curSec += (l + 1);
+		}
+
+		return true;
 	}
-
-	return true;
+	catch (...) {
+		return false;
+	}
 }
 
 Bool Configuration::GetValue(const StaticString& sectionName, const StaticString& key, String& outValue) const {

@@ -14,9 +14,13 @@ public:
 	static Bool	UpdateFrom(const rapidjson::Value& value, TParameters& outParams) {
 		assert(value.IsObject());
 
+		auto reflector = Singleton<Reflector<TParameters>>::GetInstance();
 		FOREACH_MEMBER(iter, value) {
-			auto reflector = Singleton<Reflector<TParameters>>::GetInstance();
-			reflector->Set(iter->name.GetString(), outParams, iter->value);//This is expected to fail when it attempts to parse "Type"
+			//if (!reflector->HasMember(iter->name.GetString())) {//Ignore "Type"
+			//	continue;
+			//}
+			auto memberName = iter->name.GetString();
+			reflector->Set(memberName, outParams, iter->value);
 		}
 		return true;
 	}

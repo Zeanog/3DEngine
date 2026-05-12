@@ -1,6 +1,7 @@
 #include "Image.h"
 #include "cmath"
 #include <gl/glew.h>
+#include <MathUtils.h>
 
 Neo::Image::~Image() {
 	if( m_Id != 0 ) {
@@ -56,9 +57,11 @@ Bool Neo::Image::UploadData( const ImageLoader& loader ) {
 	assert( loader.IsValid() );
 	//assert( IsPowerOfTwo(loader.ImageWidth()) );
 	//assert( IsPowerOfTwo(loader.ImageHeight()) );
+	auto w = MathUtils::NearestPowerOfTwo(loader.ImageWidth());
+	auto h = MathUtils::NearestPowerOfTwo(loader.ImageHeight());
 
 	GLenum format = loader.BytesPerPixel() <= 3 ? GL_RGB: GL_RGBA;
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, loader.ImageWidth(), loader.ImageHeight(), 0, format, GL_UNSIGNED_BYTE, loader.Data() );
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, format, GL_UNSIGNED_BYTE, loader.Data() );
 	assert( !glGetError() );
 
 	return true;

@@ -102,7 +102,7 @@ public:
 
 namespace Neo {
 	class Keyboard : public ADevice {
-		INHERITEDCLASS_TYPEDEFS(Keyboard, ADevice)
+		INHERITED_CLASS_TYPEDEFS(Keyboard, ADevice)
 
 	protected:
 		DEFINE_MEMBER_EX( KeyboardState, State )

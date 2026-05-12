@@ -88,9 +88,8 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	UInt32 dwChunkSize{};
 	UInt32 dwChunkPosition{};
 
-	//TODO: All these FindChunk calls are probably inefficient
+	//TODO: All these FindChunk calls are inefficient
 
-	//check the file type, should be fourccWAVE or 'XWMA'
 	verify(FindChunk(file, FourCC::RIFF, dwChunkSize, dwChunkPosition));
 	file.Seek(dwChunkPosition, SEEK_SET);
 
@@ -105,6 +104,8 @@ Bool AudioLoader_RIFF::Load(const Char* fileName) {
 	if (!file.Read(m_Format)) {
 		return false;
 	}
+	/*DWORD mask = m_Format.dwChannelMask & GetChannelMask(m_Format.Format.nChannels);
+	assert(0 != mask);*/
 
 	verify(FindChunk(file, FourCC::DATA, dwChunkSize, dwChunkPosition));
 	file.Seek(dwChunkPosition, SEEK_SET);

@@ -1,7 +1,7 @@
-#include "../System/DebugConsole.h"
-#include "../System/Win32/Error.h"
-#include "String.h"
-#include "StaticString.h"
+#include "System/DebugConsole.h"
+#include "System/Win32/Error.h"
+#include "System/String.h"
+
 
 Bool DebugConsole::Open() {//TODO: Make sure the console doesn't get focus unless clicked on
 	if (IsOpen()) {
@@ -18,12 +18,29 @@ Bool DebugConsole::Open() {//TODO: Make sure the console doesn't get focus unles
 		return false;
 	}
 
+	HWND hwndConsole = GetConsoleWindow();
+	assert(hwndConsole);
+	if (!SetWindowPos(hwndConsole, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW)) {
+		const Char* errorMsg = GetErrorMessage(GetLastError());
+		return false;
+	}
+
+	if (HMENU hMenu = GetSystemMenu(hwndConsole, FALSE))
+	{
+		EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+	}
+
+	LONG currentStyle = GetWindowLong(hwndConsole, GWL_EXSTYLE);
+	verify(!!SetWindowLong(hwndConsole, GWL_EXSTYLE, currentStyle | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW));
+
+	SetConsoleTitle("Neo Debug Window!");
+
 	return true;
 }
 
 void DebugConsole::Close() {
 	DetachIO();
-	FreeConsole();
+	verify(FreeConsole());
 }
 
 Bool DebugConsole::AttachIO() {
@@ -31,16 +48,26 @@ Bool DebugConsole::AttachIO() {
 		return true;
 	}
 
-	auto err = freopen_s(&m_hOutputFile, "CONOUT$", "w", stdout);
-	return !err && AttachConsole(ATTACH_PARENT_PROCESS) && IsOpen();
+	auto err = freopen_s(&m_hStdOutFile, "CONOUT$", "w", stdout);
+	if (err) {
+		m_hStdOutFile = nullptr;
+		m_hErrFile = nullptr;
+		return false;
+	}
+
+	verify(!freopen_s(&m_hErrFile, "CONOUT$", "w", stderr));
+
+	return IsOpen();
 }
 
 void DebugConsole::DetachIO() {
 	if (!IsOpen()) {
 		return;
 	}
-	fclose(m_hOutputFile);
-	m_hOutputFile = nullptr;
+	fclose(m_hStdOutFile);
+	m_hStdOutFile = nullptr;
+	fclose(m_hErrFile);
+	m_hErrFile = nullptr;
 }
 
 Bool	DebugConsole::Write(const Char* format, ...) {

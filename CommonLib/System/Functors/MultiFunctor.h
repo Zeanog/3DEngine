@@ -6,7 +6,7 @@
 
 template< class _TList >
 class AMultiFunctor : public IFunctorImpl<void, _TList> {
-	INHERITEDCLASS_TYPEDEFS(AMultiFunctor, TEMPLATE_2(IFunctorImpl, void, _TList))
+	INHERITED_CLASS_TYPEDEFS(AMultiFunctor, TEMPLATE_2(IFunctorImpl, void, _TList))
 
 public:
 	typedef _TList		TParamList;
@@ -88,7 +88,7 @@ class MultiFunctor;
 
 template<>
 class MultiFunctor<TNull> : public AMultiFunctor<TNull> {
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor, AMultiFunctor<TNull>)
+	INHERITED_CLASS_TYPEDEFS(MultiFunctor, AMultiFunctor<TNull>)
 
 protected:
 	typedef typename TSuper::TListenerContainer	TListenerContainer;
@@ -99,7 +99,7 @@ public:
 
 	virtual void	operator()() override {
 		//TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)();
 			}
@@ -108,7 +108,7 @@ public:
 		return;
 	}
 	virtual void	operator()() const override {
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)();
 			}
@@ -120,7 +120,7 @@ public:
 
 template<typename _TParam1>
 class MultiFunctor<TYPELIST_1(_TParam1)> : public AMultiFunctor<TYPELIST_1(_TParam1)> {
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TYPELIST_1(_TParam1)>, AMultiFunctor<TYPELIST_1(_TParam1)>)
+	INHERITED_CLASS_TYPEDEFS(MultiFunctor<TYPELIST_1(_TParam1)>, AMultiFunctor<TYPELIST_1(_TParam1)>)
 
 public:
 	typedef typename TSuper::TParam1	TParam1;
@@ -132,7 +132,7 @@ public:
 
 	virtual void	operator()(TParam1 param1) override {
 		//typename TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1);
 			}
@@ -141,7 +141,7 @@ public:
 		return;
 	}
 	virtual void	operator()(TParam1 param1) const override {
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1);
 			}
@@ -154,7 +154,7 @@ public:
 template<typename _TParam1, typename _TParam2>
 class MultiFunctor<TYPELIST_2(_TParam1, _TParam2)> : public AMultiFunctor<TYPELIST_2(_TParam1, _TParam2)> {
 	typedef TYPELIST_2(_TParam1, _TParam2) TTypeList;
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>)
+	INHERITED_CLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>)
 
 public:
 	typedef typename TSuper::TParam1	TParam1;
@@ -166,7 +166,7 @@ public:
 	}
 
 	virtual void	operator()(TParam1 param1, TParam2 param2) override {
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1, param2);
 			}
@@ -175,7 +175,7 @@ public:
 		return;
 	}
 	virtual void	operator()(TParam1 param1, TParam2 param2) const override {
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1, param2);
 			}
@@ -188,7 +188,7 @@ public:
 template<typename _TParam1, typename _TParam2, typename _TParam3>
 class MultiFunctor<TYPELIST_3(_TParam1, _TParam2, _TParam3)> : public AMultiFunctor<TYPELIST_3(_TParam1, _TParam2, _TParam3)> {
 	typedef TYPELIST_3(_TParam1, _TParam2, _TParam3) TTypeList;
-	INHERITEDCLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>)
+	INHERITED_CLASS_TYPEDEFS(MultiFunctor<TTypeList>, AMultiFunctor<TTypeList>)
 
 public:
 	typedef typename TSuper::TParam1	TParam1;
@@ -202,7 +202,7 @@ public:
 
 	virtual void	operator()(TParam1 param1, TParam2 param2, TParam3 param3) override {
 		//typename TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if(iter->IsValid()) {
 				(*iter)(param1, param2, param3);
 			}
@@ -212,7 +212,7 @@ public:
 	}
 	virtual void	operator()(TParam1 param1, TParam2 param2, TParam3 param3) const override {
 		//typename TListenerContainer::TValue	listener;
-		FOREACH_CONST(iter, m_Listeners) {
+		FOREACH_CONST(iter, this->m_Listeners) {
 			if (iter->IsValid()) {
 				(*iter)(param1, param2, param3);
 			}

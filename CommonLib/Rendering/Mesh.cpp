@@ -1,14 +1,13 @@
 #include "Mesh.h"
-
-#include <windows.h>
-#include <gl/gl.h>
 #include "ModelLoaders/MeshLoader_FBX.h"
 #include "Rendering/Joint.h"
+#include <windows.h>
+#include <gl/gl.h>
 
 Neo::Mesh::Mesh() {
 }
 
-Neo::Mesh::Mesh(const VertexBuffer& vb, const IndexBuffer& ib) {
+Neo::Mesh::Mesh(const Neo::VertexBuffer& vb, const Neo::IndexBuffer& ib) {
 	m_VertexBuffer = vb;
 	m_IndexBuffer = ib;
 }
@@ -56,9 +55,8 @@ Bool Neo::Mesh::RenderMaterial(int index, const List<StaticString>& channels) co
 
 	for (UInt32 iy = 0; iy < matSlot->Ranges.Length(); ++iy) {
 		auto range = matSlot->Ranges[iy];
-		if (range.VertCount == 0) {
-			continue;
-		}
+		assert(range.VertCount > 0);
+
 		const UInt32*	indexStart = &m_IndexBuffer[range.StartIndex];
 		UInt32			indexCount = range.VertCount;
 		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indexStart);
@@ -94,9 +92,10 @@ Bool Neo::Mesh::RenderJoints(const AnimKeyFrame* keyFrame) const {
 	}
 
 	glm::mat4 transform;
-	for (UInt32 ix = 0; ix < m_Skeleton.NumJoints(); ++ix) {
+	assert(m_Skeleton.NumJoints() == keyFrame->FrameDataCount());
+	for (UInt32 ix = 0; ix < keyFrame->FrameDataCount(); ++ix) {
 		transform = keyFrame->GetGlobalTransform(ix, m_Skeleton);
-		Joint::Render(transform, 0.1f, 64);
+		Joint::Render(transform, 0.5f, 64);
 	}
 
 	return true;
@@ -112,20 +111,20 @@ void Neo::Mesh::PostRender() const {
 	assert(!glGetError());
 }
 
-Bool Neo::Mesh::UploadData(const AMeshLoader& loader) {
-	m_VertexBuffer = loader.VB();
-	m_IndexBuffer = loader.IB();
-	m_Materials = loader.Materials();
+Bool Neo::Mesh::UploadData(const IMeshLoader& loader) {
+	//m_VertexBuffer = loader.VB();
+	//m_IndexBuffer = loader.IB();
+	//m_Materials = loader.Materials();
 
-	m_Bounds += m_VertexBuffer.Positions();
+	//m_Bounds += m_VertexBuffer.Positions();
 
-	verify(m_Skeleton.UploadData(loader));
+	//verify(m_Skeleton.UploadData(loader));
 
-	auto& animNames = loader.AnimNames();
-	m_AnimNames = animNames;//TODO: Find a more efficient way to do this
+	//auto& animNames = loader.AnimNames();
+	//m_AnimNames = animNames;//TODO: Find a more efficient way to do this
 
-	auto& clips = loader.AnimationClips();
-	m_AnimationClips = clips;//TODO: Find a more efficient way to do this
+	//auto& clips = loader.AnimationClips();
+	//m_AnimationClips = clips;//TODO: Find a more efficient way to do this
 
 	return true;
 }

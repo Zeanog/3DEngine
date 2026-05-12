@@ -133,7 +133,7 @@ struct Header {
 class ColorMap;
 
 class ImageLoader_TGA : public ImageLoader {
-	INHERITEDCLASS_TYPEDEFS(ImageLoader_TGA, ImageLoader)
+	INHERITED_CLASS_TYPEDEFS(ImageLoader_TGA, ImageLoader)
 
 public:
 

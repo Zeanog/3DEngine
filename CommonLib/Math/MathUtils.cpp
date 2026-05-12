@@ -33,16 +33,14 @@ glm::mat4x4 MathUtils::CreateAxisAlong( const glm::vec3& forward, const glm::vec
 	yDir = glm::normalize(yDir);
 
 	return glm::mat3x3( xDir, yDir, zDir );
-	//return glm::lookAt(glm::zero<glm::vec3>(), forward * 10.0f, up);
 }
 
 glm::mat4x4 MathUtils::CreateAxisAlong(const glm::vec3& eye, const glm::vec3& focalPt, const glm::vec3& up) {
-	glm::vec3 dir = glm::normalize(focalPt - eye);
+	/*glm::vec3 dir = glm::normalize(focalPt - eye);
 	glm::vec3 dirXup = glm::cross(dir, up);
 	if (glm::length(dirXup) > MathUtils::Epsilon) {
 		return glm::lookAt(eye, focalPt, up);
-	}
-
+	}*/
 	return glm::lookAt(eye, focalPt, up);
 }
 
@@ -50,17 +48,27 @@ Float32	MathUtils::Sqrt( Float32 val ) {
 	return sqrtf( val );
 }
 
+#include <bit>
 UInt32 MathUtils::NearestPowerOfTwo(UInt32 val) {
-	Float32 pos = ceilf((Float32)log2(val));//  (ceiling of log n with base 2)
-	return (UInt32)powf(2, pos);
+	assert(val > 0);
+
+	if(IsPowerOfTwo(val)) {
+		return val;
+	}
+
+	decltype(val) constexpr totalBits = sizeof(decltype(val)) * 8;
+	decltype(val) leading_zeros = std::countl_zero(val);
+	auto shiftAmount = totalBits - leading_zeros;
+
+	assert(shiftAmount > 0);
+	assert(shiftAmount < totalBits);
+
+	UInt32 nextPowerOfTwo = 1 << shiftAmount;
+	assert(IsPowerOfTwo(nextPowerOfTwo) && nextPowerOfTwo > val);
+	return nextPowerOfTwo;
 }
 
-Int32 MathUtils::NearestPowerOfTwo(Int32 val) {
-	Float32 pos = ceilf((Float32)log2(val));//  (ceiling of log n with base 2)
-	return (Int32)powf(2, pos);
-}
-
-Char	MathUtils::ToChar(int num) {
+Char	MathUtils::ToChar(Int32 num) {
 	if (num <= 9) {
 		return (Char)(num + '0');
 	}
@@ -69,7 +77,7 @@ Char	MathUtils::ToChar(int num) {
 	}
 }
 
-Int32     MathUtils::ToNumber(Char ch) {
+UInt32     MathUtils::ToNumber(Char ch) {
 	if (ch <= '9') {
 		return ch - '0';
 	} else if(ch >= 'a' && ch <= 'z') {
@@ -79,8 +87,8 @@ Int32     MathUtils::ToNumber(Char ch) {
 	return (ch - 'A') + 10;
 }
 
-Int32		MathUtils::NumDigits(Int32 val, Int32 base) {
-	return (int)(log2(val) / log2(base)) + 1;
+UInt32	MathUtils::NumDigits(Int32 val, Int32 base) {
+	return (UInt32)(log2(val) / log2(base)) + 1;
 }
 
 void	MathUtils::ConvertTo(Int32 dstBase, Int32 inputNum, std::string& outDstNum) {
@@ -115,10 +123,10 @@ void MathUtils::Convert(const Char* str, Int32 srcBase, Int32 dstBase, std::stri
 }
 
 Char* MathUtils::Convert(const Char* pNumber, Int32 srcBase, Int32 dstBase) {
-	static constexpr Int32 numBuffers = 5;
-	static constexpr Int32 bufferLength = 256;
-	static Char	buffers[numBuffers][bufferLength];
-	static Int32	currentBufferIndex = -1;
+	static constexpr UInt32 numBuffers = 5;
+	static constexpr UInt32 bufferLength = 256;
+	static Char				buffers[numBuffers][bufferLength];
+	static UInt32			currentBufferIndex = 0;
 
 	currentBufferIndex = (currentBufferIndex + 1) % numBuffers;
 	Char* buffer = buffers[currentBufferIndex];

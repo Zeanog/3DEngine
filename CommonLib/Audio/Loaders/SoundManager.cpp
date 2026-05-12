@@ -1,13 +1,13 @@
 #include "SoundManager.h"
 #include "AudioLoader_RIFF.h"
-#include "AudioLoader_OggVorbis.h"
+#include "AudioLoader_Ogg.h"
 #include "AudioLoader_MP3.h"
 #include "System/DebugConsole.h"
 #include "System/File.h"
 
 SoundManager::SoundManager() {
 	m_Loaders.Add(StaticString(".wav"), new AudioLoader_RIFF());
-	m_Loaders.Add(StaticString(".ogg"), new AudioLoader_OggVorbis());
+	m_Loaders.Add(StaticString(".ogg"), new AudioLoader_Ogg());
 	m_Loaders.Add(StaticString(".mp3"), new AudioLoader_MP3());
 }
 
@@ -39,8 +39,6 @@ void SoundManager::ReloadAll() {
 
 Bool SoundManager::Load(const StaticString& path, Sound* asset) {
 	assert(asset);
-
-	//Singleton<DebugConsole>::GetInstance()->Write("Loading '%s'...\n", path.CStr());
 
 	AAudioLoader* loader{};
 	if(!m_Loaders.Find(StaticString(FilePath::GetExtension(path)), loader)) {

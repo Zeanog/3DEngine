@@ -19,26 +19,25 @@ protected:
 	ICamera() {}
 
 public:
-	virtual void						Update(Float32 deltaTime) = 0;
-	virtual void						LinkTransform() const = 0;
+	virtual void	Update(Float32 deltaTime) = 0;
+	virtual void	LinkTransform() const = 0;
 
 	ABSTRACT_GETSET(TPosition, Position)
 	ABSTRACT_GETSET(TRotation, Rotation)
 
-	virtual void						Translate(const TPosition& delta) = 0;
+	virtual void	Translate(const TPosition& delta) = 0;
 
-	virtual void						Rotate(const TRotation& delta) = 0;
-	virtual void						Rotate(Float32 pitch, Float32 yaw, Float32 roll) = 0;
-	virtual void						RotateAround(const TRotation& delta, const TPosition& pt) = 0;
-	virtual void						RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) = 0;
+	virtual void	Rotate(const TRotation& delta) = 0;
+	virtual void	Rotate(Float32 pitch, Float32 yaw, Float32 roll) = 0;
+	virtual void	RotateAround(const TRotation& delta, const TPosition& pt) = 0;
+	virtual void	RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) = 0;
 
-	virtual TPosition					Forward() const = 0;
-
-	virtual glm::mat4x4					ToMat4x4() const = 0;
+	virtual void	Forward(TPosition& outVec) const = 0;
+	virtual void	ToMat4x4(glm::mat4x4& outMat) const = 0;
 };
 
 class ACameraDecorator : public ICamera {
-	INHERITEDCLASS_TYPEDEFS(ACameraDecorator, ICamera)
+	INHERITED_CLASS_TYPEDEFS(ACameraDecorator, ICamera)
 
 protected:
 	ICamera*	m_Decoratee;
@@ -101,14 +100,14 @@ public:
 	virtual void						RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) override {
 	}
 
-	virtual TPosition					Forward() const override {
+	virtual void					Forward(TPosition& outVec) const override {
 		assert(m_Decoratee);
-		return m_Decoratee->Forward();
+		m_Decoratee->Forward(outVec);
 	}
 
-	virtual glm::mat4x4					ToMat4x4() const override {
+	virtual void					ToMat4x4(glm::mat4x4& outMat) const override {
 		assert(m_Decoratee);
-		return m_Decoratee->ToMat4x4();
+		m_Decoratee->ToMat4x4(outMat);
 	}
 
 protected:
@@ -118,7 +117,7 @@ protected:
 };
 
 class Camera : public ICamera {
-	INHERITEDCLASS_TYPEDEFS(Camera, ICamera)
+	INHERITED_CLASS_TYPEDEFS(Camera, ICamera)
 
 protected:
 	TRotation		m_Rotation;
@@ -135,14 +134,13 @@ public:
 	DECLARE_GETSET(Position)
 	DECLARE_GETSET(Rotation)
 
-	virtual void		Translate(const TPosition& delta) override;
+	virtual void	Translate(const TPosition& delta) override;
 
-	virtual void		Rotate(const TRotation& delta) override;
-	virtual void		Rotate(Float32 pitch, Float32 yaw, Float32 roll) override;
-	virtual void		RotateAround(const TRotation& delta, const TPosition& pt) override;
-	virtual void		RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) override;
+	virtual void	Rotate(const TRotation& delta) override;
+	virtual void	Rotate(Float32 pitch, Float32 yaw, Float32 roll) override;
+	virtual void	RotateAround(const TRotation& delta, const TPosition& pt) override;
+	virtual void	RotateAround(Float32 pitch, Float32 yaw, Float32 roll, const TPosition& pt) override;
 
-	virtual glm::vec3		Forward() const override;
-
-	virtual glm::mat4x4		ToMat4x4() const override;
+	virtual void	Forward(TPosition& outVec) const override;
+	virtual void	ToMat4x4(glm::mat4x4& outMat) const override;
 };

@@ -119,7 +119,7 @@ public:
 
 template< class TChild, typename _TReturn, typename _TList >
 class IFunctorImpl_Compare : public IFunctorImpl<_TReturn, _TList> {
-	INHERITEDCLASS_TYPEDEFS(IFunctorImpl_Compare, TEMPLATE_2(IFunctorImpl, _TReturn, _TList));
+	INHERITED_CLASS_TYPEDEFS(IFunctorImpl_Compare, TEMPLATE_2(IFunctorImpl, _TReturn, _TList));
 
 public:
 	using TSuper::operator==;

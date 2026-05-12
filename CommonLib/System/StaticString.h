@@ -81,20 +81,6 @@ public:
 #endif
 	}
 
-	/*StaticString(json_value* val) : StaticString(val->u.string.ptr) {
-		
-	}
-
-	virtual Bool	ReadFrom(json_value* val) {
-		m_Hash = Singleton<StringPool>::GetInstance()->Add(val->u.string.ptr);
-#if _DEBUG
-		m_DebugPtr = (m_Hash) ? CStr() : NULL;
-		UInt32 debugHash = Singleton<StringPool>::GetInstance()->Add(m_DebugPtr);
-		assert(!String::StrICmp(m_DebugPtr, val->u.string.ptr));
-#endif
-		return true;
-	}*/
-
 	const String&	Str() const {
 		return (*Singleton<StringPool>::GetInstance())[ m_Hash ];
 	}
@@ -103,7 +89,7 @@ public:
 		return Str().CStr();
 	}
 
-	Int32		Length() const {
+	UInt32		Length() const {
 		return (m_Hash <= 0) ? 0 : Str().Length();
 	}
 

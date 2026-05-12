@@ -2,9 +2,13 @@
 #include "SourceVoiceCallbacks.h"
 #include "AudioSystem.h"
 
-SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format) {
+SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format) : TSelf(audio, format, Singleton<AudioSystem>::GetInstance()->GenerateHash(format)) {
+	
+}
+
+SourceVoice::SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format, UInt64 formatHash) {
 	m_Format = format;
-	m_FormatHash = Singleton<AudioSystem>::GetInstance()->GenerateHash(format);
+	m_FormatHash = formatHash;
 
 	m_Callbacks = new SourceVoiceCallbacks(this);
 	HRESULT hr = audio->CreateSourceVoice(&m_Voice, &m_Format, 0, 2.0f, m_Callbacks);

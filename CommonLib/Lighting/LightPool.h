@@ -8,7 +8,7 @@
 
 
 class DirectionalLightPool : public Pool<Light_Directional> {
-	INHERITEDCLASS_TYPEDEFS( DirectionalLightPool, Pool<Light_Directional> )
+	INHERITED_CLASS_TYPEDEFS( DirectionalLightPool, Pool<Light_Directional> )
 	SINGLETON_DECLARATIONS( DirectionalLightPool ) {
 	}
 
@@ -25,7 +25,7 @@ public:
 };
 
 class SpotLightPool : public Pool<Light_Spot> {
-	INHERITEDCLASS_TYPEDEFS( SpotLightPool, Pool<Light_Spot> )
+	INHERITED_CLASS_TYPEDEFS( SpotLightPool, Pool<Light_Spot> )
 	SINGLETON_DECLARATIONS( SpotLightPool ) {
 	}
 
@@ -45,7 +45,7 @@ public:;
 };
 
 class PointLightPool : public Pool<Light_Point> {
-	INHERITEDCLASS_TYPEDEFS( PointLightPool, Pool<Light_Point> )
+	INHERITED_CLASS_TYPEDEFS( PointLightPool, Pool<Light_Point> )
 	SINGLETON_DECLARATIONS( PointLightPool ) {
 	}
 

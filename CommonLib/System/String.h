@@ -2,15 +2,9 @@
 
 #include "TypeDefs.h"
 #include <string>
-#include <assert.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <TCHAR.h>
 
 class AString {
-protected:
-	AString() {
-	}
+	ABSTRACT_CLASS_TYPEDEFS(AString) {}
 
 public:
 	virtual const Char*	CStr() const = 0;
@@ -32,7 +26,7 @@ public:
 		return m_Data.c_str();
 	}
 
-	Char*	CStr() {
+	Char*	Str() {
 		return const_cast<Char*>(m_Data.c_str());
 	}
 
@@ -55,7 +49,7 @@ public:
 	}
 
 	Char&	operator[]( Int32 index ) {
-		return CStr()[ index ];
+		return Str()[ index ];
 	}
 
 	const Char&	operator[]( Int32 index ) const {
@@ -79,13 +73,23 @@ public:
 		return m_Data.find_last_of( ch, -1 );
 	}
 
-	static Int32 FindLastOf(const Char* str, Char ch) {
-		for( int ix = String::StrLen(str) - 1; ix >= 0; --ix ) {
-			if( str[ix] == ch ) {
+	static constexpr Int32 FindLastOf(const Char* str, UInt32 strLen, Char ch) {
+		for (int ix = strLen - 1; ix >= 0; --ix) {
+			if (str[ix] == ch) {
 				return ix;
 			}
 		}
+
 		return -1;
+	}
+
+	static constexpr Int32 FindLastOf(const Char* str, Char ch) {
+		UInt32 strLen = 0;
+		while (str[strLen] ) {
+			++strLen;
+		}
+
+		return FindLastOf(str, strLen, ch);
 	}
 
 	Int32 FindIndexOf(const String& lookingFor) {
@@ -108,6 +112,12 @@ public:
 
 public:
 	inline static UInt32	StrLen( const Char* str ) {
+		/*UInt32 strLen = 0;
+		while (str[strLen]) {
+			++strLen;
+		}
+		return strLen;
+		*/
 		return strlen( str );
 	}
 
@@ -115,13 +125,11 @@ public:
 		return _stricmp( lhs, rhs );
 	}
 
-	inline static Bool	StrCpy( Char* dst, UInt32 size, const Char* src) {
-		 return !strcpy_s(dst, size, src);
-	}
+	static Bool	StrCpy(Char* dst, UInt32 size, const Char* src);
 
 	static Char* Format(const char* format, va_list& args) {
-		static const int NumBuffers = 5;
-		static const int MaxBufferSize = 256;
+		static constexpr int NumBuffers = 5;
+		static constexpr int MaxBufferSize = 256;
 		static int currentIndex = 0;
 		static Char buffers[NumBuffers][MaxBufferSize];
 
@@ -132,11 +140,5 @@ public:
 		return currentBuffer;
 	}
 
-	static Char*	Format( const char* format, ... ) {
-		va_list args;
-		va_start(args, format);
-		auto str = Format(format, args);
-		va_end(args);
-		return str;
-	}
+	static Char* Format(const char* format, ...);
 };

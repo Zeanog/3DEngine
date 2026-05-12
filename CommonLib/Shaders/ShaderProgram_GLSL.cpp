@@ -25,10 +25,10 @@ Bool	ShaderProgram_GLSL::Create(const StaticString& vsPath, const StaticString& 
 		return false;
 	}
 
-	glAttachObjectARB(m_Handle, m_pVertexShader->GetHandle());
+	glAttachObjectARB(m_Handle, *m_pVertexShader);
 	assert(!glGetError());
 
-	glAttachObjectARB(m_Handle, m_pFragmentShader->GetHandle());
+	glAttachObjectARB(m_Handle, *m_pFragmentShader);
 	assert(!glGetError());
 
 	glLinkProgramARB(m_Handle);

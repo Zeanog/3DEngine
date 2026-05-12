@@ -7,7 +7,7 @@
 #include "System\Functors\MultiFunctor.h"
 
 class SourceVoice : public ASourceVoice<IXAudio2SourceVoice>{
-	INHERITEDCLASS_TYPEDEFS(SourceVoice, ASourceVoice<IXAudio2SourceVoice>)
+	INHERITED_CLASS_TYPEDEFS(SourceVoice, ASourceVoice<IXAudio2SourceVoice>)
 
 	friend class AudioSystem;
 
@@ -20,6 +20,7 @@ protected:
 
 public:
 	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format);
+	SourceVoice(IXAudio2* audio, const WAVEFORMATEX& format, UInt64 formatHash);
 
 	DEFINE_MEMBER_EX(WAVEFORMATEX, Format)
 
@@ -29,8 +30,8 @@ public:
 
 	virtual Bool	Submit(const XAUDIO2_BUFFER& buffer);
 	virtual Bool	Submit(const XAUDIO2_BUFFER* buffer);
-	virtual Bool	Start(const XAUDIO2_BUFFER& buffer, UInt32 operationSet = 0U);
-	virtual Bool	Start(const XAUDIO2_BUFFER* buffer, UInt32 operationSet = 0U);
+	virtual Bool	Start(const XAUDIO2_BUFFER& buffer, UInt32 operationSet = XAUDIO2_COMMIT_NOW);
+	virtual Bool	Start(const XAUDIO2_BUFFER* buffer, UInt32 operationSet = XAUDIO2_COMMIT_NOW);
 
 	virtual Bool	Start();
 	virtual Bool	Start(UInt32 operationSet);

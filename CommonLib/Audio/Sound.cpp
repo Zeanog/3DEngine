@@ -20,11 +20,12 @@
 		m_FormatHash = Singleton<AudioSystem>::GetInstance()->GenerateHash(m_Format.Format);
 
 		m_DataSize = loader.DataSize();
-		m_Data = loader.Data();//Take ownership of the data.  This avoids another allocation and copy
-		assert(!loader.IsValid());//Verify that the pointer is nullptr
+		m_Data.release();
+		m_Data = std::move(loader.Data());
+		assert(!loader.IsValid());
 
-		auto bytesPerSmaple = m_Format.Format.wBitsPerSample / 8.0f;
-		m_Duration = (Float32)m_DataSize / (bytesPerSmaple * (Float32)m_Format.Format.nSamplesPerSec);
+		auto bytesPerSample = m_Format.Format.wBitsPerSample / 8.0f;
+		m_Duration = (Float32)m_DataSize / (bytesPerSample * (Float32)m_Format.Format.nSamplesPerSec);
 		return true;
 	}
 //}

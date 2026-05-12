@@ -46,6 +46,9 @@
     <Filter Include="Audio\Loaders">
       <UniqueIdentifier>{3a8ffd04-7a99-4d81-9002-491c46d5aca3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\Tests">
+      <UniqueIdentifier>{23851bfa-e909-434f-9d1b-ae7a5baa728f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\AssetManager.h">
@@ -231,19 +234,10 @@
     <ClInclude Include="System\Reflector.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="System\Audio\AParameters.h">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ModelLoaders\AMeshLoader.h">
-      <Filter>Rendering\ModelLoaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ModelLoaders\MeshLoader_FBX.h">
-      <Filter>Rendering\ModelLoaders</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\ModelLoaders\ModelLoader.h">
       <Filter>Rendering\ModelLoaders</Filter>
     </ClInclude>
-    <ClInclude Include="System\JsonLoader.h">
+    <ClInclude Include="System\JsonValueParsers.h">
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\ModelLoaders\SceneLoader.h">
@@ -291,9 +285,6 @@
     <ClInclude Include="Audio\Loaders\AudioLoader_MP3.h">
       <Filter>Audio\Loaders</Filter>
     </ClInclude>
-    <ClInclude Include="Audio\Loaders\AudioLoader_OggVorbis.h">
-      <Filter>Audio\Loaders</Filter>
-    </ClInclude>
     <ClInclude Include="Audio\Loaders\AudioLoader_RIFF.h">
       <Filter>Audio\Loaders</Filter>
     </ClInclude>
@@ -305,6 +296,46 @@
     </ClInclude>
     <ClInclude Include="Rendering\FlyingCamera.h">
       <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Reflector_glm.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\VertexBufferObject.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\FbxConversions.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\ASkeletonLoader.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\AFBXNodeParser.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\FBXNodeParser_Mesh.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\FBXHierarchyParser_Skeleton.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\FBXSceneParser_Animation.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\MeshLoader_FBX.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\IMeshLoader.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\AnimationRange.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ModelLoaders\ModelDef.h">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\Loaders\AudioLoader_Ogg.h" />
+    <ClInclude Include="System\Tests\MethodReflectorTest.h">
+      <Filter>System\Tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -407,16 +438,13 @@
     <ClCompile Include="System\File.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\ModelLoaders\MeshLoader_FBX.cpp">
-      <Filter>Rendering\ModelLoaders</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\ModelLoaders\ModelLoader.cpp">
       <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
     <ClCompile Include="System\String.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="System\JsonLoader.cpp">
+    <ClCompile Include="System\JsonValueParsers.cpp">
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ModelLoaders\SceneLoader.cpp">
@@ -452,14 +480,33 @@
     <ClCompile Include="Audio\Loaders\AudioLoader_MP3.cpp">
       <Filter>Audio\Loaders</Filter>
     </ClCompile>
-    <ClCompile Include="Audio\Loaders\AudioLoader_OggVorbis.cpp">
-      <Filter>Audio\Loaders</Filter>
-    </ClCompile>
     <ClCompile Include="Audio\Loaders\AudioLoader_RIFF.cpp">
       <Filter>Audio\Loaders</Filter>
     </ClCompile>
     <ClCompile Include="Audio\Loaders\SoundManager.cpp">
       <Filter>Audio\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\VertexBufferObject.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\Loaders\AAudioLoader.cpp">
+      <Filter>Audio\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Mesh.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Animation.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\FBXHierarchyParser_Skeleton.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ModelLoaders\MeshLoader_FBX.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\Loaders\AudioLoader_Ogg.cpp" />
+    <ClCompile Include="System\Tests\MethodReflectorTest.cpp">
+      <Filter>System\Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

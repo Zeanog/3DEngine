@@ -10,8 +10,8 @@ struct TNull {
 
 template< class THead, class TTail >
 struct TypeListNode {
-	typedef THead	Head;
-	typedef TTail	Tail;
+	typedef THead	THead;
+	typedef TTail	TTail;
 };
 
 #define TYPELIST( THead, TTail )				TypeListNode<THead, TTail>

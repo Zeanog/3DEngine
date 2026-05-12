@@ -10,22 +10,26 @@ ShaderProgramManager::~ShaderProgramManager() {
 }
 
 const ShaderProgramManager::TAsset*	ShaderProgramManager::Get(const StaticString& vertPath, const StaticString& fragPath) {
-	TAsset* asset{};
+	try {
+		TAsset* asset{};
+		//TODO: Please find a better way of doing this!!!!!
+		UInt32 pathLength = vertPath.Length() + fragPath.Length() + 1;
+		STACK_STRING(uniqueName, pathLength);
+		strcat_s(uniqueName.Str(), pathLength, vertPath.CStr());
+		strcat_s(uniqueName.Str(), pathLength, fragPath.CStr());
+		//TODO: Please find a better way of doing this!!!!!
 
-	//TODO: Please find a better way of doing this!!!!!
-	UInt32 pathLength = vertPath.Length() + fragPath.Length() + 1;
-	STACK_STRING(uniqueName, pathLength);
-	strcat_s(uniqueName.CStr(), pathLength, vertPath.CStr());
-	strcat_s(uniqueName.CStr(), pathLength, fragPath.CStr());
-	//TODO: Please find a better way of doing this!!!!!
+		if (m_Container.Find(uniqueName.CStr(), asset)) {
+			return asset;
+		}
 
-	if (m_Container.Find(uniqueName.CStr(), asset)) {
+		asset = new TAsset();
+		Load(uniqueName.CStr(), vertPath, fragPath, asset);
 		return asset;
 	}
-
-	asset = new TAsset();
-	Load(uniqueName.CStr(), vertPath, fragPath, asset);
-	return asset;
+	catch(...){
+		return nullptr;
+	}
 }
 
 void ShaderProgramManager::ReloadAll() {

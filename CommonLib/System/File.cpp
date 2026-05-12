@@ -24,8 +24,9 @@ const Char* File::RebuildFullPath(String& path, const Char* removePath, const Ch
 const Char* File::RebuildFullPath(const Char* path, const Char* removePath, const Char* addPath) {
 	Int32 index = String::FindIndexOf(path, removePath);
 	if (index < 0) {
+		UInt32 pathLen = String::StrLen(path);
 		for (int ix = 0, count = STATIC_ARRAY_LENGTH(File::Delimiters); ix < count; ++ix) {
-			index = String::FindLastOf(path, File::Delimiters[ix]);
+			index = String::FindLastOf(path, pathLen, File::Delimiters[ix]);
 			if (index >= 0) {
 				break;
 			}
@@ -80,7 +81,7 @@ const Char* FilePath::GetLocalPath(const StaticString& fullPath) {
 	try {
 		STACK_STRING(systemPath, MAX_PATH);
 
-		Int32 systemPathLength = GetCurrentDirectory(systemPath.Length(), systemPath.CStr());
+		Int32 systemPathLength = GetCurrentDirectory(systemPath.Length(), systemPath.Str());
 		auto index = fullPath.FindIndexOf(systemPath.CStr());
 		if (index < 0) {
 			return GetFileName(fullPath);

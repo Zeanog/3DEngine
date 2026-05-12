@@ -5,7 +5,7 @@
 #include "System/Functors/Functor.h"
 #include "Rendering/Mesh.h"
 #include "Shaders/ShaderProgram_GLSL.h"
-#include "System/Reflector.h"
+#include "Rendering/ModelLoaders/ModelDef.h"
 
 class IModelLoader {
 	CLASS_TYPEDEFS(IModelLoader)
@@ -16,12 +16,12 @@ public:
 };
 
 class ModelLoader : public IModelLoader {
-	INHERITEDCLASS_TYPEDEFS(ModelLoader, IModelLoader)
+	INHERITED_CLASS_TYPEDEFS(ModelLoader, IModelLoader)
 
 protected:
-	DEFINE_MEMBER_EX(Bool, InvertNormals)
+	ModelDef			m_Def;
 
-	StaticString		m_MeshFilePath;
+	DEFINE_MEMBER_EX(Bool, InvertNormals)
 
 	ShaderProgram_GLSL* m_ShaderProgram{};
 
@@ -31,14 +31,14 @@ protected:
 	static Map<StaticString, TFieldParser>	m_FieldParsers;
 
 protected:
-	void				ParseMesh(const rapidjson::Value& value);
-	void				ParseInvertedNormals(const rapidjson::Value& value);
-	void				ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL& inoutProgram);
-	void				ParseShaderProgram(const rapidjson::Value& value);
-	void				ParseShadowProgram(const rapidjson::Value& value);
+	void			ParseDef(const rapidjson::Value& value);
+	void			ParseInvertedNormals(const rapidjson::Value& value);
+	void			ParseProgram(const rapidjson::Value& value, ShaderProgram_GLSL& inoutProgram);
+	void			ParseShaderProgram(const rapidjson::Value& value);
+	void			ParseShadowProgram(const rapidjson::Value& value);
 
 	template<typename TData>
-	void				Parse(const rapidjson::Value& value, TData& outData) {
+	void			Parse(const rapidjson::Value& value, TData& outData) {
 		Singleton<ValueParser<TData>>::GetInstance()->Get(value, outData);
 	}
 
@@ -48,10 +48,10 @@ public:
 	ModelLoader();
 
 	Neo::Mesh*		Mesh() const;
-	const ShaderProgram_GLSL* GetShaderProgram() {
+	const ShaderProgram_GLSL* GetShaderProgram() const {
 		return m_ShaderProgram;
 	}
-	const ShaderProgram_GLSL* GetShadowPrograms() {
+	const ShaderProgram_GLSL* GetShadowPrograms() const {
 		return m_ShadowProgram;
 	}
 

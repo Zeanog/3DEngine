@@ -20,31 +20,30 @@ public:
 	DECLARE_GETSET(Parent)
 };
 
-class AMeshLoader;
-class Skeleton;
+class IMeshLoader;
 
 namespace Neo {
 	class Skeleton {
-	public:
-		//static void				DestroyTree(Joint* root);
-
 	protected:
-		List<Joint*>			m_Joints;
+		List<Joint>			m_Joints;
 
 	public:
 		Skeleton() {
 		}
 
 		~Skeleton() {
-			//Destroy(m_Joints);
+		}
+
+		List<Joint>&		Joints() {
+			return m_Joints;
 		}
 
 		Joint*		FindJoint(int index) {
-			return m_Joints[index];
+			return &m_Joints[index];
 		}
 
 		const Joint*		FindJoint(int index) const {
-			return m_Joints[index];
+			return &m_Joints[index];
 		}
 
 		Joint*		FindJoint(const StaticString& name);
@@ -53,8 +52,6 @@ namespace Neo {
 		UInt32					NumJoints() const {
 			return m_Joints.Length();
 		}
-
-		Bool UploadData(const AMeshLoader& loader);
 	};
 };
 
@@ -66,6 +63,9 @@ protected:
 
 public:
 	DECLARE_GETSET(Time)
+	UInt32		FrameDataCount() const {
+		return m_FrameData.Length();
+	}
 	
 	void	SetLocalTransform(int index, const glm::mat4& transform) {
 		m_FrameData.EnsureSize(index + 1);
@@ -75,17 +75,39 @@ public:
 	const glm::mat4& GetLocalTransform(int index) const;
 
 	glm::mat4 GetGlobalTransform(int index, const Neo::Skeleton& skeletonRef) const;
+
+	Bool	operator==(const AnimKeyFrame& rhs) const {
+		for( UInt32 ix = 0; ix < FrameDataCount(); ++ix ) {
+			if( m_FrameData[ix] != rhs.m_FrameData[ix] ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	Bool	operator!=(const AnimKeyFrame& rhs) const {
+		for (UInt32 ix = 0; ix < FrameDataCount(); ++ix) {
+			if (m_FrameData[ix] == rhs.m_FrameData[ix]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 };
 
 class AnimationClip {
 protected:
-	Float64		m_Duration;
-	Float32		m_FrameRate;
+	StaticString		m_Name;
+	Float64				m_Duration;
+	Float32				m_FrameRate;
 
 	List<AnimKeyFrame*>	m_Frames;
 
 public:
-	DECLARE_GETSET( Duration )
+	DECLARE_GETSET(Name)
+	DECLARE_GETSET(Duration)
 	DECLARE_GETSET(FrameRate)
 
 	UInt32		NumFrames() const {
@@ -102,5 +124,19 @@ public:
 
 	const AnimKeyFrame*	GetFrame(UInt32 index) const {
 		return m_Frames[index];
+	}
+
+	Bool	IsValid() const {
+		Bool result = false;
+		for(UInt32 iy = 0; iy < NumFrames(); ++iy) {
+			for (UInt32 ix = 0; ix < NumFrames(); ++ix) {
+				if(iy == ix) {
+					continue;
+				}
+
+				result |= (*m_Frames[ix]) != (*m_Frames[iy]);
+			}
+		}
+		return result;
 	}
 };

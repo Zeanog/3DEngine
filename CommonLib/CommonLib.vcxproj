@@ -27,7 +27,7 @@
     <ClInclude Include="Audio\EQParameters.h" />
     <ClInclude Include="Audio\Loaders\AAudioLoader.h" />
     <ClInclude Include="Audio\Loaders\AudioLoader_MP3.h" />
-    <ClInclude Include="Audio\Loaders\AudioLoader_OggVorbis.h" />
+    <ClInclude Include="Audio\Loaders\AudioLoader_Ogg.h" />
     <ClInclude Include="Audio\Loaders\AudioLoader_RIFF.h" />
     <ClInclude Include="Audio\Loaders\SoundManager.h" />
     <ClInclude Include="Audio\MasteringVoice.h" />
@@ -47,6 +47,7 @@
     <ClInclude Include="Lighting\LightPool.h" />
     <ClInclude Include="Math\Bounds.h" />
     <ClInclude Include="Math\MathUtils.h" />
+    <ClInclude Include="Math\Reflector_glm.h" />
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Rendering\Camera.h" />
     <ClInclude Include="Rendering\CameraInterpolator.h" />
@@ -57,21 +58,29 @@
     <ClInclude Include="Rendering\Joint.h" />
     <ClInclude Include="Rendering\Mesh.h" />
     <ClInclude Include="Rendering\Model.h" />
-    <ClInclude Include="Rendering\ModelLoaders\AMeshLoader.h" />
+    <ClInclude Include="Rendering\ModelLoaders\AFBXNodeParser.h" />
+    <ClInclude Include="Rendering\ModelLoaders\AnimationRange.h" />
+    <ClInclude Include="Rendering\ModelLoaders\ASkeletonLoader.h" />
+    <ClInclude Include="Rendering\ModelLoaders\FbxConversions.h" />
+    <ClInclude Include="Rendering\ModelLoaders\IMeshLoader.h" />
     <ClInclude Include="Rendering\ModelLoaders\MeshLoader_FBX.h" />
+    <ClInclude Include="Rendering\ModelLoaders\FBXNodeParser_Mesh.h" />
+    <ClInclude Include="Rendering\ModelLoaders\FBXHierarchyParser_Skeleton.h" />
+    <ClInclude Include="Rendering\ModelLoaders\FBXSceneParser_Animation.h" />
     <ClInclude Include="Rendering\ModelLoaders\MeshManager.h" />
+    <ClInclude Include="Rendering\ModelLoaders\ModelDef.h" />
     <ClInclude Include="Rendering\ModelLoaders\ModelLoader.h" />
     <ClInclude Include="Rendering\ModelLoaders\ModelManager.h" />
     <ClInclude Include="Rendering\ModelLoaders\SceneLoader.h" />
     <ClInclude Include="Rendering\RenderDef.h" />
     <ClInclude Include="Rendering\VertexBuffer.h" />
+    <ClInclude Include="Rendering\VertexBufferObject.h" />
     <ClInclude Include="Shaders\ShaderManager_Fragment.h" />
     <ClInclude Include="Shaders\ShaderManager_Vertex.h" />
     <ClInclude Include="Shaders\ShaderProgramManager.h" />
     <ClInclude Include="Shaders\ShaderProgram_GLSL.h" />
     <ClInclude Include="Shaders\Shader_GLSL.h" />
     <ClInclude Include="System\AssetManager.h" />
-    <ClInclude Include="System\Audio\AParameters.h" />
     <ClInclude Include="System\Color.h" />
     <ClInclude Include="System\Configuration.h" />
     <ClInclude Include="System\DataStructureLibrary.h" />
@@ -91,7 +100,7 @@
     <ClInclude Include="System\Input\Keyboard.h" />
     <ClInclude Include="System\Input\Mouse.h" />
     <ClInclude Include="System\Input\VirtualKey.h" />
-    <ClInclude Include="System\JsonLoader.h" />
+    <ClInclude Include="System\JsonValueParsers.h" />
     <ClInclude Include="System\LinkedList.h" />
     <ClInclude Include="System\List.h" />
     <ClInclude Include="System\Map.h" />
@@ -101,6 +110,7 @@
     <ClInclude Include="System\StackString.h" />
     <ClInclude Include="System\StaticString.h" />
     <ClInclude Include="System\String.h" />
+    <ClInclude Include="System\Tests\MethodReflectorTest.h" />
     <ClInclude Include="System\Typedefs.h" />
     <ClInclude Include="System\Win32\Error.h" />
     <ClInclude Include="System\Win32\Window.h" />
@@ -110,8 +120,9 @@
     <ClCompile Include="Audio\AudioSystem.cpp" />
     <ClCompile Include="Audio\EchoParameters.cpp" />
     <ClCompile Include="Audio\EQParameters.cpp" />
+    <ClCompile Include="Audio\Loaders\AAudioLoader.cpp" />
     <ClCompile Include="Audio\Loaders\AudioLoader_MP3.cpp" />
-    <ClCompile Include="Audio\Loaders\AudioLoader_OggVorbis.cpp" />
+    <ClCompile Include="Audio\Loaders\AudioLoader_Ogg.cpp" />
     <ClCompile Include="Audio\Loaders\AudioLoader_RIFF.cpp" />
     <ClCompile Include="Audio\Loaders\SoundManager.cpp" />
     <ClCompile Include="Audio\MasteringVoice.cpp" />
@@ -141,12 +152,16 @@
     <ClCompile Include="Rendering\Mesh.cpp" />
     <ClCompile Include="Rendering\Model.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\MeshLoader_FBX.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Animation.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Mesh.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\FBXHierarchyParser_Skeleton.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\ModelLoader.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\ModelManager.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\SceneLoader.cpp" />
     <ClCompile Include="Rendering\RenderDef.cpp" />
     <ClCompile Include="Rendering\VertexBuffer.cpp" />
+    <ClCompile Include="Rendering\VertexBufferObject.cpp" />
     <ClCompile Include="Shaders\ShaderManager_Fragment.cpp" />
     <ClCompile Include="Shaders\ShaderManager_Vertex.cpp" />
     <ClCompile Include="Shaders\ShaderProgramManager.cpp" />
@@ -156,9 +171,10 @@
     <ClCompile Include="System\Configuration.cpp" />
     <ClCompile Include="System\DebugConsole.cpp" />
     <ClCompile Include="System\File.cpp" />
-    <ClCompile Include="System\JsonLoader.cpp" />
+    <ClCompile Include="System\JsonValueParsers.cpp" />
     <ClCompile Include="System\StaticString.cpp" />
     <ClCompile Include="System\String.cpp" />
+    <ClCompile Include="System\Tests\MethodReflectorTest.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />
     <ClCompile Include="TinyXML\tinyxml2.cpp" />
   </ItemGroup>
@@ -228,11 +244,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;FBXSDK_SHARED;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)Rendering\ModelLoaders\FbxSdk\include;$(ProjectDir)\Math;$(ProjectDir)..\..\tinyxml;$(ProjectDir)freeglut\include;$(SolutionDir)packages\rapidjson.1.0.2\build\native\include;$(ProjectDir)glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

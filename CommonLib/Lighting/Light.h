@@ -32,7 +32,7 @@ public:
 			DeletePtr(m_ShadowFBO);
 		}
 		else if( !CastsShadows() && castsShadows ) {
-			m_ShadowFBO = new FrameBufferObject_Depth(1024, 768);
+			m_ShadowFBO = new FrameBufferObject_Depth(1024, 768);//ALLOCATING THIS HERE IS REALLY DUMB BUT IT WILL DO FOR NOW
 			InitShadowMap();
 		}
 	}
@@ -49,7 +49,7 @@ public:
 		}
 	}
 
-	virtual 	const RenderTarget*				LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const = 0;
+	virtual 	const IRenderTarget*				LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const = 0;
 
 	void				DebugRenderMap(float xPos, float yPos, float renderWidth, float renderHeight) const {
 		m_ShadowFBO->showTexture("tShadowMap", renderWidth, renderHeight, xPos, yPos);
@@ -61,18 +61,18 @@ public:
 	}
 
 protected:
-	FrameBufferObject*			m_ShadowFBO;
+	FrameBufferObject* m_ShadowFBO;
 
 public:
 	ALight();
 
 	virtual ~ALight();
 
-	virtual const RenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const = 0;
+	virtual const IRenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const = 0;
 };
 
 class Light_Directional : public ALight {
-	INHERITEDCLASS_TYPEDEFS( Light_Directional, ALight );
+	INHERITED_CLASS_TYPEDEFS( Light_Directional, ALight )
 
 public:
 	static void	PreShadowRender();
@@ -94,14 +94,14 @@ public:
 
 	glm::mat4				Transform() const;
 
-	virtual const RenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
-	virtual const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual const IRenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual const IRenderTarget*		LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 
 	virtual void DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform) override;
 };
 
 class Light_Point : public ALight {
-	INHERITEDCLASS_TYPEDEFS( Light_Point, ALight )
+	INHERITED_CLASS_TYPEDEFS( Light_Point, ALight )
 
 public:
 
@@ -136,12 +136,12 @@ public:
 	DECLARE_GETSET(LinearAttenuation)
 	DECLARE_GETSET(QuadraticAttenuation)
 
-	virtual const RenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
-	virtual 	const RenderTarget*				LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual const IRenderTarget*		LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual 	const IRenderTarget*	LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
 };
 
 class Light_Spot : public ALight {
-	INHERITEDCLASS_TYPEDEFS( Light_Spot, ALight)
+	INHERITED_CLASS_TYPEDEFS( Light_Spot, ALight)
 
 public:
 	static void RenderShadows(const Functor<void>& perLightRenderHandler, const ICamera& camera);
@@ -149,26 +149,19 @@ public:
 protected:
 	glm::mat4	m_ProjectionMatrix{};
 
-	glm::mat4	m_Transform{};
+	glm::mat4	m_Transform{glm::identity<glm::mat4>()};
+	glm::vec3*	m_Position = reinterpret_cast<glm::vec3*>(&m_Transform[3]);
+	glm::vec3*	m_Direction = reinterpret_cast<glm::vec3*>(&m_Transform[2]);
 
-	Float32		m_ConstantAttenuation = 0.0f;
-	Float32		m_LinearAttenuation = 0.0f;
-	Float32		m_QuadraticAttenuation = 0.0f;
-	Float32		m_Exponent = 0.0f;
 	Float32		m_CosCutoff = 0.0f;
 
 	Float32		m_FOV = 0.0f;
 	Float32		m_AspectRatio = 0.0f;
+	Float32		m_Distance = 100.0f;
 
 protected:
 	void	PreShadowRender();
 	void	PostShadowRender();
-
-	virtual void		InitShadowMap() override {
-		m_ShadowFBO->Bind();
-		m_ShadowFBO->AddTarget("tShadowMap", GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
-		m_ShadowFBO->Unbind();
-	}
 
 public:
 	Light_Spot();
@@ -176,12 +169,9 @@ public:
 	virtual ~Light_Spot();
 
 	DECLARE_GETSET(Transform)
-	DECLARE_GETSET(ConstantAttenuation)
-	DECLARE_GETSET(LinearAttenuation)
-	DECLARE_GETSET(QuadraticAttenuation)
-	DECLARE_GETSET(Exponent)
 	DECLARE_GETSET(AspectRatio)
 	DECLARE_GETSET(ProjectionMatrix)
+	DECLARE_GETSET(Distance)
 
 	void FOV(Float32 fov) {
 		m_FOV = fov;
@@ -192,26 +182,22 @@ public:
 		return m_FOV;
 	}
 
-	glm::vec3	Position() const {
-		return m_Transform[3];
+	const glm::vec3&	Position() const {
+		return *m_Position;
 	}
 
 	void		Position(const glm::vec3& pt) {
-		m_Transform[3] = glm::vec4(pt, 1.0f);
+		*m_Position = glm::vec4(pt, 1.0f);
 	}
 
-	glm::vec3	Direction() const {
-		return m_Transform[2];
+	const glm::vec3&	Direction() const {
+		return *m_Direction;
 	}
 
-	/*void	Direction(const glm::vec3& dir) {
-		m_Transform[2] = glm::vec4(dir, 1.0f);
-	}*/
-
-	virtual const RenderTarget*			LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
-	virtual 	const RenderTarget*		LinkShadowMapTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
-	void								DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform);
+	virtual const IRenderTarget*	LinkTo(const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	virtual const IRenderTarget*	LinkShadowMapTo(UInt32 location, const ShaderProgram_GLSL& program, const Neo::Bounds& bounds, const ICamera& camera) const override;
+	void							DebugRender(ShaderProgram_GLSL& program, const glm::mat4& transform);
 
 	//AOB: Then remove ToMat4x4 and just use Transform getter
-	virtual glm::mat4		AsCameraTransform() const;
+	virtual const glm::mat4&		AsCameraTransform() const;
 };

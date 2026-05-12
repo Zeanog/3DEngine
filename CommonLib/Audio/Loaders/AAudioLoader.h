@@ -3,6 +3,7 @@
 #include "System\Typedefs.h"
 #include "System\String.h"
 #include "System\StaticString.h"
+#include "System\Map.h"
 
 #include <xaudio2.h>
 #include <memory>
@@ -14,10 +15,19 @@ protected:
 
 	WAVEFORMATEXTENSIBLE	m_Format{};
 
+	static Map<UInt32, DWORD>	m_ChannelCountToChannelMaskMap;
+
 protected:
 	AAudioLoader() {}
 
 public:
+	static void	InitializeChannelMaskMap();
+
+	static DWORD	GetChannelMask(UInt32 channelCount) {
+		assert(m_ChannelCountToChannelMaskMap.Contains(channelCount));
+		return m_ChannelCountToChannelMaskMap[channelCount];
+	}
+
 	virtual Bool	Load(const Char* fileName) = 0;
 
 	virtual Bool	Load(const StaticString& fileName) {
@@ -45,13 +55,9 @@ public:
 		return m_Format;
 	}
 
-	virtual WAVEFORMATEXTENSIBLE& Format() {
-		return m_Format;
-	}
-
-	virtual std::unique_ptr<Byte>&& Data() {
+	virtual std::unique_ptr<Byte>& Data() {
 		assert(m_AudioData.get());
-		return std::move(m_AudioData);
+		return m_AudioData;
 	}
 
 	UInt32	DataSize() const {
