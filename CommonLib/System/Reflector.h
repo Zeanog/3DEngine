@@ -137,40 +137,41 @@ struct function_traits<R(C::*)(TArgs...)> {
 	typedef typename MethodInfo<R, C, TArgs...> TMethodInfo;
 };
 
-#define METHOD_INFO_TYPE_FOR( owner, method ) typename function_traits<decltype(&owner::method)>::TMethodInfo
+#define METHOD_INFO_TYPE_FOR( methodPtr ) typename function_traits<decltype(methodPtr)>::TMethodInfo
+#define METHOD_INFO_TYPE_FROM( methodType ) typename function_traits<methodType>::TMethodInfo
 
-#define CREATE_METHOD_INFO_FOR( owner, method ) METHOD_INFO_TYPE_FOR(owner, method)(#method, &owner::method)
+#define CREATE_METHOD_INFO_FOR( owner, methodType, method ) METHOD_INFO_TYPE_FROM(methodType)(#method, (methodType)&owner::method)
 
-#define REGISTER_METHODS_1( owner, methodListName, method1 ) \
-METHODNODE_TYPE_1(METHOD_INFO_TYPE_FOR(owner, method1))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1),								\
+#define REGISTER_METHODS_1( owner, methodListName, method1Type, method1 ) \
+METHODNODE_TYPE_1(METHOD_INFO_TYPE_FOR(&owner::method1))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
 		TNull()	\
 };
 
 #define REGISTER_METHODS_2( owner, methodListName, method1, method2 ) \
-METHODNODE_TYPE_2(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(owner, method2))	methodListName = {	\
+METHODNODE_TYPE_2(METHOD_INFO_TYPE_FOR(&owner::method1), METHOD_INFO_TYPE_FOR(owner, method2))	methodListName = {	\
 		CREATE_METHOD_INFO_FOR(owner, method1),								\
 		METHODNODE_1(	\
-			METHOD_INFO_TYPE_FOR(owner, method2), CREATE_METHOD_INFO_FOR(owner, method2)	\
+			METHOD_INFO_TYPE_FOR(&owner::method2), CREATE_METHOD_INFO_FOR(owner, method2)	\
 		)	\
 };
 
-#define REGISTER_METHODS_3( owner, methodListName,  method1, method2, method3 ) \
-METHODNODE_TYPE_3(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(owner, method2), METHOD_INFO_TYPE_FOR(owner, method3))	methodListName = {	\
+#define REGISTER_METHODS_3( owner, methodListName, method1, method2, method3 ) \
+METHODNODE_TYPE_3(METHOD_INFO_TYPE_FOR(&owner::method1), METHOD_INFO_TYPE_FOR(&owner::method2), METHOD_INFO_TYPE_FOR(&owner::method3))	methodListName = {	\
 		CREATE_METHOD_INFO_FOR(owner, method1),								\
 		METHODNODE_2(	\
-			METHOD_INFO_TYPE_FOR(owner, method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
-			METHOD_INFO_TYPE_FOR(owner, method3), CREATE_METHOD_INFO_FOR(owner, method3)	\
+			METHOD_INFO_TYPE_FOR(&owner::method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
+			METHOD_INFO_TYPE_FOR(&owner::method3), CREATE_METHOD_INFO_FOR(owner, method3)	\
 		)	\
 };
 
-#define REGISTER_METHODS_4( owner, methodListName,  method1, method2, method3, method4 ) \
-METHODNODE_TYPE_4(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(owner, method2), METHOD_INFO_TYPE_FOR(owner, method3), METHOD_INFO_TYPE_FOR(owner, method4))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1),								\
+#define REGISTER_METHODS_4( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4 ) \
+METHODNODE_TYPE_4(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type), METHOD_INFO_TYPE_FROM(method4Type))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
 		METHODNODE_3(	\
-			METHOD_INFO_TYPE_FOR(owner, method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
-			METHOD_INFO_TYPE_FOR(owner, method3), CREATE_METHOD_INFO_FOR(owner, method3),	\
-			METHOD_INFO_TYPE_FOR(owner, method4), CREATE_METHOD_INFO_FOR(owner, method4)	\
+			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
+			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3),	\
+			METHOD_INFO_TYPE_FROM(method4Type), CREATE_METHOD_INFO_FOR(owner, method4Type, method4)	\
 		)	\
 };
 
