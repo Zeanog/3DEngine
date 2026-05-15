@@ -11,8 +11,13 @@ protected:
 public:
 	DECLARE_GETSET(Value)
 
+	//TODO: Make a typelist of method types per method name.
 	void F() {
 		m_Value = 1;
+	}
+
+	void F(UInt32 ui) {
+		m_Value = ui;
 	}
 
 	Bool F1(const char* str, UInt32 num) {
@@ -30,18 +35,17 @@ public:
 //TODO: Add Support for getters and setters with similar names but different signatures (e.g. Value() and Value(UInt32 value)) and possibly properties with the same name as well (e.g. Value member and Value() method)
 template<>
 class Reflector<MethodReflectorTest> : public AReflectorJson {
+private:
 	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
 	SINGLETON_DECLARATIONS(Reflector)
 	{
-		METHOD_INFO_TYPE_FOR(TReflected, F1)* methodInfo;
-		if (FindMethodInfo("F1", methodInfo)) {
-			methodInfo->Call((TReflected*)nullptr, "Hello", 5);
-		}
+		/*METHOD_INFO_TYPE_FROM(TFMethodSignature2)* methodInfo;
+		if (FindMethodInfo("F", methodInfo)) {
+			methodInfo->Call((TReflected*)nullptr, 5);
+		}*/
 	}
 
 public:
-	typedef MethodReflectorTest	TReflected;
-
 	template<typename TMethodInfo>
 	Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo) const {
 		return m_MethodList.FindMethodInfo(methodName, outMethodInfo);
@@ -51,6 +55,12 @@ public:
 		return m_MethodList.HasMethod(methodName);
 	}
 
+	typedef MethodReflectorTest	TReflected;
+	using TFMethodSignature1 = void(TReflected::*)();
+	using TFMethodSignature2 = void(TReflected::*)(UInt32);
+	using TF1MethodSignature = Bool(TReflected::*)(const char*, UInt32);
+	using TF2MethodSignature = Int32(TReflected::*)();
+
 protected:
-	REGISTER_METHODS_3(TReflected, m_MethodList, F, F1, F2)
+	REGISTER_METHODS_4(TReflected, m_MethodList, TFMethodSignature1, F, TFMethodSignature2, F, TF1MethodSignature, F1, TF2MethodSignature, F2)
 };
