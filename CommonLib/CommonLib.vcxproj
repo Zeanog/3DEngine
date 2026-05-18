@@ -89,6 +89,7 @@
     <ClInclude Include="System\Flash\Dispatcher.h" />
     <ClInclude Include="System\Flash\SWF.h" />
     <ClInclude Include="System\Functors\FunctionHandler.h" />
+    <ClInclude Include="System\Functors\FunctionTraits.h" />
     <ClInclude Include="System\Functors\Functor.h" />
     <ClInclude Include="System\Functors\IFunctorImpl.h" />
     <ClInclude Include="System\Functors\MemberFunctionHandler.h" />

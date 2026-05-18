@@ -16,7 +16,7 @@ public:
 		m_Value = 1;
 	}
 
-	void F(UInt32 ui) {
+	void F(UInt32 ui, Bool b) {
 		m_Value = ui;
 	}
 
@@ -32,35 +32,41 @@ public:
 	}
 };
 
-//TODO: Add Support for getters and setters with similar names but different signatures (e.g. Value() and Value(UInt32 value)) and possibly properties with the same name as well (e.g. Value member and Value() method)
+#include "System/Functors/TypeList.h"
+
+#define DEFINE_SIGNATURE_ACCESSORS_FOR(methodName) \
+template<std::size_t N>				\
+using SignatureFor##methodName = TypeAt<TMethodSignatures_##methodName, N>::Result;
+
+#define DEFINE_SIGNATURE_ACCESSOR_FOR(methodName) \
+using SignatureFor##methodName = TypeAt<TMethodSignatures_##methodName, 0>::Result;
+
 template<>
 class Reflector<MethodReflectorTest> : public AReflectorJson {
 private:
 	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
-	SINGLETON_DECLARATIONS(Reflector)
-	{
-		/*METHOD_INFO_TYPE_FROM(TFMethodSignature2)* methodInfo;
-		if (FindMethodInfo("F", methodInfo)) {
-			methodInfo->Call((TReflected*)nullptr, 5);
-		}*/
-	}
+	SINGLETON_DECLARATIONS(Reflector) {}
 
 public:
-	template<typename TMethodInfo>
-	Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo) const {
-		return m_MethodList.FindMethodInfo(methodName, outMethodInfo);
-	}
-
-	Bool HasMethod(const StaticString& methodName) const {
-		return m_MethodList.HasMethod(methodName);
-	}
+	DEFINE_METHOD_ACCESSORS(m_MethodList)
 
 	typedef MethodReflectorTest	TReflected;
-	using TFMethodSignature1 = void(TReflected::*)();
-	using TFMethodSignature2 = void(TReflected::*)(UInt32);
-	using TF1MethodSignature = Bool(TReflected::*)(const char*, UInt32);
-	using TF2MethodSignature = Int32(TReflected::*)();
+
+	//I wish I could auto-magically determine these
+	using TMethodSignatures_F = TYPELIST_2( void(TReflected::*)(), void(TReflected::*)(UInt32, Bool) );
+	using TMethodSignatures_F1 = TYPELIST_1( Bool(TReflected::*)(const char*, UInt32) );
+	using TMethodSignatures_F2 = TYPELIST_1( Int32(TReflected::*)() );
+
+	DEFINE_SIGNATURE_ACCESSORS_FOR(F)
+	DEFINE_SIGNATURE_ACCESSOR_FOR(F1)
+	DEFINE_SIGNATURE_ACCESSOR_FOR(F2)
 
 protected:
-	REGISTER_METHODS_4(TReflected, m_MethodList, TFMethodSignature1, F, TFMethodSignature2, F, TF1MethodSignature, F1, TF2MethodSignature, F2)
+	REGISTER_METHODS_4(
+		MethodReflectorTest, m_MethodList,
+		SignatureForF<0>, F,
+		SignatureForF<1>, F,
+		SignatureForF1, F1,
+		SignatureForF2, F2
+	)
 };

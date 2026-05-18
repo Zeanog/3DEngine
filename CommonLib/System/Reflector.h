@@ -2,7 +2,8 @@
 
 #include "System/StaticString.h"
 #include "System/Singleton.h"
-#include "System/JsonValueParsers.h"
+#include "System/Functors/TypeList.h"
+#include "System/Map.h"
 
 template<typename TObject>
 class Reflector;
@@ -89,8 +90,13 @@ public:
 	DECLARE_GETSET(MethodName)
 
 	template<typename TCaller>
-	constexpr Bool CanCall() const {
-		return std::same_as<TCaller, TObject> || std::is_base_of<TObject, TCaller>::value;
+	constexpr Bool CanCall() const {//TODO: TEST THIS
+		return std::same_as<TCaller, TObject> || std::is_base_of<TCaller, TObject>::value;
+	}
+
+	template<typename TCaller>
+	Bool CanCall( TCaller* caller ) const {//TODO: TEST THIS
+		return CanCall<TCaller>() && caller != nullptr;
 	}
 
 	template<typename TCaller>
@@ -98,47 +104,18 @@ public:
 		assert(caller);
 		assert(m_Method);
 		
-		if (CanCall<TCaller>()) {
-			return  (caller->*m_Method)(args...);
-		}
-		else {
+		if(!CanCall(caller)) {
 			return TReturn();
 		}
+
+		return (caller->*m_Method)(args...);
 	}
 };
 
-#include <tuple>
+#include "System/Functors/FunctionTraits.h"
 
-// Base template
-template<typename T>
-struct function_traits;
-
-// Specialization for regular functions
-template<typename R, typename... TArgs>
-struct function_traits<R(TArgs...)> {
-	using TReturn = R;
-	
-	static constexpr std::size_t NumArgs = sizeof...(TArgs);
-
-	// Helper to get a specific argument type by index
-	template<std::size_t N>
-	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
-};
-
-template<typename R, typename C, typename... TArgs>
-struct function_traits<R(C::*)(TArgs...)> {
-	using TReturn = R;
-	static constexpr std::size_t NumArgs = sizeof...(TArgs);
-
-	// Helper to get a specific argument type by index
-	template<std::size_t N>
-	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
-
-	typedef typename MethodInfo<R, C, TArgs...> TMethodInfo;
-};
-
-#define METHOD_INFO_TYPE_FOR( methodPtr ) typename function_traits<decltype(methodPtr)>::TMethodInfo
-#define METHOD_INFO_TYPE_FROM( methodType ) typename function_traits<methodType>::TMethodInfo
+#define METHOD_INFO_TYPE_FOR( methodPtr ) typename FunctionTraits<decltype(methodPtr)>::TMethodInfo
+#define METHOD_INFO_TYPE_FROM( methodType ) typename FunctionTraits<methodType>::TMethodInfo
 
 #define CREATE_METHOD_INFO_FOR( owner, methodType, method ) METHOD_INFO_TYPE_FROM(methodType)(#method, (methodType)&owner::method)
 
@@ -186,6 +163,15 @@ METHODNODE_TYPE_5(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(own
 		)	\
 };
 
+#define DEFINE_METHOD_ACCESSORS(methodListName) \
+template<typename TMethodInfo>				\
+Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo) const { \
+	return methodListName.FindMethodInfo(methodName, outMethodInfo); \
+} \
+Bool HasMethod(const StaticString& methodName) const { \
+	return methodListName.HasMethod(methodName);	\
+}
+
 class AReflector {
 	ABSTRACT_CLASS_TYPEDEFS(AReflector) {}
 
@@ -197,7 +183,7 @@ protected:
 	Map<StaticString, MemberInfo>	m_MemberInfoMap;
 
 protected:
-	template<typename TMember> //TODO: Possibly handle container types and pointers
+	template<typename TMember> //TODO: Verify we handle container types and pointers
 	void	RegisterMember(const StaticString& memberName, UInt64 offset) {
 		m_MemberInfoMap.Add(memberName, { offset, sizeof(TMember) });
 	}
@@ -239,6 +225,8 @@ public:
 		return true;
 	}
 };
+
+#include "System/JsonValueParsers.h"
 
 class AReflectorJson : public AReflector {
 	INHERITED_CLASS_TYPEDEFS(AReflectorJson, AReflector)
