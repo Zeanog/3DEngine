@@ -90,7 +90,7 @@ public:
 	DECLARE_GETSET(MethodName)
 
 	template<typename TCaller>
-	constexpr Bool CanCall() const {//TODO: TEST THIS
+	constexpr Bool CanCall() const {//TODO: TEST THIS!  Especially is_base_of use
 		return std::same_as<TCaller, TObject> || std::is_base_of<TCaller, TObject>::value;
 	}
 
@@ -163,14 +163,16 @@ METHODNODE_TYPE_5(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(own
 		)	\
 };
 
-#define DEFINE_METHOD_ACCESSORS(methodListName) \
+#define DEFINE_METHODINFO_ACCESSORS(methodListName) \
 template<typename TMethodInfo>				\
 Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo) const { \
 	return methodListName.FindMethodInfo(methodName, outMethodInfo); \
 } \
 Bool HasMethod(const StaticString& methodName) const { \
 	return methodListName.HasMethod(methodName);	\
-}
+}	\
+template<typename TMethod>	\
+using MethodInfoFor = METHOD_INFO_TYPE_FROM(TMethod);
 
 class AReflector {
 	ABSTRACT_CLASS_TYPEDEFS(AReflector) {}

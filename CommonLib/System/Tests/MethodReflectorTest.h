@@ -36,10 +36,13 @@ public:
 
 #define DEFINE_SIGNATURE_ACCESSORS_FOR(methodName) \
 template<std::size_t N>				\
-using SignatureFor##methodName = TypeAt<TMethodSignatures_##methodName, N>::Result;
+using SignatureFor##methodName = TypeAt<TMethodSignatures_##methodName, N>::Result;	\
+template<std::size_t N>				\
+using MethodInfo##SignatureFor##methodName = METHOD_INFO_TYPE_FROM(SignatureFor##methodName<N>);
 
 #define DEFINE_SIGNATURE_ACCESSOR_FOR(methodName) \
-using SignatureFor##methodName = TypeAt<TMethodSignatures_##methodName, 0>::Result;
+using SignatureFor##methodName = TypeAt<TMethodSignatures_##methodName, 0>::Result;	\
+using MethodInfo##SignatureFor##methodName = METHOD_INFO_TYPE_FROM(SignatureFor##methodName);
 
 template<>
 class Reflector<MethodReflectorTest> : public AReflectorJson {
@@ -48,7 +51,7 @@ private:
 	SINGLETON_DECLARATIONS(Reflector) {}
 
 public:
-	DEFINE_METHOD_ACCESSORS(m_MethodList)
+	DEFINE_METHODINFO_ACCESSORS(m_MethodList)
 
 	typedef MethodReflectorTest	TReflected;
 
