@@ -337,6 +337,9 @@
     <ClInclude Include="System\Tests\MethodReflectorTest.h">
       <Filter>System\Tests</Filter>
     </ClInclude>
+    <ClInclude Include="System\Functors\FunctionTraits.h">
+      <Filter>System\Functors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\StaticString.cpp">
