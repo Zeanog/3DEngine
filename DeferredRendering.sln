@@ -11,6 +11,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonLib", "CommonLib\CommonLib.vcxproj", "{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest_Reflection", "UnitTest_Reflection\UnitTest_Reflection.vcxproj", "{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0970B8EF-258C-4C9D-8598-02DC23D6AF70} = {0970B8EF-258C-4C9D-8598-02DC23D6AF70}
+		{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235} = {6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
