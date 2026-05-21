@@ -19,7 +19,7 @@ public:
 	}
 
 	String( const Char* str ) {
-		m_Data = str;
+		m_Data.assign(str);
 	}
 
 	const Char*	CStr() const {
@@ -111,7 +111,7 @@ public:
 	static const Char* Replace(const Char* str, UInt32 offset, Int32 count, const Char* newSubString);
 
 public:
-	inline static UInt32	StrLen( const Char* str ) {
+	inline static UInt32	Length( const Char* str ) {
 		/*UInt32 strLen = 0;
 		while (str[strLen]) {
 			++strLen;
@@ -141,4 +141,18 @@ public:
 	}
 
 	static Char* Format(const char* format, ...);
+
+	template<typename TAction>
+	static void ConvertFor(const char* formattedString, TAction action) {
+		size_t formattedStringLen = String::Length(formattedString);
+		size_t wcStrLen = formattedStringLen * sizeof(wchar_t);
+		auto wcStr = STACK_ALLOC(wchar_t, wcStrLen);
+		size_t convertedChars = 0;
+
+		// Convert mbStr to wcStr
+		// _TRUNCATE allows the function to copy as much as fits
+		errno_t err = mbstowcs_s(&convertedChars, wcStr, wcStrLen, formattedString, _TRUNCATE);
+		assert(!err);
+		action(wcStr, NULL);
+	}
 };

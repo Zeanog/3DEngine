@@ -13,6 +13,15 @@ Bool FBXNodeParser_Mesh::GetMaterialFactor(const FbxProperty& lProperty, Neo::Me
 	return mat->UpdateChannel(channelName, Color<Float32>((float)lResult, (float)lResult, (float)lResult, 1.0f));
 }
 
+Bool FBXNodeParser_Mesh::GetMaterialColor(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName) {
+		if (!lProperty.IsValid())
+	{
+		return false;
+	}
+	FbxDouble3 lResult = lProperty.Get<FbxDouble3>();
+	return mat->UpdateChannel(channelName, Color<Float32>((float)lResult[0], (float)lResult[1], (float)lResult[2], 1.0f));
+}
+
 #include "Images/ImageManager.h"
 Bool FBXNodeParser_Mesh::GetMaterialTexture(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName) {
 	if (!lProperty.IsValid())

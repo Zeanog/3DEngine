@@ -73,7 +73,7 @@ public:
 	}
 
 	StackString&	operator=(const Char* rhs) {
-		auto rhsLen = String::StrLen(rhs);
+		auto rhsLen = String::Length(rhs);
 		assert(m_Allocated > rhsLen);
 		m_Length = rhsLen;
 		String::StrCpy(m_pData, m_Allocated, rhs);
@@ -82,4 +82,4 @@ public:
 };
 
 #define STACK_STRING( name, length)	StackString name(STACK_ALLOC(Char, (length)), (length))
-#define STACK_STRING_COPY( name, cstr )	StackString name(STACK_ALLOC(Char, String::StrLen(cstr)), String::StrLen(cstr), cstr)
+#define STACK_STRING_COPY( name, cstr )	StackString name(STACK_ALLOC(Char, String::Length(cstr)), String::Length(cstr), cstr)

@@ -24,7 +24,7 @@ const Char* File::RebuildFullPath(String& path, const Char* removePath, const Ch
 const Char* File::RebuildFullPath(const Char* path, const Char* removePath, const Char* addPath) {
 	Int32 index = String::FindIndexOf(path, removePath);
 	if (index < 0) {
-		UInt32 pathLen = String::StrLen(path);
+		UInt32 pathLen = String::Length(path);
 		for (int ix = 0, count = STATIC_ARRAY_LENGTH(File::Delimiters); ix < count; ++ix) {
 			index = String::FindLastOf(path, pathLen, File::Delimiters[ix]);
 			if (index >= 0) {

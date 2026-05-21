@@ -10,7 +10,7 @@ Bool ConfigurationSection::LoadFrom(const Char* sectionName, const Char* fileNam
 
 		const Char* curKey = sectionKeys.CStr();
 		while (curKey && curKey[0]) {
-			int l = String::StrLen(curKey);
+			int l = String::Length(curKey);
 
 			GetPrivateProfileString(sectionName, curKey, "", sectionVal.Str(), sectionVal.Allocated(), fileName);
 
@@ -35,7 +35,7 @@ Bool Configuration::LoadFrom(const Char* relativeFilePath) {
 
 		const Char* curSec = sectionNames.CStr();
 		while (curSec && curSec[0]) {
-			int l = String::StrLen(curSec);
+			int l = String::Length(curSec);
 
 			ConfigurationSection section;
 			section.LoadFrom(curSec, m_FilePath.CStr());

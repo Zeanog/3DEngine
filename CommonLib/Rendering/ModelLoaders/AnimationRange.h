@@ -39,7 +39,7 @@ public:
 			auto startLength = index;
 			STACK_STRING(startFrameStr, startLength + 1);
 			strncpy_s(startFrameStr.Str(), startLength + 1, encodedRange, startLength);
-			auto endLength = String::StrLen(encodedRange) - (index + 1);
+			auto endLength = String::Length(encodedRange) - (index + 1);
 			STACK_STRING(endFrameStr, endLength + 1);
 			strncpy_s(endFrameStr.Str(), endLength + 1, encodedRange + startLength + 1, endLength);
 
@@ -58,6 +58,6 @@ public:
 
 	virtual void Set(const TValue& value, rapidjson::Value& outValue) const override {
 		const auto formatedRange = String::Format("%d:%d", value.StartFrame, value.EndFrame);
-		outValue.SetString(formatedRange, String::StrLen(formatedRange));
+		outValue.SetString(formatedRange, String::Length(formatedRange));
 	}
 };

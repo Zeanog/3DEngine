@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36408.4 d17.14
+VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredRendering", "DeferredRendering.vcxproj", "{0970B8EF-258C-4C9D-8598-02DC23D6AF70}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredRendering", "Deferr
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonLib", "CommonLib\CommonLib.vcxproj", "{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest_Reflection", "UnitTest_Reflection\UnitTest_Reflection.vcxproj", "{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,14 @@ Global
 		{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}.Release|Win32.Build.0 = Release|Win32
 		{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}.Release|x64.ActiveCfg = Release|x64
 		{6AEE965D-B022-4CF0-A51F-4AD6CBBC5235}.Release|x64.Build.0 = Release|x64
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Debug|Win32.Build.0 = Debug|Win32
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Debug|x64.ActiveCfg = Debug|x64
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Debug|x64.Build.0 = Debug|x64
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Release|Win32.ActiveCfg = Release|Win32
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Release|Win32.Build.0 = Release|Win32
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Release|x64.ActiveCfg = Release|x64
+		{EC558F19-B832-9F27-8A53-CF6AB22DAAFE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

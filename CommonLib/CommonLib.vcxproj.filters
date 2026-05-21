@@ -46,9 +46,6 @@
     <Filter Include="Audio\Loaders">
       <UniqueIdentifier>{3a8ffd04-7a99-4d81-9002-491c46d5aca3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="System\Tests">
-      <UniqueIdentifier>{23851bfa-e909-434f-9d1b-ae7a5baa728f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\AssetManager.h">
@@ -334,9 +331,6 @@
       <Filter>Rendering\ModelLoaders</Filter>
     </ClInclude>
     <ClInclude Include="Audio\Loaders\AudioLoader_Ogg.h" />
-    <ClInclude Include="System\Tests\MethodReflectorTest.h">
-      <Filter>System\Tests</Filter>
-    </ClInclude>
     <ClInclude Include="System\Functors\FunctionTraits.h">
       <Filter>System\Functors</Filter>
     </ClInclude>
@@ -508,9 +502,6 @@
       <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
     <ClCompile Include="Audio\Loaders\AudioLoader_Ogg.cpp" />
-    <ClCompile Include="System\Tests\MethodReflectorTest.cpp">
-      <Filter>System\Tests</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

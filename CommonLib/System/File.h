@@ -122,7 +122,7 @@ public:
 		outContents[numElementsRead] = '\0';//numElementsRead == outContents.Allocated() will cause us to put a character out of bounds
 
 		assert(!ReportedError());
-		return outContents.Length() == String::StrLen(outContents.CStr());
+		return outContents.Length() == String::Length(outContents.CStr());
 	}
 
 	template< typename TValue >
@@ -276,7 +276,7 @@ public:
 
 	static Bool	HasExtension(const StaticString& str, const Char* ext) {
 		auto strLen = str.Length();
-		auto extLen = String::StrLen(ext);
+		auto extLen = String::Length(ext);
 
 		const Char* lhs = &str.CStr()[strLen - extLen];
 

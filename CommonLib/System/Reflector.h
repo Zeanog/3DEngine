@@ -43,9 +43,21 @@ struct MethodListNode {
 		if constexpr (std::same_as<TNextNode, TNull>) {
 			outMethodInfo = nullptr;
 			return false;
+		} else {
+			return NextNode.FindMethodInfo(methodName, outMethodInfo);
 		}
-		else {
-			return NextNode.FindMethodInfo<TRequestedMethodInfo>(methodName, outMethodInfo);
+	}
+
+	template<typename TRequestedMethodInfo>
+	TRequestedMethodInfo* FindMethodInfo(StaticString methodName) const {
+		if (MethodInfo.MethodName() == methodName && std::same_as<TRequestedMethodInfo, TMethodInfo>) {
+			return (TRequestedMethodInfo*)&MethodInfo;
+		}
+
+		if constexpr (std::same_as<TNextNode, TNull>) {
+			return nullptr;
+		} else {
+			return NextNode.FindMethodInfo<TRequestedMethodInfo>(methodName);
 		}
 	}
 
@@ -68,12 +80,16 @@ struct MethodListNode {
 #define METHODNODE_TYPE_3( methodInfo1Type, methodInfo2Type, methodInfo3Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_2(methodInfo2Type, methodInfo3Type)>
 #define METHODNODE_TYPE_4( methodInfo1Type, methodInfo2Type, methodInfo3Type, methodInfo4Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_3(methodInfo2Type, methodInfo3Type, methodInfo4Type)>
 #define METHODNODE_TYPE_5( methodInfo1Type, methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_4(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type)>
+#define METHODNODE_TYPE_6( methodInfo1Type, methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type, methodInfo6Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_5(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type, methodInfo6Type)>
 
 #define METHODNODE_1( methodInfo1Type, method1 ) METHODNODE_TYPE_1(methodInfo1Type)(method1, TNull())
 #define METHODNODE_2( methodInfo1Type, method1, methodInfo2Type, method2 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_1(methodInfo2Type)>(method1, METHODNODE_1(methodInfo2Type, method2))
 #define METHODNODE_3( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_2(methodInfo2Type, methodInfo3Type)>(method1, METHODNODE_2(methodInfo2Type, method2, methodInfo3Type, method3))
 #define METHODNODE_4( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_3(methodInfo2Type, methodInfo3Type)>(method1, METHODNODE_3(methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4))
 #define METHODNODE_5( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_4(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type)>(method1, METHODNODE_4(methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5))
+#define METHODNODE_6( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5, methodInfo6Type, method6 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_5(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type, methodInfo6Type)>(method1, METHODNODE_5(methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5, methodInfo6Type, method6))
+
+#include <stdexcept>
 
 template<typename TReturn, class TObject, typename... TArgs>
 struct MethodInfo {
@@ -85,30 +101,41 @@ protected:
 	TMethod			m_Method;
 
 public:
-	MethodInfo(StaticString name, TMethod method) : m_MethodName(name), m_Method(method) {}
+	MethodInfo(const StaticString& name, TMethod method) : m_MethodName(name), m_Method(method) {}
+	MethodInfo(const Char* name, TMethod method) : m_MethodName(name), m_Method(method) {}
 
 	DECLARE_GETSET(MethodName)
 
 	template<typename TCaller>
-	constexpr Bool CanCall() const {//TODO: TEST THIS!  Especially is_base_of use
+	static constexpr bool CanCall() {//TODO: TEST THIS!  Especially is_base_of use.  TCaller can be a parent class of TObject, but not a child class.
 		return std::same_as<TCaller, TObject> || std::is_base_of<TCaller, TObject>::value;
 	}
 
 	template<typename TCaller>
-	Bool CanCall( TCaller* caller ) const {//TODO: TEST THIS
+	Bool CanCall( TCaller* caller ) const {
 		return CanCall<TCaller>() && caller != nullptr;
 	}
 
 	template<typename TCaller>
-	TReturn Call(TCaller* caller, TArgs... args) const {
-		assert(caller);
-		assert(m_Method);
-		
-		if(!CanCall(caller)) {
+	TReturn Call(TCaller* caller, TArgs... args) {
+		if(!caller || !m_Method) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Invalid caller or method for method '%s'", m_MethodName.CStr()));
+#else
 			return TReturn();
+#endif		
 		}
-
-		return (caller->*m_Method)(args...);
+		
+		if constexpr (!CanCall<TCaller>()) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Invalid caller type for method '%s'", m_MethodName.CStr()));
+#else
+			return TReturn();
+#endif
+		}
+		else {
+			return (caller->*m_Method)(args...);
+		}
 	}
 };
 
@@ -117,7 +144,7 @@ public:
 #define METHOD_INFO_TYPE_FOR( methodPtr ) typename FunctionTraits<decltype(methodPtr)>::TMethodInfo
 #define METHOD_INFO_TYPE_FROM( methodType ) typename FunctionTraits<methodType>::TMethodInfo
 
-#define CREATE_METHOD_INFO_FOR( owner, methodType, method ) METHOD_INFO_TYPE_FROM(methodType)(#method, (methodType)&owner::method)
+#define CREATE_METHOD_INFO_FOR( owner, methodType, method ) METHOD_INFO_TYPE_FROM(methodType)(StaticString(#method), (methodType)&owner::method)
 
 #define REGISTER_METHODS_1( owner, methodListName, method1Type, method1 ) \
 METHODNODE_TYPE_1(METHOD_INFO_TYPE_FOR(&owner::method1))	methodListName = {	\
@@ -163,7 +190,37 @@ METHODNODE_TYPE_5(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(own
 		)	\
 };
 
+#define REGISTER_METHODS_6( owner, methodListName,  method1, method2, method3, method4, method5, method6 ) \
+METHODNODE_TYPE_6(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(owner, method2), METHOD_INFO_TYPE_FOR(owner, method3), METHOD_INFO_TYPE_FOR(owner, method4), METHOD_INFO_TYPE_FOR(owner, method5), METHOD_INFO_TYPE_FOR(owner, method6))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1),								\
+		METHODNODE_5(	\
+			METHOD_INFO_TYPE_FOR(owner, method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
+			METHOD_INFO_TYPE_FOR(owner, method3), CREATE_METHOD_INFO_FOR(owner, method3),	\
+			METHOD_INFO_TYPE_FOR(owner, method4), CREATE_METHOD_INFO_FOR(owner, method4),	\
+			METHOD_INFO_TYPE_FOR(owner, method5), CREATE_METHOD_INFO_FOR(owner, method5),	\
+			METHOD_INFO_TYPE_FOR(owner, method6), CREATE_METHOD_INFO_FOR(owner, method6)	\
+		)	\
+};
+
+#define DEFINE_SIGNATURE_ACCESSORS_FOR(methodName) \
+template<std::size_t N>				\
+using SignatureFor_##methodName = typename TypeAt<TMethodSignatures_##methodName, N>::Result;	\
+template<std::size_t N>				\
+using MethodInfoFor_##methodName = METHOD_INFO_TYPE_FROM(SignatureFor_##methodName<N>);
+
+#define DEFINE_SIGNATURE_ACCESSOR_FOR(methodName) \
+using SignatureFor_##methodName = typename TypeAt<TMethodSignatures_##methodName, 0>::Result;	\
+using MethodInfoFor_##methodName = METHOD_INFO_TYPE_FROM(SignatureFor_##methodName);
+
 #define DEFINE_METHODINFO_ACCESSORS(methodListName) \
+template<typename TMethodInfo>				\
+TMethodInfo* FindMethodInfo(const StaticString& methodName) const {	\
+	return methodListName.FindMethodInfo(methodName);	\
+}	\
+template<typename TMethodInfo>				\
+Bool FindMethodInfo(const Char* methodName, TMethodInfo*& outMethodInfo) const { \
+	return methodListName.FindMethodInfo(StaticString(methodName), outMethodInfo); \
+} \
 template<typename TMethodInfo>				\
 Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo) const { \
 	return methodListName.FindMethodInfo(methodName, outMethodInfo); \
@@ -172,7 +229,7 @@ Bool HasMethod(const StaticString& methodName) const { \
 	return methodListName.HasMethod(methodName);	\
 }	\
 template<typename TMethod>	\
-using MethodInfoFor = METHOD_INFO_TYPE_FROM(TMethod);
+using TMethodInfoFor = METHOD_INFO_TYPE_FROM(TMethod);
 
 class AReflector {
 	ABSTRACT_CLASS_TYPEDEFS(AReflector) {}
