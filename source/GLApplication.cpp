@@ -442,7 +442,7 @@ void GLApplication::LoadAssets()
 
 	// Retrieve the current working directory
 	DWORD size = GetCurrentDirectory(bufferSize, &currentDirectory[0]);
-	assert( size == String::StrLen(currentDirectory.CStr()) );
+	assert( size == String::Length(currentDirectory.CStr()) );
 	File::SetWorkingDirectory(currentDirectory.CStr());
 #pragma endregion
 

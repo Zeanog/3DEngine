@@ -105,19 +105,19 @@ void MeshLoader_FBX::DestroyGlobals() {
 	}
 }
 
-void MeshLoader_FBX::VisitNode(fbxsdk::FbxNode* node, Neo::Mesh& outMesh) {
+void MeshLoader_FBX::VisitNode(fbxsdk::FbxNode* node, const StaticString& jointPrefix, Neo::Mesh& outMesh) {
 	if (Singleton<FBXNodeParser_Mesh>::GetInstance()->CanParse(node)) {
-		Singleton<FBXNodeParser_Mesh>::GetInstance()->Parse(node, outMesh);//TODO: This is really bad.  We should be passing in the mesh we're building and have the parser add to it instead of creating a new mesh and throwing it away every time.
+		Singleton<FBXNodeParser_Mesh>::GetInstance()->Parse(node, outMesh);
 	}
 	
 	if (Singleton<FBXNodeParser_Skeleton>::GetInstance()->CanParse(node)) {
 		Joint joint;
-		Singleton<FBXNodeParser_Skeleton>::GetInstance()->Parse(node, "jointPrefix", joint);
+		Singleton<FBXNodeParser_Skeleton>::GetInstance()->Parse(node, jointPrefix, joint);
 		outMesh.Skeleton().Joints().Add(joint);
 	}
 
 	for( int ix = 0; ix < node->GetChildCount(); ++ix ) {
-		VisitNode(node->GetChild(ix), outMesh);
+		VisitNode(node->GetChild(ix), jointPrefix, outMesh);
 	}
 }
 
@@ -133,7 +133,7 @@ Bool MeshLoader_FBX::Load(const ModelDef& def, Neo::Mesh& outMesh) {
 		}
 	}
 
-	FOREACH(animFileIter, def.AnimationFiles) {
+	/*FOREACH(animFileIter, def.AnimationFiles) {
 		if(animFileIter->first == def.Mesh) {
 			continue;
 		}
@@ -146,19 +146,21 @@ Bool MeshLoader_FBX::Load(const ModelDef& def, Neo::Mesh& outMesh) {
 			Singleton<DebugConsole>::GetInstance()->Write("MeshLoader_FBX::Load: Warning: Failed to parse animations from anim %s for mesh %s. Skipping.\n", animFileIter->first.CStr(), def.Mesh.CStr());
 			continue;
 		}
-	}
+	}*/
 	return true;
 }
 
 Bool MeshLoader_FBX::ParseMesh(const StaticString& jointPrefix, Neo::Mesh& outMesh) {
-	assert(m_Scene);
+	/*assert(m_Scene);
 	Singleton<FBXNodeParser_Mesh>::GetInstance()->Parse(m_Scene->GetRootNode(), outMesh);
 	Joint joint;
 	if (!Singleton<FBXNodeParser_Skeleton>::GetInstance()->Parse(m_Scene->GetRootNode(), jointPrefix, joint)) {
 		return false;
 	}
 
-	outMesh.Skeleton().Joints().Add(joint);
+	outMesh.Skeleton().Joints().Add(joint);*/
+
+	VisitNode(m_Scene->GetRootNode(), jointPrefix, outMesh);
 	return true;
 }
 

@@ -111,7 +111,6 @@
     <ClInclude Include="System\StackString.h" />
     <ClInclude Include="System\StaticString.h" />
     <ClInclude Include="System\String.h" />
-    <ClInclude Include="System\Tests\MethodReflectorTest.h" />
     <ClInclude Include="System\Typedefs.h" />
     <ClInclude Include="System\Win32\Error.h" />
     <ClInclude Include="System\Win32\Window.h" />
@@ -175,7 +174,6 @@
     <ClCompile Include="System\JsonValueParsers.cpp" />
     <ClCompile Include="System\StaticString.cpp" />
     <ClCompile Include="System\String.cpp" />
-    <ClCompile Include="System\Tests\MethodReflectorTest.cpp" />
     <ClCompile Include="System\Win32\Error.cpp" />
     <ClCompile Include="TinyXML\tinyxml2.cpp" />
   </ItemGroup>

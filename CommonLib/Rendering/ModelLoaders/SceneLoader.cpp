@@ -30,7 +30,7 @@ void SceneLoader::ParseModels(const rapidjson::Value& value) {
 void SceneLoader::ParseAudioChannels(const rapidjson::Value& value) {
 	FOREACH_MEMBER(memberIter, value) {
 #ifdef CASE_SENSITIVE_CHANNEL_NAMES
-		auto nameLen = String::StrLen(memberIter->name.GetString());
+		auto nameLen = String::Length(memberIter->name.GetString());
 		auto allocateLen = nameLen + 1;
 		STACK_STRING(chName, allocateLen);
 		chName = memberIter->name.GetString();//String copy

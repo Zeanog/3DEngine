@@ -104,7 +104,7 @@ public:
 	static void	Format(TData data, String& out) {
 		Int32 l = Type().Length();
 		Int32 numExtraChars = 6;//<%s>%s</%s>
-		STACK_STRING(encodedData, String::StrLen(data) + Type().Length() * 2 + numExtraChars);
+		STACK_STRING(encodedData, String::Length(data) + Type().Length() * 2 + numExtraChars);
 
 		sprintf_s(encodedData.CStr(), encodedData.Allocated(), "<%s>%s</%s>", Type().CStr(), data, Type().CStr());
 		out = encodedData.CStr();
@@ -113,7 +113,7 @@ public:
 	static _bstr_t	Format(TData data) {
 		Int32 l = Type().Length();
 		Int32 numExtraChars = 6;//<%s>%s</%s>
-		STACK_STRING(encodedData, String::StrLen(data) + Type().Length() * 2 + numExtraChars);
+		STACK_STRING(encodedData, String::Length(data) + Type().Length() * 2 + numExtraChars);
 
 		sprintf_s(encodedData.CStr(), encodedData.Allocated(), "<%s>%s</%s>", Type().CStr(), data, Type().CStr());
 		return encodedData.CStr();

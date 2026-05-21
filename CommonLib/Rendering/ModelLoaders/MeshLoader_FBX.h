@@ -14,7 +14,7 @@ protected:
 	FbxScene*			m_Scene = nullptr;
 
 protected:
-	void	VisitNode( fbxsdk::FbxNode* node, Neo::Mesh& outMesh);
+	void	VisitNode( fbxsdk::FbxNode* node, const StaticString& jointPrefix, Neo::Mesh& outMesh);
 
 public:
 	static void	CreateGlobals();

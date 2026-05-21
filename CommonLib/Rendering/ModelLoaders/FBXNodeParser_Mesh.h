@@ -13,6 +13,8 @@ class FBXNodeParser_Mesh : public AFBXNodeParser<TYPELIST_1(Neo::Mesh)> {
 		//m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sAmbient, { "Ambient", GetMaterialTexture });
 		//m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sAmbientFactor, { "Ambient", GetMaterialFactor });
 
+		m_MaterialPropertyParsers.Add("Color", { "Color", GetMaterialColor });
+
 		m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sDiffuse, { "Diffuse", GetMaterialTexture });
 		m_MaterialPropertyParsers.Add(FbxSurfaceMaterial::sDiffuseFactor, { "Diffuse", GetMaterialFactor });
 
@@ -63,6 +65,7 @@ protected:
 protected:
 	static Bool			GetMaterialFactor(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName);
 	static Bool			GetMaterialTexture(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName);
+	static Bool			GetMaterialColor(const FbxProperty& lProperty, Neo::Mesh::AMaterial* mat, const char* channelName);
 	static FbxAMatrix	GetLocalTransform(FbxNode* node);
 	static FbxAMatrix	GetGlobalTransform(FbxNode* node);
 	static FbxAMatrix	GetGlobalTransform(FbxNode* node, const FbxTime& time);

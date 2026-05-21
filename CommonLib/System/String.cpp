@@ -7,7 +7,7 @@ const Char* String::Replace(const Char* str, UInt32 offset, Int32 count, const C
 		auto removeStart = str + offset;
 		auto removeEnd = removeStart + count;
 
-		UInt32 sizeInBytes = StrLen(removeEnd) + 1;//Including null terminator
+		UInt32 sizeInBytes = Length(removeEnd) + 1;//Including null terminator
 		STACK_STRING(post, sizeInBytes);
 		String::StrCpy(post.Str(), sizeInBytes, removeEnd);
 
