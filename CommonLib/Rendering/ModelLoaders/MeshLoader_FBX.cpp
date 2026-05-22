@@ -366,27 +366,11 @@ void MeshLoader_FBX::LoadGeometry(FbxMesh* pMesh, VertexBuffer& vb, IndexBuffer&
 	FbxAMatrix globalRMatrix = globalTMatrix;
 	globalRMatrix.SetT(FbxVector4(0.0f, 0.0f, 0.0f, 0.0f));
 
-	static Map<Int32, IndexRange>	materialInfos;//To minimize reallocations.  This makes this function non-thread-safe.
-	materialInfos.Clear();
-
 	int lVertexCount = 0;
 	const int lPolygonCount = pMesh->GetPolygonCount();
 	vb.Resize(lPolygonCount * TRIANGLE_VERTEX_COUNT);
 	for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
 	{
-		// The material for current face.
-		int lMaterialIndex = 0;
-		if (lMaterialIndice && lMaterialMappingMode == FbxGeometryElement::eByPolygon)
-		{
-			lMaterialIndex = lMaterialIndice->GetAt(lPolygonIndex);
-		}
-
-		if (!materialInfos.Contains(lMaterialIndex)) {
-			materialInfos.Add(lMaterialIndex, IndexRange());
-		}
-		auto& info = materialInfos[lMaterialIndex];
-		info.AddPolyIndex(lPolygonIndex);
-
 		for (int lVerticeIndex = 0; lVerticeIndex < TRIANGLE_VERTEX_COUNT; ++lVerticeIndex)
 		{
 			const int lControlPointIndex = pMesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
@@ -412,35 +396,32 @@ void MeshLoader_FBX::LoadGeometry(FbxMesh* pMesh, VertexBuffer& vb, IndexBuffer&
 		}
 	}
 
-	LoadMaterials(pMesh, appendingOffset, materialInfos, matMap, mats);
+	LoadMaterials(pMesh, appendingOffset, matMap, mats);
 }
 
-void MeshLoader_FBX::LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, const Map<Int32, IndexRange>& materialIndices, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
-	FbxLayerElementMaterial* pLayerElementMaterial = pMesh->GetElementMaterial();
-	assert(pLayerElementMaterial);
+void MeshLoader_FBX::LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
+	Int32 lNbMat = pMesh->GetNode()->GetSrcObjectCount();
 
-	assert(pMesh->GetNode()->GetMaterialCount() == materialIndices.Size());
-	
-	FOREACH (matRangeIter, materialIndices) {
-		auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(matRangeIter->first);	
+	FOR(Int32, lMaterialIndex, 0, lNbMat, 1) {
+		auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(lMaterialIndex);
+
 		if (!pMaterial)
 		{
 			continue;
 		}
-
 		auto name = pMaterial->GetName();
-		assert(name && name[0]);
-		Neo::Mesh::AMaterial* mat{};
-		if (!matMap.Contains(name)) {
-			mat = new Neo::Mesh::Material(name);
-			mats.Add(mat);
-			matMap.Add(name, mat);
-		}
-		else {
-			mat = matMap[name];
+		if (!name || !name[0]) {
+			continue;
 		}
 
-		mat->Ranges.Add({ matRangeIter->second.StartPolyIndex + (Int32)appendingOffset, (UInt32)matRangeIter->second.PolyCount() });
+		Neo::Mesh::AMaterial* mat = new Neo::Mesh::Material(name);
+
+		mats.Add(mat);
+		matMap.Add(pMaterial->GetName(), mat);
+
+		//mat->Index = 0;
+		//mat->PolyCount = pMesh->GetPolygonCount();
+		mat->Ranges.Add({ (Int32)appendingOffset, (UInt32)pMesh->GetPolygonCount() });
 
 #if _DEBUG
 		List<StaticString>	propertyNames;//To allow us to see all the of the properties in the debugger
@@ -463,9 +444,7 @@ void MeshLoader_FBX::LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, const
 
 void MeshLoader_FBX::LoadMesh(FbxNode* pNode, VertexBuffer& vb, UInt32 appendingOffset, IndexBuffer& ib, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
 	FbxMesh* pMesh = pNode->GetMesh();
-	if (!pMesh->GetNode()) {
-		return;
-	}
+	assert(pNode == pMesh->GetNode());
 
 	LoadGeometry(pMesh, vb, ib, appendingOffset, matMap, mats);
 }

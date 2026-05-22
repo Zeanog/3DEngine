@@ -116,7 +116,7 @@ protected:
 	void	LoadSkeletonHierarchy(FbxNode* rootnode);
 	void	LoadSkeletonHierarchyre(FbxNode* node, int depth, int index, int parentindex);
 	void	LoadGeometry(FbxMesh* pMesh, VertexBuffer& vb, IndexBuffer& ib, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
-	void	LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, const Map<Int32, IndexRange>& materialIndices, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
+	void	LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
 
 public:
 	static void	CreateGlobals();
