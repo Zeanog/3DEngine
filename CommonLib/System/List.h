@@ -61,7 +61,7 @@ public:
 	}
 
 	Int32	AddUnique( const TData& data ) {
-		for( Int32 ix = 0; ix < Length(); ++ix ) {
+		for( UInt32 ix = 0; ix < Length(); ++ix ) {
 			if( m_Data[ix] == data ) {
 				return ix;
 			}

@@ -13,8 +13,10 @@ protected:
 	static FbxManager*	g_SdkManager;
 	FbxScene*			m_Scene = nullptr;
 
+	TJointNameToNodeMap m_JointNameToNodeMap;
+
 protected:
-	void	VisitNode( fbxsdk::FbxNode* node, const StaticString& jointPrefix, Neo::Mesh& outMesh);
+	void	VisitNode( fbxsdk::FbxNode* node, const StaticString& jointPrefix, TJointNameToNodeMap& jointNameToNodeMap, Neo::Mesh& outMesh);
 
 public:
 	static void	CreateGlobals();

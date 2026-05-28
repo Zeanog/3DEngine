@@ -26,6 +26,7 @@ public:
 	ABSTRACT_GETSET(TRotation, Rotation)
 
 	virtual void	Translate(const TPosition& delta) = 0;
+	virtual void	TranslateRelative(const TPosition& delta) = 0;
 
 	virtual void	Rotate(const TRotation& delta) = 0;
 	virtual void	Rotate(Float32 pitch, Float32 yaw, Float32 roll) = 0;
@@ -81,6 +82,11 @@ public:
 		assert(m_Decoratee);
 		m_Decoratee->Translate(delta);
 	}
+	
+	virtual void						TranslateRelative(const TPosition& delta) override {
+		assert(m_Decoratee);
+		m_Decoratee->TranslateRelative(delta);
+	}
 
 	virtual void						Rotate(const TRotation& delta) override {
 		assert(m_Decoratee);
@@ -135,6 +141,7 @@ public:
 	DECLARE_GETSET(Rotation)
 
 	virtual void	Translate(const TPosition& delta) override;
+	virtual void	TranslateRelative(const TPosition& delta) override;
 
 	virtual void	Rotate(const TRotation& delta) override;
 	virtual void	Rotate(Float32 pitch, Float32 yaw, Float32 roll) override;

@@ -105,19 +105,19 @@ void MeshLoader_FBX::DestroyGlobals() {
 	}
 }
 
-void MeshLoader_FBX::VisitNode(fbxsdk::FbxNode* node, const StaticString& jointPrefix, Neo::Mesh& outMesh) {
+void MeshLoader_FBX::VisitNode(fbxsdk::FbxNode* node, const StaticString& jointPrefix, TJointNameToNodeMap& jointNameToNodeMap, Neo::Mesh& outMesh) {
 	if (Singleton<FBXNodeParser_Mesh>::GetInstance()->CanParse(node)) {
 		Singleton<FBXNodeParser_Mesh>::GetInstance()->Parse(node, outMesh);
-	}
-	
-	if (Singleton<FBXNodeParser_Skeleton>::GetInstance()->CanParse(node)) {
+	} 
+	else if (Singleton<FBXNodeParser_Joint>::GetInstance()->CanParse(node)) {
 		Joint joint;
-		Singleton<FBXNodeParser_Skeleton>::GetInstance()->Parse(node, jointPrefix, joint);
+		Singleton<FBXNodeParser_Joint>::GetInstance()->Parse(node, jointPrefix, joint);
 		outMesh.Skeleton().Joints().Add(joint);
+		jointNameToNodeMap.Add(joint.Name(), node);
 	}
 
 	for( int ix = 0; ix < node->GetChildCount(); ++ix ) {
-		VisitNode(node->GetChild(ix), jointPrefix, outMesh);
+		VisitNode(node->GetChild(ix), jointPrefix, jointNameToNodeMap, outMesh);
 	}
 }
 
@@ -133,7 +133,7 @@ Bool MeshLoader_FBX::Load(const ModelDef& def, Neo::Mesh& outMesh) {
 		}
 	}
 
-	/*FOREACH(animFileIter, def.AnimationFiles) {
+	FOREACH(animFileIter, def.AnimationFiles) {
 		if(animFileIter->first == def.Mesh) {
 			continue;
 		}
@@ -142,36 +142,26 @@ Bool MeshLoader_FBX::Load(const ModelDef& def, Neo::Mesh& outMesh) {
 			Singleton<DebugConsole>::GetInstance()->Write("MeshLoader_FBX::Load: Warning: Failed to load animation file %s for mesh %s. Skipping.\n", animFileIter->first.CStr(), def.Mesh.CStr());
 			continue;
 		}
+
+		//TODO: Pull the nodes out for joints
+		if (!Singleton<FBXHierarchyParser_Skeleton>::GetInstance()->Validate(m_Scene, def.SkeletonPrefix, outMesh.Skeleton())) {
+			continue;
+		}
 		if (!ParseAnimations(def.SkeletonPrefix, animFileIter->second, outMesh)) {
 			Singleton<DebugConsole>::GetInstance()->Write("MeshLoader_FBX::Load: Warning: Failed to parse animations from anim %s for mesh %s. Skipping.\n", animFileIter->first.CStr(), def.Mesh.CStr());
 			continue;
 		}
-	}*/
+	}
 	return true;
 }
 
 Bool MeshLoader_FBX::ParseMesh(const StaticString& jointPrefix, Neo::Mesh& outMesh) {
-	/*assert(m_Scene);
-	Singleton<FBXNodeParser_Mesh>::GetInstance()->Parse(m_Scene->GetRootNode(), outMesh);
-	Joint joint;
-	if (!Singleton<FBXNodeParser_Skeleton>::GetInstance()->Parse(m_Scene->GetRootNode(), jointPrefix, joint)) {
-		return false;
-	}
-
-	outMesh.Skeleton().Joints().Add(joint);*/
-
-	VisitNode(m_Scene->GetRootNode(), jointPrefix, outMesh);
+	assert(m_Scene);
+	VisitNode(m_Scene->GetRootNode(), jointPrefix, m_JointNameToNodeMap, outMesh);
 	return true;
 }
 
 Bool MeshLoader_FBX::ParseAnimations(const StaticString& jointPrefix, const ModelDef::TInFileAnimationMap& inFileAnimMap, Neo::Mesh& outMesh) {
 	assert(m_Scene);
-	Joint joint;
-	Singleton<FBXNodeParser_Skeleton>::GetInstance()->Parse(m_Scene->GetRootNode(), jointPrefix, joint);
-	//TODO: Validate that the skeleton in the animation file matches the skeleton in the mesh file. For now we just assume that they match and hope for the best.
-	if (!Singleton<FBXSceneParser_Animation>::GetInstance()->Parse(m_Scene, outMesh.Skeleton().Joints(), inFileAnimMap, outMesh.AnimationClips())) {
-		return false;
-	}
-	
-	return true;
+	return Singleton<FBXSceneParser_Animation>::GetInstance()->Parse(m_Scene, m_JointNameToNodeMap, inFileAnimMap, outMesh.AnimationClips());
 }

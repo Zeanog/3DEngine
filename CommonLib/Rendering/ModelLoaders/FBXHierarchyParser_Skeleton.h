@@ -3,27 +3,30 @@
 #include "AFBXNodeParser.h"
 #include "MeshLoader_FBX.h"
 
-class FBXNodeParser_Skeleton : public AFBXNodeParser< TYPELIST_2(const StaticString, Joint) > {
-	INHERITED_CLASS_TYPEDEFS(FBXNodeParser_Skeleton, AFBXNodeParser)
-	SINGLETON_DECLARATIONS(FBXNodeParser_Skeleton) {
+class FBXNodeParser_Joint : public AFBXNodeParser< TYPELIST_2(const StaticString, Joint) > {
+	INHERITED_CLASS_TYPEDEFS(FBXNodeParser_Joint, AFBXNodeParser)
+	SINGLETON_DECLARATIONS(FBXNodeParser_Joint) {
 		m_NodeType = fbxsdk::FbxNodeAttribute::eSkeleton;
 	}
 
 protected:
 	Map<fbxsdk::FbxString, Int32>		m_NodeNameToJointIndexMap;
-	MeshLoader_FBX::TJointNameToNodeMap m_JointNameToNodeMap;
 
 public:
 	virtual Bool	Parse(fbxsdk::FbxNode* node, const StaticString& prefixToRemove, Joint& outJoint) override;
-	virtual	void	Clear() override {
-		m_NodeNameToJointIndexMap.Clear();
-		m_JointNameToNodeMap.Clear();
+	virtual	void	Clear() override;
+};
+
+class FBXHierarchyParser_Skeleton : public AFBXSceneParser< TYPELIST_3(const StaticString, MeshLoader_FBX::TJointNameToNodeMap, Neo::Skeleton) > {
+	INHERITED_CLASS_TYPEDEFS(FBXHierarchyParser_Skeleton, AFBXSceneParser)
+	SINGLETON_DECLARATIONS(FBXHierarchyParser_Skeleton) {
 	}
 
-	fbxsdk::FbxNode* JointNode(const StaticString& jointName) const {
-		if (!m_JointNameToNodeMap.Contains(jointName)) {
-			return nullptr;
-		}
-		return m_JointNameToNodeMap[jointName];
-	}
+public:
+	typedef Map<StaticString, fbxsdk::FbxNode*>		TJointNameToNodeMap;
+
+public:
+	virtual Bool	Parse(fbxsdk::FbxScene* scene, const StaticString& prefixToRemove, MeshLoader_FBX::TJointNameToNodeMap& jointNameToNodeMap, Neo::Skeleton& outSkeleton) override;
+	Bool			Validate(fbxsdk::FbxScene* scene, const StaticString& prefixToRemove, const Neo::Skeleton& meshSkeleton);
+	virtual	void	Clear() override;
 };

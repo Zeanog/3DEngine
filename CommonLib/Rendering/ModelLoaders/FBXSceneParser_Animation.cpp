@@ -1,11 +1,8 @@
 #include "FBXSceneParser_Animation.h"
-#include "FBXSceneParser_Skeleton.h"
 #include "System/DebugConsole.h"
 
-Bool FBXSceneParser_Animation::Parse(fbxsdk::FbxScene* scene, List<Joint>& joints, const ModelDef::TInFileAnimationMap& inFileAnimMap, List<AnimationClip*>& outAnims) {
+Bool FBXSceneParser_Animation::Parse(fbxsdk::FbxScene* scene, FBXHierarchyParser_Skeleton::TJointNameToNodeMap& nodes, const ModelDef::TInFileAnimationMap& inFileAnimMap, List<AnimationClip*>& outAnims) {
 	Clear();
-
-	auto skeletonParser = Singleton<FBXSceneParser_Skeleton>::GetInstance();
 
 	Int32 numStacks = scene->GetSrcObjectCount<FbxAnimStack>();
 	FOR(Int32, ix, 0, numStacks, 1) {
@@ -25,7 +22,7 @@ Bool FBXSceneParser_Animation::Parse(fbxsdk::FbxScene* scene, List<Joint>& joint
 
 		auto& animMap = inFileAnimMap[animStackName];
 		auto fileDuration = animDuration.GetSecondDouble();
-		FOREACH(animIter, animMap) {
+		FOREACH_CONST(animIter, animMap) {
 			AnimationClip* animClip = new AnimationClip();
 			outAnims.Add(animClip);
 			
@@ -46,17 +43,19 @@ Bool FBXSceneParser_Animation::Parse(fbxsdk::FbxScene* scene, List<Joint>& joint
 				pKeyFrame->Time(fFrameIndex / animClip->FrameRate());
 
 				time.SetSecondDouble(pKeyFrame->Time());
-				for (UInt32 ix = 0; ix < joints.Length(); ++ix) {
-					auto node = skeletonParser->JointNode(joints[ix].Name());
+				FOREACH(nodeIter, nodes) {
+					auto node = nodeIter->second;
 					if (!node) {
-						Singleton<DebugConsole>::GetInstance()->Write("FBXSceneParser_Animation::Parse: Warning: Failed to find node for joint %s. Skipping animation data for this joint.\n", joints[ix].Name().CStr());
+						//Singleton<DebugConsole>::GetInstance()->Write("FBXSceneParser_Animation::Parse: Warning: Failed to find node for joint %s. Skipping animation data for this joint.\n", joints[ix].Name().CStr());
 						return false;
 					}
 					const fbxsdk::FbxAMatrix& localTransform = pAnimEvaluator->GetNodeLocalTransform(node, time);
 					//const fbxsdk::FbxAMatrix& globalTransform = pAnimEvaluator->GetNodeGlobalTransform(node, time);
 
 					FbxConversions::Convert(mat, localTransform);
-					pKeyFrame->SetLocalTransform(ix, mat);
+
+					assert(0);
+					//pKeyFrame->SetLocalTransform(nodeIter->first, mat);
 				}
 			}
 		}

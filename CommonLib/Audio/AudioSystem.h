@@ -18,8 +18,7 @@ class Sound;
 
 class AudioSystem {
 	CLASS_TYPEDEFS(AudioSystem)
-		SINGLETON_DECLARATIONS(AudioSystem) {
-	}
+	SINGLETON_DECLARATIONS(AudioSystem) {}
 
 	//TODO: Possibly have a cap on number of source voices per format
 	typedef LinkedList<SourceVoice*>	TVoiceList;

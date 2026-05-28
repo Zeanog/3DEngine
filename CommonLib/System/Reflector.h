@@ -34,8 +34,8 @@ struct MethodListNode {
 	}
 
 	template<typename TRequestedMethodInfo>
-	Bool FindMethodInfo(StaticString methodName, TRequestedMethodInfo*& outMethodInfo) const {
-		if (MethodInfo.MethodName() == methodName && std::same_as<TRequestedMethodInfo, TMethodInfo>) {
+	Bool FindMethodInfo(const StaticString& methodName, TRequestedMethodInfo*& outMethodInfo) const {
+		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && MethodInfo.MethodName() == methodName) {
 			outMethodInfo = (TRequestedMethodInfo*)&MethodInfo;
 			return true;
 		}
@@ -49,7 +49,7 @@ struct MethodListNode {
 	}
 
 	template<typename TRequestedMethodInfo>
-	TRequestedMethodInfo* FindMethodInfo(StaticString methodName) const {
+	TRequestedMethodInfo* FindMethodInfo(const StaticString& methodName) const {
 		if (MethodInfo.MethodName() == methodName && std::same_as<TRequestedMethodInfo, TMethodInfo>) {
 			return (TRequestedMethodInfo*)&MethodInfo;
 		}
@@ -61,7 +61,7 @@ struct MethodListNode {
 		}
 	}
 
-	Bool HasMethod(StaticString methodName) const {
+	Bool HasMethod(const StaticString& methodName) const {
 		if (MethodInfo.MethodName() == methodName) {
 			return true;
 		}
@@ -75,6 +75,7 @@ struct MethodListNode {
 	}
 };
 
+//TODO: Possilby use std::tuple instead so we can use variadic templates instead of macros.  But this is probably good enough for now.
 #define METHODNODE_TYPE_1( methodInfo1Type ) MethodListNode<methodInfo1Type, TNull>
 #define METHODNODE_TYPE_2( methodInfo1Type, methodInfo2Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_1(methodInfo2Type)>
 #define METHODNODE_TYPE_3( methodInfo1Type, methodInfo2Type, methodInfo3Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_2(methodInfo2Type, methodInfo3Type)>
@@ -108,7 +109,7 @@ public:
 
 	template<typename TCaller>
 	static constexpr bool CanCall() {//TODO: TEST THIS!  Especially is_base_of use.  TCaller can be a parent class of TObject, but not a child class.
-		return std::same_as<TCaller, TObject> || std::is_base_of<TCaller, TObject>::value;
+		return std::same_as<TCaller, TObject> || std::is_base_of<TObject, TCaller>::value;
 	}
 
 	template<typename TCaller>
@@ -152,20 +153,20 @@ METHODNODE_TYPE_1(METHOD_INFO_TYPE_FOR(&owner::method1))	methodListName = {	\
 		TNull()	\
 };
 
-#define REGISTER_METHODS_2( owner, methodListName, method1, method2 ) \
-METHODNODE_TYPE_2(METHOD_INFO_TYPE_FOR(&owner::method1), METHOD_INFO_TYPE_FOR(owner, method2))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1),								\
+#define REGISTER_METHODS_2( owner, methodListName, method1Type, method1, method2Type, method2 ) \
+METHODNODE_TYPE_2(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
 		METHODNODE_1(	\
-			METHOD_INFO_TYPE_FOR(&owner::method2), CREATE_METHOD_INFO_FOR(owner, method2)	\
+			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2)	\
 		)	\
 };
 
-#define REGISTER_METHODS_3( owner, methodListName, method1, method2, method3 ) \
-METHODNODE_TYPE_3(METHOD_INFO_TYPE_FOR(&owner::method1), METHOD_INFO_TYPE_FOR(&owner::method2), METHOD_INFO_TYPE_FOR(&owner::method3))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1),								\
+#define REGISTER_METHODS_3( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3 ) \
+METHODNODE_TYPE_3(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
 		METHODNODE_2(	\
-			METHOD_INFO_TYPE_FOR(&owner::method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
-			METHOD_INFO_TYPE_FOR(&owner::method3), CREATE_METHOD_INFO_FOR(owner, method3)	\
+			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
+			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3)	\
 		)	\
 };
 
@@ -179,37 +180,41 @@ METHODNODE_TYPE_4(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(meth
 		)	\
 };
 
-#define REGISTER_METHODS_5( owner, methodListName,  method1, method2, method3, method4, method5 ) \
-METHODNODE_TYPE_5(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(owner, method2), METHOD_INFO_TYPE_FOR(owner, method3), METHOD_INFO_TYPE_FOR(owner, method4), METHOD_INFO_TYPE_FOR(owner, method5))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1),								\
+#define REGISTER_METHODS_5( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 ) \
+METHODNODE_TYPE_5(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type), METHOD_INFO_TYPE_FROM(method4Type), METHOD_INFO_TYPE_FROM(method5Type))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
 		METHODNODE_4(	\
-			METHOD_INFO_TYPE_FOR(owner, method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
-			METHOD_INFO_TYPE_FOR(owner, method3), CREATE_METHOD_INFO_FOR(owner, method3),	\
-			METHOD_INFO_TYPE_FOR(owner, method4), CREATE_METHOD_INFO_FOR(owner, method4),	\
-			METHOD_INFO_TYPE_FOR(owner, method5), CREATE_METHOD_INFO_FOR(owner, method5)	\
+			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
+			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3),	\
+			METHOD_INFO_TYPE_FROM(method4Type), CREATE_METHOD_INFO_FOR(owner, method4Type, method4),	\
+			METHOD_INFO_TYPE_FROM(method5Type), CREATE_METHOD_INFO_FOR(owner, method5Type, method5)	\
 		)	\
 };
 
-#define REGISTER_METHODS_6( owner, methodListName,  method1, method2, method3, method4, method5, method6 ) \
-METHODNODE_TYPE_6(METHOD_INFO_TYPE_FOR(owner, method1), METHOD_INFO_TYPE_FOR(owner, method2), METHOD_INFO_TYPE_FOR(owner, method3), METHOD_INFO_TYPE_FOR(owner, method4), METHOD_INFO_TYPE_FOR(owner, method5), METHOD_INFO_TYPE_FOR(owner, method6))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1),								\
+#define REGISTER_METHODS_6( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 ) \
+METHODNODE_TYPE_6(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type), METHOD_INFO_TYPE_FROM(method4Type), METHOD_INFO_TYPE_FROM(method5Type), METHOD_INFO_TYPE_FROM(method6Type))	methodListName = {	\
+		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
 		METHODNODE_5(	\
-			METHOD_INFO_TYPE_FOR(owner, method2), CREATE_METHOD_INFO_FOR(owner, method2),	\
-			METHOD_INFO_TYPE_FOR(owner, method3), CREATE_METHOD_INFO_FOR(owner, method3),	\
-			METHOD_INFO_TYPE_FOR(owner, method4), CREATE_METHOD_INFO_FOR(owner, method4),	\
-			METHOD_INFO_TYPE_FOR(owner, method5), CREATE_METHOD_INFO_FOR(owner, method5),	\
-			METHOD_INFO_TYPE_FOR(owner, method6), CREATE_METHOD_INFO_FOR(owner, method6)	\
+			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
+			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3),	\
+			METHOD_INFO_TYPE_FROM(method4Type), CREATE_METHOD_INFO_FOR(owner, method4Type, method4),	\
+			METHOD_INFO_TYPE_FROM(method5Type), CREATE_METHOD_INFO_FOR(owner, method5Type, method5),	\
+			METHOD_INFO_TYPE_FROM(method6Type), CREATE_METHOD_INFO_FOR(owner, method6Type, method6)	\
 		)	\
 };
 
-#define DEFINE_SIGNATURE_ACCESSORS_FOR(methodName) \
+#include <tuple>
+
+#define DEFINE_SIGNATURE_ACCESSORS_FOR(methodName, ...) \
+using TMethodSignatures_##methodName = std::tuple<__VA_ARGS__>;	\
 template<std::size_t N>				\
-using SignatureFor_##methodName = typename TypeAt<TMethodSignatures_##methodName, N>::Result;	\
+using SignatureFor_##methodName = typename std::tuple_element_t<N, TMethodSignatures_##methodName>;	\
 template<std::size_t N>				\
 using MethodInfoFor_##methodName = METHOD_INFO_TYPE_FROM(SignatureFor_##methodName<N>);
 
-#define DEFINE_SIGNATURE_ACCESSOR_FOR(methodName) \
-using SignatureFor_##methodName = typename TypeAt<TMethodSignatures_##methodName, 0>::Result;	\
+#define DEFINE_SIGNATURE_ACCESSOR_FOR(methodName, methodSignature) \
+using TMethodSignatures_##methodName = std::tuple<methodSignature>;	\
+using SignatureFor_##methodName = typename std::tuple_element_t<0, TMethodSignatures_##methodName>;	\
 using MethodInfoFor_##methodName = METHOD_INFO_TYPE_FROM(SignatureFor_##methodName);
 
 #define DEFINE_METHODINFO_ACCESSORS(methodListName) \

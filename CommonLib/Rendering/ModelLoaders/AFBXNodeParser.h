@@ -66,6 +66,27 @@ public:
 	virtual Bool	Parse(fbxsdk::FbxScene* obj, TOutData1& outData1, TOutData2& outData2) = 0;
 	virtual Bool	CanParse(fbxsdk::FbxScene* scene) const override { return true; }
 	virtual void	Clear() = 0;
+
+	template<typename TCallback>
+	void			VisitNode(fbxsdk::FbxNode* node, TOutData1& outData1, TOutData2& outData2, TCallback callback) const {
+		callback(node, outData1, outData2);
+		for (int ix = 0; ix < node->GetChildCount(); ++ix) {
+			VisitNode(node->GetChild(ix), outData1, outData2, callback);
+		}
+	}
+
+	template<typename TCallback, typename ...TData>
+	Bool			VisitNode(fbxsdk::FbxNode* node, TCallback callback, TData... data) const {
+		if (!callback(node, data...)) {
+			return false;
+		}
+		for (int ix = 0; ix < node->GetChildCount(); ++ix) {
+			if (!VisitNode(node->GetChild(ix), callback, data...)) {
+				return false;
+			}
+		}
+		return true;
+	}
 };
 
 template<typename TOutData1, typename TOutData2, typename TOutData3>
@@ -77,6 +98,19 @@ public:
 	virtual Bool	Parse(fbxsdk::FbxScene* obj, TOutData1& outData1, TOutData2& outData2, TOutData3& outData3) = 0;
 	virtual Bool	CanParse(fbxsdk::FbxScene* scene) const override { return true; }
 	virtual void	Clear() = 0;
+
+	template<typename TCallback, typename ...TData>
+	Bool			VisitNode(fbxsdk::FbxNode* node, TCallback callback, TData... data) const {
+		if (!callback(node, data...)) {
+			return false;
+		}
+		for (int ix = 0; ix < node->GetChildCount(); ++ix) {
+			if (!VisitNode(node->GetChild(ix), callback, data...)) {
+				return false;
+			}
+		}
+		return true;
+	}
 };
 
 template<typename TOutDataList>

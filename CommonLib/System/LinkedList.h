@@ -113,7 +113,6 @@ public:
 				return iter;
 			}
 		}
-
 		return m_Data.cend();
 	}
 
