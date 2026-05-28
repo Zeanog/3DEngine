@@ -127,7 +127,7 @@ public:
 
 	static Bool	StrCpy(Char* dst, UInt32 size, const Char* src);
 
-	static Char* Format(const char* format, va_list& args) {
+	static Char* Format(const Char* format, va_list& args) {
 		static constexpr int NumBuffers = 5;
 		static constexpr int MaxBufferSize = 256;
 		static int currentIndex = 0;
@@ -143,16 +143,25 @@ public:
 	static Char* Format(const char* format, ...);
 
 	template<typename TAction>
-	static void ConvertFor(const char* formattedString, TAction action) {
-		size_t formattedStringLen = String::Length(formattedString);
-		size_t wcStrLen = formattedStringLen * sizeof(wchar_t);
-		auto wcStr = STACK_ALLOC(wchar_t, wcStrLen);
-		size_t convertedChars = 0;
+	static void ConvertFor(const Char* formattedString, TAction action) {
+		try {
+#if _MBCS
+			size_t formattedStringLen = String::Length(formattedString);
+			size_t wcStrLen = formattedStringLen * sizeof(wchar_t);
+			auto wcStr = STACK_ALLOC(wchar_t, wcStrLen);
+			size_t convertedChars = 0;
 
-		// Convert mbStr to wcStr
-		// _TRUNCATE allows the function to copy as much as fits
-		errno_t err = mbstowcs_s(&convertedChars, wcStr, wcStrLen, formattedString, _TRUNCATE);
-		assert(!err);
-		action(wcStr, NULL);
+			// Convert mbStr to wcStr
+			// _TRUNCATE allows the function to copy as much as fits
+			errno_t err = mbstowcs_s(&convertedChars, wcStr, wcStrLen, formattedString, _TRUNCATE);
+			assert(!err);
+			action(wcStr);
+#else
+			action(formattedString);
+#endif
+		}
+		catch (...) {
+			assert(0);//TODO: Fix this.  This is used incase STACK_ALLOC fails
+		}
 	}
 };

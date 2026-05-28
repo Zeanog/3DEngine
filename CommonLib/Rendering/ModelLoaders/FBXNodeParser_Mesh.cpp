@@ -46,12 +46,12 @@ Bool FBXNodeParser_Mesh::GetMaterialTexture(const FbxProperty& lProperty, Neo::M
 		}
 
 		//TODO: Possibly find a better way to resolve texture paths
-		String fileName(texture->GetFileName());//TODO: Try and remove this allocation
-		if (fileName.Length() <= 0) {
+		const Char* fileName = texture->GetFileName();
+		if (String::Length(fileName) <= 0) {
 			continue;
 		}
 
-		auto image = Singleton<ImageManager>::GetInstance()->Get(fileName.CStr());
+		auto image = Singleton<ImageManager>::GetInstance()->Get(fileName);
 		if (!image) {//If path fails then try to rebuild it to our data path
 			auto fullDataPath = File::RebuildFullDataPath(fileName);
 			image = Singleton<ImageManager>::GetInstance()->Get(fullDataPath);
@@ -135,9 +135,6 @@ void FBXNodeParser_Mesh::LoadGeometry(FbxMesh* pMesh, Neo::VertexBuffer& vb, Neo
 	FbxAMatrix globalRMatrix = globalTMatrix;
 	globalRMatrix.SetT(FbxVector4(0.0f, 0.0f, 0.0f, 0.0f));
 
-	static Map<Int32, IndexRange>	materialInfos;//To minimize reallocations.  This makes this function non-thread-safe.
-	materialInfos.Clear();
-
 	int lVertexCount = 0;
 	const int lPolygonCount = pMesh->GetPolygonCount();
 	vb.Resize(lPolygonCount * TRIANGLE_VERTEX_COUNT);
@@ -155,24 +152,13 @@ void FBXNodeParser_Mesh::LoadGeometry(FbxMesh* pMesh, Neo::VertexBuffer& vb, Neo
 
 	for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
 	{
-		// The material for current face.
-		int lMaterialIndex = 0;
-		if (lMaterialIndice && lMaterialMappingMode == FbxGeometryElement::eByPolygon)
-		{
-			lMaterialIndex = lMaterialIndice->GetAt(lPolygonIndex);
-		}
-
-		if (!materialInfos.Contains(lMaterialIndex)) {
-			materialInfos.Add(lMaterialIndex, IndexRange());
-		}
-		auto& info = materialInfos[lMaterialIndex];
-		info.AddPolyIndex(lPolygonIndex);
-
+		int* indices = pMesh->GetPolygonVertices();
+		auto index = pMesh->GetPolygonVertexIndex(lPolygonIndex);
 		for (int lVerticeIndex = 0; lVerticeIndex < TRIANGLE_VERTEX_COUNT; ++lVerticeIndex)
 		{
 			const int lControlPointIndex = pMesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
-
-			ib.AddIndex(lPolygonIndex * TRIANGLE_VERTEX_COUNT + lVerticeIndex + appendingOffset);
+			
+			ib.AddIndex(indices[index + lVerticeIndex] + appendingOffset);
 
 			lCurrentVertex = lControlPoints[lControlPointIndex];
 			lCurrentVertex = globalTMatrix.MultT(lCurrentVertex);
@@ -198,5 +184,60 @@ void FBXNodeParser_Mesh::LoadGeometry(FbxMesh* pMesh, Neo::VertexBuffer& vb, Neo
 		}
 	}
 
-	LoadMaterials(pMesh, appendingOffset, materialInfos, matMap, mats);
+	LoadMaterials(pMesh, appendingOffset, matMap, mats);
+}
+
+void FBXNodeParser_Mesh::LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
+	auto numMaterials = pMesh->GetNode()->GetSrcObjectCount();
+
+	FOR(int, matIndex, 0, numMaterials, 1) {
+		auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(matIndex);
+		if (!pMaterial)
+		{
+			continue;
+		}
+
+		Bool containsTexture = false;
+		for (auto&& prop = pMaterial->GetFirstProperty(); prop.IsValid(); prop = pMaterial->GetNextProperty(prop)) {
+			containsTexture |= MaterialPropertyParsingInfo::ContainsTexture(prop);
+		}
+		if (!containsTexture) {
+			continue;
+		}
+
+		auto name = pMaterial->GetName();
+		if (!name || !name[0]) {
+			continue;
+		}
+
+		Neo::Mesh::AMaterial* mat{};
+		if (!matMap.Contains(name)) {
+			mat = new Neo::Mesh::Material(name);
+			mats.Add(mat);
+			matMap.Add(name, mat);
+		}
+		else {
+			mat = matMap[name];
+		}
+
+		mat->Ranges.Add({ (Int32)appendingOffset, (UInt32)pMesh->GetPolygonCount() });
+
+#if _DEBUG
+		List<StaticString>	propertyNames;//To allow us to see all the of the properties in the debugger
+#endif
+		for (auto&& prop = pMaterial->GetFirstProperty(); prop.IsValid(); prop = pMaterial->GetNextProperty(prop)) {
+			StaticString propName(prop.GetNameAsCStr());
+
+#if _DEBUG
+			propertyNames.Add(propName);
+#endif
+
+			if (!m_MaterialPropertyParsers.Contains(propName)) {
+				continue;
+			}
+
+			const auto& parser = m_MaterialPropertyParsers[propName];
+			parser.Parse(prop, mat);
+		}
+	}
 }

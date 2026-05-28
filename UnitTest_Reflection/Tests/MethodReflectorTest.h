@@ -2,13 +2,19 @@
 
 #include "System/Reflector.h"
 
-class MethodReflectorTest {
+class ParentReflectorTest {
+	virtual Bool F1(const char* str, UInt32 num) { return true; }
+};
+
+class MethodReflectorTest : public ParentReflectorTest {
 	CLASS_TYPEDEFS(MethodReflectorTest)
 
 protected:
 	UInt32 m_Value;
 
 public:
+	StaticString String;
+
 	DECLARE_GETSET(Value)
 
 	//TODO: Make a typelist of method types per method name.
@@ -20,7 +26,7 @@ public:
 		m_Value = ui;
 	}
 
-	Bool F1(const char* str, UInt32 num) {
+	virtual Bool F1(const char* str, UInt32 num) override {
 		assert(str);
 		m_Value = num;
 		return true;
@@ -32,32 +38,31 @@ public:
 	}
 };
 
+class InheritanceTest : public MethodReflectorTest {
+};
+
 #include "System/Functors/TypeList.h"
 
 template<>
 class Reflector<MethodReflectorTest> : public AReflectorJson {
 private:
 	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
-	SINGLETON_DECLARATIONS(Reflector) {}
+	SINGLETON_DECLARATIONS(Reflector) {
+		REGISTER_MEMBER(TReflected, String)
+	}
 
 public:
 	DEFINE_METHODINFO_ACCESSORS(m_MethodList)
 
 	typedef MethodReflectorTest	TReflected;
 
-	//I wish I could auto-magically determine these
-	using TMethodSignatures_Value = TYPELIST_2( void(TReflected::*)(), void(TReflected::*)(UInt32, Bool) );
-	DEFINE_SIGNATURE_ACCESSORS_FOR(Value)
-
-	using TMethodSignatures_F1 = TYPELIST_1( Bool(TReflected::*)(const char*, UInt32) );
-	DEFINE_SIGNATURE_ACCESSOR_FOR(F1)
-
-	using TMethodSignatures_F2 = TYPELIST_1( Int32(TReflected::*)() );
-	DEFINE_SIGNATURE_ACCESSOR_FOR(F2)
+	DEFINE_SIGNATURE_ACCESSORS_FOR(Value, void(TReflected::*)(), void(TReflected::*)(UInt32, Bool) )
+	DEFINE_SIGNATURE_ACCESSOR_FOR(F1, Bool(TReflected::*)(const char*, UInt32))
+	DEFINE_SIGNATURE_ACCESSOR_FOR(F2, Int32(TReflected::*)())
 
 protected:
 	REGISTER_METHODS_4(
-		MethodReflectorTest, m_MethodList,
+		TReflected, m_MethodList,
 		SignatureFor_Value<0>, Value,
 		SignatureFor_Value<1>, Value,
 		SignatureFor_F1, F1,

@@ -18,6 +18,14 @@ public:
 
 	DECLARE_GETSET(Name)
 	DECLARE_GETSET(Parent)
+
+	Bool	operator==(const Joint& rhs) const {
+		return Name() == rhs.Name() && Parent() == rhs.Parent();
+	}
+
+	Bool	operator!=(const Joint& rhs) const {
+		return !(*this == rhs);
+	}
 };
 
 class IMeshLoader;
@@ -37,6 +45,15 @@ namespace Neo {
 		List<Joint>&		Joints() {
 			return m_Joints;
 		}
+
+		Bool				Contains(const StaticString& jointName) const {
+			for (UInt32 ix = 0; ix < m_Joints.Length(); ++ix) {
+				if (m_Joints[ix].Name() == jointName) {
+					return true;
+				}
+			}
+			return false;
+		}	
 
 		Joint*		FindJoint(int index) {
 			return &m_Joints[index];

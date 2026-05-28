@@ -57,6 +57,12 @@ protected:
 		Bool	Parse(const FbxProperty& property, Neo::Mesh::AMaterial* mat) const {
 			return Parser(property, mat, ChannelName);
 		}
+
+		static Bool    ContainsTexture(const FbxProperty& property) {
+			const int lTextureCount = property.GetSrcObjectCount<FbxFileTexture>();
+			assert(lTextureCount <= 1);//We only support one texture per property for now
+			return lTextureCount > 0;
+		}
 	};
 	Map<StaticString, MaterialPropertyParsingInfo> m_MaterialPropertyParsers;
 
@@ -71,48 +77,7 @@ protected:
 	static FbxAMatrix	GetGlobalTransform(FbxNode* node, const FbxTime& time);
 
 	void LoadGeometry(FbxMesh* pMesh, Neo::VertexBuffer& vb, Neo::IndexBuffer& ib, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
-	void LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, const Map<Int32, IndexRange>& materialIndices, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats) {
-		assert(pMesh->GetNode()->GetMaterialCount() == materialIndices.Size());
-
-		FOREACH(matRangeIter, materialIndices) {
-			auto pMaterial = (fbxsdk::FbxSurfaceMaterial*)pMesh->GetNode()->GetSrcObject(matRangeIter->first);
-			if (!pMaterial)
-			{
-				continue;
-			}
-
-			auto name = pMaterial->GetName();
-			assert(name && name[0]);
-			Neo::Mesh::AMaterial* mat{};
-			if (!matMap.Contains(name)) {
-				mat = new Neo::Mesh::Material(name);
-				mats.Add(mat);
-				matMap.Add(name, mat);
-			}
-			else {
-				mat = matMap[name];
-			}
-
-			mat->Ranges.Add({ matRangeIter->second.StartPolyIndex + (Int32)appendingOffset, (UInt32)matRangeIter->second.PolyCount() });
-
-#if _DEBUG
-			List<StaticString>	propertyNames;//To allow us to see all the of the properties in the debugger
-#endif
-			for (auto&& prop = pMaterial->GetFirstProperty(); prop.IsValid(); prop = pMaterial->GetNextProperty(prop)) {
-				StaticString propName(prop.GetNameAsCStr());
-
-#if _DEBUG
-				propertyNames.Add(propName);
-#endif
-
-				if (!m_MaterialPropertyParsers.Contains(propName)) {
-					continue;
-				}
-				const auto& parser = m_MaterialPropertyParsers[propName];
-				parser.Parse(prop, mat);
-			}
-		}
-	}
+	void LoadMaterials(FbxMesh* pMesh, UInt32 appendingOffset, Map<StaticString, Neo::Mesh::AMaterial*>& matMap, List<Neo::Mesh::AMaterial*>& mats);
 
 public:
 	virtual Bool	Parse(fbxsdk::FbxNode* node, Neo::Mesh& outMesh) override;

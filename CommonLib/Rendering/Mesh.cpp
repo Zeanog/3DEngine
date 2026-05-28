@@ -49,6 +49,9 @@ Bool Neo::Mesh::RenderMaterial(int index, const List<StaticString>& channels) co
 	const AMaterial* matSlot = m_Materials[index];
 
 	for (UInt32 ix = 0; ix < channels.Length(); ++ix) {
+		if (!matSlot->ChannelMap.Contains(channels[ix])) {
+			continue;
+		}
 		auto channel = matSlot->ChannelMap[channels[ix]];
 		channel->Bind();
 	}
@@ -64,6 +67,9 @@ Bool Neo::Mesh::RenderMaterial(int index, const List<StaticString>& channels) co
 	}
 
 	for (UInt32 ix = 0; ix < channels.Length(); ++ix) {
+		if (!matSlot->ChannelMap.Contains(channels[ix])) {
+			continue;
+		}
 		auto channel = matSlot->ChannelMap[channels[ix]];
 		channel->Unbind();
 	}

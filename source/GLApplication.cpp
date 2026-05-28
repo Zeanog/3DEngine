@@ -108,11 +108,12 @@ GLApplication::~GLApplication() {
 }
 
 void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) {
+	float speed = 15.0f;
 	if (keyboardState.KeyIsDown(DIK_W)) {
-		TranslateCamera(0.0f, 0.0f, 1.0f);
+		TranslateCamera(0.0f, 0.0f, 1.0f * speed);
 	} 
 	else if (keyboardState.KeyIsDown(DIK_S)) {
-		TranslateCamera(0.0f, 0.0f, -1.0f);
+		TranslateCamera(0.0f, 0.0f, -1.0f * speed);
 	}
 
 	/*if (keyboardState.KeyWasReleased(DIK_W)) {
@@ -123,10 +124,10 @@ void	GLApplication::OnKeyboardChanged(Param<KeyboardState>::Type keyboardState) 
 	}*/
 
 	if (keyboardState.KeyIsDown(DIK_A)) {
-		TranslateCamera(1.0f, 0.0f, 0.0f);
+		TranslateCamera(1.0f * speed, 0.0f, 0.0f);
 	} 
 	else if (keyboardState.KeyIsDown(DIK_D)) {
-		TranslateCamera(-1.0f, 0.0f, 0.0f);
+		TranslateCamera(-1.0f * speed, 0.0f, 0.0f);
 	}
 
 	/*if (keyboardState.KeyWasReleased(DIK_A)) {
@@ -203,11 +204,11 @@ void GLApplication::SetSize(int w, int h)
 }
 
 void GLApplication::RotateCamera(Int64 deltaX, Int64 deltaY) {
-	m_Camera.Rotate(glm::vec3(deltaY, deltaX, 0.0f));
+	m_Camera.Rotate(glm::vec3(deltaY, deltaX, 0.0f) * m_DeltaTime);
 }
 
 void GLApplication::TranslateCamera(Float32 x, Float32 y, Float32 z) {
-	m_Camera.Translate(glm::vec3(x, y, z) * m_DeltaTime);
+	m_Camera.TranslateRelative(glm::vec3(x, y, z) * m_DeltaTime);
 }
 
 void GLApplication::Update()
@@ -271,22 +272,22 @@ void GLApplication::Update()
 	}
 
 	//Just for debugging
-	/*DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+	DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = -90.0f;
 	currAngles.y = 45.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime));
 	currAngles.z = 0.0f;
 	glm::vec3 dir = glm::forward<glm::vec4>() * glm::quat(glm::vec3(MathUtils::Deg2Radians(currAngles.x), MathUtils::Deg2Radians(currAngles.y), MathUtils::Deg2Radians(currAngles.z)));
-	(*iter)->Direction(dir);*/
+	(*iter)->Direction(dir);
 
-	SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+	/*SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 	glm::vec3 currAngles;
 	currAngles.x = MathUtils::Deg2Radians(90.0f);
 	currAngles.y = MathUtils::Deg2Radians(30.0f * std::sin(MathUtils::MilliSec2Sec(m_CurrentTime)));
 	currAngles.z = MathUtils::Deg2Radians(0.0f);
 	glm::mat4 t = glm::eulerAngleXYZ(currAngles.x, currAngles.y, currAngles.z);
 	t[3] = glm::vec4((*iter)->Position(), 1.0f);
-	(*iter)->Transform(t);
+	(*iter)->Transform(t);*/
 
 	auto rotMat = glm::eulerAngleXYZ(0.0f, m_DeltaTime, 0.0f);
 	if (m_Models.Length() >= 1) {
@@ -306,7 +307,7 @@ void GLApplication::Update()
 	}
 }
 
-#define CAST_SHADOWS 1
+#define CAST_SHADOWS 0
 
 void GLApplication::RenderModels(ShaderProgram_GLSL& program) {
 	for (UInt32 i = 0; i < m_PrevTypeModels.Length(); ++i) {
@@ -490,13 +491,13 @@ void GLApplication::LoadAssets()
 	m->Position(7, 2.5, 0);
 	m->Rotate(0.0f, 0.0f, 3.14f / 3.0f);
 	//
-	//	ALight* light = NULL;
-	//	glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
-	//	light = new Light_Directional(dir);
+		ALight* light = NULL;
+		glm::vec3 dir = glm::vec4(glm::forward<glm::vec3>(), 0.0f) * glm::quat(glm::vec3(MathUtils::Deg2Radians(-90), MathUtils::Deg2Radians(-45), MathUtils::Deg2Radians(0)));
+		light = new Light_Directional(dir);
 	//#if CAST_SHADOWS
 	//	light->CastsShadows(true);
 	//#endif
-	//	m_Lights.push_back(light);
+		m_Lights.Add(light);
 
 		//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
 #if CAST_SHADOWS
@@ -504,15 +505,15 @@ void GLApplication::LoadAssets()
 #endif
 	//m_Lights.push_back(light);
 
-	Light_Spot* spotLight = new Light_Spot(glm::vec3(2.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(0.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
-	spotLight->Distance(30.0f);
+	//Light_Spot* spotLight = new Light_Spot(glm::vec3(2.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(0.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
+	//spotLight->Distance(30.0f);
 #if CAST_SHADOWS
 	spotLight->CastsShadows(true);
 #endif
-	m_Lights.Add(spotLight);
+	//m_Lights.Add(spotLight);
 
 	Singleton<SceneLoader>::GetInstance()->Load("Scene.json");
-	m_Models.AddRange(Singleton<SceneLoader>::GetInstance()->Models());
+	//m_Models.AddRange(Singleton<SceneLoader>::GetInstance()->Models());
 
 	m_Camera.Position(Singleton<SceneLoader>::GetInstance()->CameraPosition());
 	m_Camera.Rotation(Singleton<SceneLoader>::GetInstance()->CameraRotation());

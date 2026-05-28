@@ -10,7 +10,6 @@ namespace UnitTestReflection
 	TEST_CLASS(UnitTestReflection)
 	{
 	public:
-		
 		TEST_METHOD(TestMethod1)
 		{
 			using TReflector = Reflector<MethodReflectorTest>;
@@ -18,38 +17,57 @@ namespace UnitTestReflection
 			const Char* methodName = "Value";
 			if (!Singleton<TReflector>::GetInstance()->FindMethodInfo(methodName, methodInfo)) {
 				auto formattedString = String::Format("Failed to find method info for %s", methodName);
-				size_t formattedStringLen = String::Length(formattedString);
-				auto wcStr = STACK_ALLOC(wchar_t, (formattedStringLen*sizeof(wchar_t)));
-				size_t convertedChars = 0;
-
-				// Convert mbStr to wcStr
-				// 100 is the size of the destination buffer
-				// _TRUNCATE allows the function to copy as much as fits
-				errno_t err = mbstowcs_s(&convertedChars, wcStr, formattedStringLen * 3, formattedString, _TRUNCATE);
-				Assert::Fail(wcStr);
+				String::ConvertFor(formattedString, [](const wchar_t* msg) {
+					Assert::Fail(msg, NULL);
+				});
 			}
 
-			MethodReflectorTest testObj;
-			methodInfo->Call(&testObj, 5, true);
+			try {
+				InheritanceTest testObj;
+				methodInfo->Call(&testObj, 5, true);
+			}
+			catch (std::runtime_error error) {
+				auto formattedString = String::Format("Caught error: %s", error.what());
+				String::ConvertFor(formattedString, [](const wchar_t* msg) {
+					Assert::IsFalse(true, msg);
+				});
+			}
 		}
 
 		TEST_METHOD(TestMethod2)
 		{
 			using TReflector = Reflector<MethodReflectorTest>;
-			TReflector::MethodInfoFor_Value<1>* methodInfo;
+			TReflector::MethodInfoFor_Value<0>* methodInfo;
 			const Char* methodName = "F1";
+			if (Singleton<TReflector>::GetInstance()->FindMethodInfo(methodName, methodInfo)) {
+				auto formattedString = String::Format("Shouldn't have found method info for %s", methodName);
+				String::ConvertFor(formattedString, [](const wchar_t* msg) {
+					Assert::Fail(msg, NULL);
+				});
+			}
+		}
+
+		TEST_METHOD(TestMethod3)
+		{
+			using TReflector = Reflector<MethodReflectorTest>;
+			TReflector::MethodInfoFor_Value<1>* methodInfo;
+			const Char* methodName = "Value";
 			if (!Singleton<TReflector>::GetInstance()->FindMethodInfo(methodName, methodInfo)) {
 				auto formattedString = String::Format("Failed to find method info for %s", methodName);
-				String::ConvertFor(formattedString, Assert::Fail);	
+				String::ConvertFor(formattedString, [](const wchar_t* msg) {
+					Assert::Fail(msg, NULL);
+				});
 			}
 
 			try {
-				MethodReflectorTest testObj;
-				methodInfo->Call(&testObj, 5, true);
+				ParentReflectorTest testObj2;
+				methodInfo->Call(&testObj2, 1509, false);
 			}
 			catch (std::runtime_error error) {
-				auto formattedString = String::Format("Exception thrown while calling '%s' through reflector", methodName);
-				String::ConvertFor(formattedString, Assert::Fail);
+				auto formattedString = String::Format("Caught expected error: %s", error.what());
+				String::ConvertFor(formattedString, [](const wchar_t* msg) {
+					Assert::IsTrue(true, msg);
+				});
 			}
 		}
 	};

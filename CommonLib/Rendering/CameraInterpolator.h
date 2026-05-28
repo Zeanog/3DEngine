@@ -37,8 +37,13 @@ public:
 		m_TargetPosition = pos;
 	}
 
-	virtual void						Translate(const TPosition& localDelta) override {
-		m_TargetPosition += localDelta * m_Decoratee->Rotation();
+	virtual void						Translate(const TPosition& delta) override {
+		m_TargetPosition += delta;
+	}
+
+	virtual void						TranslateRelative(const TPosition& delta) override {
+		m_TargetPosition += delta * m_Decoratee->Rotation();
+		
 	}
 
 	virtual void						Rotation(typename Param<TRotation>::Type rot) override {

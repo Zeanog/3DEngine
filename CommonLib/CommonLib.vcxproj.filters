@@ -492,9 +492,6 @@
     <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Mesh.cpp">
       <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Animation.cpp">
-      <Filter>Rendering\ModelLoaders</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\ModelLoaders\FBXHierarchyParser_Skeleton.cpp">
       <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
@@ -502,6 +499,9 @@
       <Filter>Rendering\ModelLoaders</Filter>
     </ClCompile>
     <ClCompile Include="Audio\Loaders\AudioLoader_Ogg.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\FBXSceneParser_Animation.cpp">
+      <Filter>Rendering\ModelLoaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

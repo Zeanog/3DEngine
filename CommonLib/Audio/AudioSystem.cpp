@@ -327,9 +327,10 @@ void AudioSystem::OnVoiceErrorHandler(SourceVoice* voice, void* context, HRESULT
 
 void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
 	//assert(context);
-	//Neo::Sound* snd = (Neo::Sound*)context;
+	//Sound* snd = (Sound*)context;
 
 	//auto hash = snd->FormatHash();
+	//assert(hash == voice->FormatHash());
 	//{
 	//	std::lock_guard<std::mutex> guard(m_Mutex);
 
@@ -337,9 +338,8 @@ void AudioSystem::OnBufferStartHandler(SourceVoice* voice, void* context) {
 	//	auto& voiceList = m_FormatToVoiceListMap[hash];
 
 	//	assert(voice->IsPlaying());
-	//	voiceList.Sort([](SourceVoice* a, SourceVoice* b) {//Put playing voices to the front of the list
-	//		return a->IsPlaying() && !b->IsPlaying();
-	//	});
+	//	voiceList.Remove(voice);
+	//	voiceList.AddFront(voice);//We are playing so place us at front of list
 	//}
 };
 
@@ -357,11 +357,9 @@ void AudioSystem::OnBufferEndHandler(SourceVoice* voice, void* context) {
 		assert(m_FormatToVoiceListMap.Contains(hash));
 		auto& voiceList = m_FormatToVoiceListMap[hash];
 
-		if (!voice->IsPlaying()) {
-			voiceList.Sort([](SourceVoice* a, SourceVoice* b) {//Put non-playing voices to the end of the list
-				return a->IsPlaying() && !b->IsPlaying();
-			});
-		}
+		voiceList.Sort([](SourceVoice* a, SourceVoice* b) {//Put non-playing voices to the end of the list
+			return a->IsPlaying() && !b->IsPlaying();
+		});
 	}
 };
 

@@ -7,8 +7,6 @@
 
 class HashGenerator {
 public:
-
-public:
 	static UInt32	Generate( const Char* str ) {
 		return std::hash<std::string>()(str);
 	}
@@ -16,8 +14,6 @@ public:
 	static UInt32	Generate( Char ch ) {
 		return std::hash<Char>()(ch);
 	}
-
-public:
 };
 
 #include "Singleton.h"
@@ -115,6 +111,10 @@ public:
 
 	Bool	operator==( const StaticString& rhs ) const {
 		return m_Hash == rhs.m_Hash;
+	}
+
+	Bool	operator!=(const StaticString& rhs) const {
+		return m_Hash != rhs.m_Hash;
 	}
 
 	Bool	operator<( const StaticString& rhs ) const {

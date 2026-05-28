@@ -151,8 +151,8 @@
     <ClCompile Include="Rendering\Joint.cpp" />
     <ClCompile Include="Rendering\Mesh.cpp" />
     <ClCompile Include="Rendering\Model.cpp" />
+    <ClCompile Include="Rendering\ModelLoaders\FBXSceneParser_Animation.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\MeshLoader_FBX.cpp" />
-    <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Animation.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\FBXNodeParser_Mesh.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\FBXHierarchyParser_Skeleton.cpp" />
     <ClCompile Include="Rendering\ModelLoaders\MeshManager.cpp" />

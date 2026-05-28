@@ -12,11 +12,11 @@
 
 Model::Model(const StaticString& meshPath)
 {
-	//m_Mesh = Singleton<MeshManager>::GetInstance()->Get(meshPath);
+	/*m_Mesh = Singleton<MeshManager>::GetInstance()->Get(meshPath);
 
 	if (m_Mesh->NumClips() > 0) {
 		m_DebugAnimPlayer.Start(m_Mesh->GetClip(0));
-	}
+	}*/
 }
 
 Model::~Model() {
