@@ -10,6 +10,7 @@ Reflection Example:
 ```
 class MethodReflectorTest {
 	CLASS_TYPEDEFS(MethodReflectorTest)
+	REFLECTION_HELPERS_FOR(MethodReflectorTest)
 
 protected:
 	UInt32 m_Value;
@@ -36,6 +37,7 @@ class Reflector<MethodReflectorTest> : public AReflectorJson {
 private:
 	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
 	SINGLETON_DECLARATIONS(Reflector) {
+	    REGISTER_MEMBER(TReflected, m_Value)
 		REGISTER_MEMBER(TReflected, ValueName)
 	}
 
