@@ -8,7 +8,7 @@ class ParentReflectorTest {
 
 class MethodReflectorTest : public ParentReflectorTest {
 	CLASS_TYPEDEFS(MethodReflectorTest)
-	REFLECTION_HELPERS()
+	REFLECTION_HELPERS_FOR(MethodReflectorTest)
 
 protected:
 	UInt32 m_Value;
