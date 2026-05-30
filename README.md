@@ -1,9 +1,20 @@
 # 3DEngine
-Just a really rough engine.  Mostly low level code.  
+
+Just a really rough engine.  Mostly low level code.
 
 I have been working on this slowly over a couple of years.  I found a demo (https://lnkd.in/gw6GtmZ) to learn from.
 
 I've also been using this to tryout various ideas in C++ I've had, like a foreach loop.  So some of the code is inefficient.  But I hope somewhat clever.  :D
+
+
+
+5/30/2026:
+
+I broke lighting and the FBX loader.  I really wanted to check-in my updated reflection code.
+
+You can now reflect methods.  System also handles method overloading.  Still needs a lot more testing.  System/Reflector.h
+
+Also added unit tests
 
 11/6/2025:
 Added a reflection system a couple of weeks ago.  Allows users to define a reflection object for a given data structure.  Needs work in regards to complex types like lists and maps.
@@ -13,3 +24,4 @@ Added first pass at xAudio2 implementation.
 
 2/23/2022:
 TODO:  Pull out animation curves from FBX files instead of/along with key frames
+
