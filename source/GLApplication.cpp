@@ -307,7 +307,7 @@ void GLApplication::Update()
 	}
 }
 
-#define CAST_SHADOWS 0
+#define CAST_SHADOWS 1
 
 void GLApplication::RenderModels(ShaderProgram_GLSL& program) {
 	for (UInt32 i = 0; i < m_PrevTypeModels.Length(); ++i) {
@@ -399,8 +399,8 @@ void GLApplication::Render()
 		m_deferredRendering->showTexture("tPositionMap", 512, 384, 512, 0);
 		m_deferredRendering->showTexture("tNormalMap", 512, 384, 0, 384);
 	
-		//DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
-		SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
+		DirectionalLightPool::Iterator iter = Singleton<DirectionalLightPool>::GetInstance()->Begin();
+		//SpotLightPool::Iterator iter = Singleton<SpotLightPool>::GetInstance()->Begin();
 		(*iter)->DebugRenderMap(512, 384, 512, 384);
 	}
 
@@ -501,14 +501,14 @@ void GLApplication::LoadAssets()
 
 		//light = new Light_Point(lm::vec3(10.0f, 0.0f, 0.0f), 30.0f );
 #if CAST_SHADOWS
-	//light->CastsShadows(true);
+	light->CastsShadows(true);
 #endif
 	//m_Lights.push_back(light);
 
 	//Light_Spot* spotLight = new Light_Spot(glm::vec3(2.0f, 10.0f, 0.0f), glm::eulerAngleXYZ(MathUtils::Deg2Radians(90.0f), MathUtils::Deg2Radians(0.0f), MathUtils::Deg2Radians(0.0f)), MathUtils::Deg2Radians(30.0f), (float)m_windowWidth / m_windowHeight);
 	//spotLight->Distance(30.0f);
 #if CAST_SHADOWS
-	spotLight->CastsShadows(true);
+	//spotLight->CastsShadows(true);
 #endif
 	//m_Lights.Add(spotLight);
 
