@@ -26,5 +26,17 @@ struct FunctionTraits<R(C::*)(TArgs...)> {
 	template<std::size_t N>
 	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
 
-	typedef typename MethodInfo<R, C, TArgs...> TMethodInfo;
+	typedef typename MethodInfo<R(C::*)(TArgs...)> TMethodInfo;
+};
+
+template<typename R, typename C, typename... TArgs>
+struct FunctionTraits<R(C::*)(TArgs...) const> {
+	using TReturn = R;
+	static constexpr std::size_t NumArgs = sizeof...(TArgs);
+
+	// Helper to get a specific argument type by index
+	template<std::size_t N>
+	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
+
+	typedef typename MethodInfo<R(C::*)(TArgs...) const> TMethodInfo;
 };

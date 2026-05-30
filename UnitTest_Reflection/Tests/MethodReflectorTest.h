@@ -13,18 +13,9 @@ protected:
 	UInt32 m_Value;
 
 public:
-	StaticString String;
+	StaticString ValueName;
 
 	DECLARE_GETSET(Value)
-
-	//TODO: Make a typelist of method types per method name.
-	void Value() {
-		m_Value = 1;
-	}
-
-	void Value(UInt32 ui, Bool b) {
-		m_Value = ui;
-	}
 
 	virtual Bool F1(const char* str, UInt32 num) override {
 		assert(str);
@@ -48,7 +39,7 @@ class Reflector<MethodReflectorTest> : public AReflectorJson {
 private:
 	INHERITED_CLASS_TYPEDEFS(Reflector, AReflectorJson)
 	SINGLETON_DECLARATIONS(Reflector) {
-		REGISTER_MEMBER(TReflected, String)
+		REGISTER_MEMBER(TReflected, ValueName)
 	}
 
 public:
@@ -56,7 +47,8 @@ public:
 
 	typedef MethodReflectorTest	TReflected;
 
-	DEFINE_SIGNATURE_ACCESSORS_FOR(Value, void(TReflected::*)(), void(TReflected::*)(UInt32, Bool) )
+	//TODO: I wish I could auto-magically generate these signatures instead of having to specify them manually.
+	DEFINE_SIGNATURE_ACCESSORS_FOR(Value, Param<UInt32>::Type(TReflected::*)() const, void(TReflected::*)(Param<UInt32>::Type))
 	DEFINE_SIGNATURE_ACCESSOR_FOR(F1, Bool(TReflected::*)(const char*, UInt32))
 	DEFINE_SIGNATURE_ACCESSOR_FOR(F2, Int32(TReflected::*)())
 
