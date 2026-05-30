@@ -410,4 +410,5 @@ public:
 
 #include <cstddef>
 
+#define REFLECTION_HELPERS()	friend class Reflector<TSelf>;
 #define REGISTER_MEMBER( ownerType, member ) RegisterMember<decltype(ownerType::member)>(#member, (UInt64)offsetof(ownerType, member) );
