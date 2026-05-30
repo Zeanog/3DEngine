@@ -92,20 +92,37 @@ struct MethodListNode {
 
 #include <stdexcept>
 
-template<typename TReturn, class TObject, typename... TArgs>
-struct MethodInfo {
+template<typename _TMethod>
+struct AMethodInfo {
+	ABSTRACT_CLASS_TYPEDEFS(AMethodInfo) {}
+
 public:
-	using TMethod = TReturn(TObject::*)(TArgs...);
+	using TMethod = _TMethod;
 
 protected:
 	StaticString	m_MethodName;
 	TMethod			m_Method;
 
 public:
-	MethodInfo(const StaticString& name, TMethod method) : m_MethodName(name), m_Method(method) {}
-	MethodInfo(const Char* name, TMethod method) : m_MethodName(name), m_Method(method) {}
+	AMethodInfo(const StaticString& name, TMethod method) : m_MethodName(name), m_Method(method) {}
+	AMethodInfo(const Char* name, TMethod method) : m_MethodName(name), m_Method(method) {}
 
 	DECLARE_GETSET(MethodName)
+};
+
+template<typename _TMethod>
+struct MethodInfo;
+
+template<typename TReturn, class TObject, typename... TArgs>
+struct MethodInfo<TReturn(TObject::*)(TArgs...)> : public AMethodInfo<TReturn(TObject::*)(TArgs...)> {
+	INHERITED_CLASS_TYPEDEFS(MethodInfo<TReturn(TObject::*)(TArgs...)>, AMethodInfo<TReturn(TObject::*)(TArgs...)>)
+
+public:
+	using TMethod = typename TSuper::TMethod;
+
+public:
+	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
+	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
 
 	template<typename TCaller>
 	static constexpr bool CanCall() {//TODO: TEST THIS!  Especially is_base_of use.  TCaller can be a parent class of TObject, but not a child class.
@@ -118,10 +135,10 @@ public:
 	}
 
 	template<typename TCaller>
-	TReturn Call(TCaller* caller, TArgs... args) {
-		if(!caller || !m_Method) {
+	TReturn Call(TCaller* caller, TArgs... args) const {
+		if(!caller || !this->m_Method) {
 #if _DEBUG
-			throw std::runtime_error(String::Format("Invalid caller or method for method '%s'", m_MethodName.CStr()));
+			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
 #else
 			return TReturn();
 #endif		
@@ -129,13 +146,57 @@ public:
 		
 		if constexpr (!CanCall<TCaller>()) {
 #if _DEBUG
-			throw std::runtime_error(String::Format("Invalid caller type for method '%s'", m_MethodName.CStr()));
+			throw std::runtime_error(String::Format("Invalid caller type for method '%s'", this->m_MethodName.CStr()));
 #else
 			return TReturn();
 #endif
 		}
 		else {
-			return (caller->*m_Method)(args...);
+			return (caller->*(this->m_Method))(args...);
+		}
+	}
+};
+
+template<typename TReturn, class TObject, typename... TArgs>
+struct MethodInfo<TReturn(TObject::*)(TArgs...) const> : public AMethodInfo<TReturn(TObject::*)(TArgs...) const> {
+	INHERITED_CLASS_TYPEDEFS(MethodInfo<TReturn(TObject::*)(TArgs...) const>, AMethodInfo<TReturn(TObject::*)(TArgs...) const>)
+
+public:
+	using TMethod = typename TSuper::TMethod;
+
+public:
+	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
+	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
+
+	template<typename TCaller>
+	static constexpr bool CanCall() {//TODO: TEST THIS!  Especially is_base_of use.  TCaller can be a parent class of TObject, but not a child class.
+		return std::same_as<TCaller, TObject> || std::is_base_of<TObject, TCaller>::value;
+	}
+
+	template<typename TCaller>
+	Bool CanCall(TCaller* caller) const {
+		return CanCall<TCaller>() && caller != nullptr;
+	}
+
+	template<typename TCaller>
+	TReturn Call(TCaller* caller, TArgs... args) const {
+		if (!caller || !this->m_Method) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
+#else
+			return TReturn();
+#endif		
+		}
+
+		if constexpr (!CanCall<TCaller>()) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Invalid caller type for method '%s'", this->m_MethodName.CStr()));
+#else
+			return TReturn();
+#endif
+		}
+		else {
+			return (caller->*(this->m_Method))(args...);
 		}
 	}
 };
