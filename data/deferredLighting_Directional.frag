@@ -37,7 +37,7 @@ void main( void )
 		nDotl = dot(normal.xyz, -vLightDir);
 		outColor *= max(0.0, nDotl);
 
-		float shadow = readShadowMap(position.xyz);
+		float shadow = 1.0;//readShadowMap(position.xyz);
 		outColor *= shadow;
 	}
 

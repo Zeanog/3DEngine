@@ -18,7 +18,7 @@ struct MethodListNode {
 
 	template<typename TRequestedMethodInfo>
 	Bool FindMethodInfoAt(int index, TRequestedMethodInfo*& outMethodInfo) const {
-		if (index <= 0 && std::same_as<TRequestedMethodInfo, TMethodInfo>) {
+		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && index <= 0) {
 			outMethodInfo = (TRequestedMethodInfo*)&MethodInfo;
 			return true;
 		}
@@ -50,7 +50,7 @@ struct MethodListNode {
 
 	template<typename TRequestedMethodInfo>
 	TRequestedMethodInfo* FindMethodInfo(const StaticString& methodName) const {
-		if (MethodInfo.MethodName() == methodName && std::same_as<TRequestedMethodInfo, TMethodInfo>) {
+		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && MethodInfo.MethodName() == methodName) {
 			return (TRequestedMethodInfo*)&MethodInfo;
 		}
 

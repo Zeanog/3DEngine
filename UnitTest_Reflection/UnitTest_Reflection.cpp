@@ -31,7 +31,7 @@ namespace UnitTestReflection
 			catch (std::runtime_error error) {
 				auto formattedString = String::Format("Caught error: %s", error.what());
 				String::ConvertFor(formattedString, [](const wchar_t* msg) {
-					Assert::IsFalse(true, msg);
+					Assert::Fail(msg, NULL);
 				});
 			}
 		}
