@@ -6,9 +6,7 @@ I have been working on this slowly over a couple of years.  I found a demo (http
 
 I've also been using this to tryout various ideas in C++ I've had, like a foreach loop.  So some of the code is inefficient.  But I hope somewhat clever.  :D
 
-///////////////////////////////////////////////
 Reflection Example:
-
 ```
 class MethodReflectorTest {
 	CLASS_TYPEDEFS(MethodReflectorTest)
@@ -61,7 +59,7 @@ protected:
 	)
 };
 ```
-///////////////////////////////////////////////
+
 
 5/30/2026:
 I broke lighting and the FBX loader.  I really wanted to check-in my updated reflection code.
