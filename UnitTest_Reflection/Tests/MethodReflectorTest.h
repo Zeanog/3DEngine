@@ -3,7 +3,7 @@
 #include "System/Reflector.h"
 
 class ParentReflectorTest {
-	virtual Bool F1(const char* str, UInt32 num) { return true; }
+	virtual Bool F1(const char* str, UInt32 num) = 0;
 };
 
 class MethodReflectorTest : public ParentReflectorTest {
@@ -33,8 +33,6 @@ public:
 class InheritanceTest : public MethodReflectorTest {
 };
 
-#include "System/Functors/TypeList.h"
-
 template<>
 class Reflector<MethodReflectorTest> : public AReflectorJson {
 private:
@@ -45,9 +43,9 @@ private:
 	}
 
 public:
-	DEFINE_METHODINFO_ACCESSORS(m_MethodList)
-
 	typedef MethodReflectorTest	TReflected;
+
+	DEFINE_METHODINFO_ACCESSORS(m_MethodList)
 
 	//TODO: I wish I could auto-magically generate these signatures instead of having to specify them manually.
 	DEFINE_SIGNATURE_ACCESSORS_FOR(Value, Param<UInt32>::Type(TReflected::*)() const, void(TReflected::*)(Param<UInt32>::Type))
