@@ -150,7 +150,11 @@ struct MethodListNode {
 	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args ) const {
 		if (MethodInfo.MethodName() != methodName) {
 			if constexpr (std::same_as<TNextNode, TNull>) {
-				return TReturn();//TODO: Throw exception
+#if _DEBUG
+				throw std::runtime_error(String::Format("Unable to find method '%s'", MethodInfo.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
 			}
 			else {
 				return NextNode.Call<Index, TReturn, TCaller, TArgs...>(methodName, caller, args...);
