@@ -62,6 +62,8 @@ protected:
 };
 ```
 
+7/25/2026:
+Refactored Reflector class.  Added Call method to reflector so users can ignore method info's
 
 5/30/2026:
 I broke lighting and the FBX loader.  I really wanted to check-in my updated reflection code.
