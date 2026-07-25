@@ -36,9 +36,6 @@ template<typename _TReturn, class TObject, typename... TArgs>
 struct MethodInfo<_TReturn(TObject::*)(TArgs...)> : public AMethodInfo<_TReturn(TObject::*)(TArgs...)> {
 	INHERITED_CLASS_TYPEDEFS(MethodInfo<_TReturn(TObject::*)(TArgs...)>, AMethodInfo<_TReturn(TObject::*)(TArgs...)>)
 
-protected:
-	std::function<_TReturn(TObject*, TArgs...)> m_FuncWrapper;
-
 public:
 	using TReturn = _TReturn;
 	using TMethod = typename TSuper::TMethod;
@@ -157,7 +154,7 @@ struct MethodListNode {
 #endif
 			}
 			else {
-				return NextNode.Call<Index, TReturn, TCaller, TArgs...>(methodName, caller, args...);
+				return NextNode.Call<Index, TReturn>(methodName, caller, args...);
 			}
 		}
 
@@ -182,7 +179,7 @@ struct MethodListNode {
 #endif
 		}
 		else {
-			return NextNode.Call<Index - 1, TReturn, TCaller, TArgs...>(methodName, caller, args...);
+			return NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
 		}
 	}
 
