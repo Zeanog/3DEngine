@@ -158,27 +158,29 @@ struct MethodListNode {
 		}
 
 		if constexpr (Index <= 0) {
-			if constexpr (std::same_as<typename TMethodInfo::TReturn, TReturn>) {
-				return MethodInfo.Call(caller, args...);
-			}
-			else {
-				assert(false);//TODO: Throw exception
+			if constexpr (!std::same_as<typename TMethodInfo::TReturn, TReturn>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", MethodInfo.MethodName().CStr()));
+#else
 				return TReturn();
+#endif
+			}
+			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
+				return MethodInfo.Call(caller, args...);
 			}
 		}
 
 		if constexpr (std::same_as<TNextNode, TNull>) {
-			return TReturn();//TODO: Throw exception
+#if _DEBUG
+			throw std::runtime_error(String::Format("Unable to find method '%s'", MethodInfo.MethodName().CStr()));
+#else
+			return TReturn();
+#endif
 		}
 		else {
 			return NextNode.Call<Index - 1, TReturn, TCaller, TArgs...>(methodName, caller, args...);
 		}
 	}
-
-	/*template<typename TReturn, typename TCaller, typename ...TArgs>
-	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
-		return Call<0, TReturn>(methodName, caller, args...);
-	}*/
 
 	Bool HasMethod(const StaticString& methodName) const {
 		if (MethodInfo.MethodName() == methodName) {
