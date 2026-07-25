@@ -3,11 +3,13 @@
 #include "System/Reflector.h"
 
 class ParentReflectorTest {
+	CLASS_TYPEDEFS(ParentReflectorTest)
+
 	virtual Bool F1(const char* str, UInt32 num) = 0;
 };
 
 class MethodReflectorTest : public ParentReflectorTest {
-	CLASS_TYPEDEFS(MethodReflectorTest)
+	INHERITED_CLASS_TYPEDEFS(MethodReflectorTest, ParentReflectorTest)
 	REFLECTION_HELPERS_FOR(MethodReflectorTest)
 
 protected:
@@ -31,6 +33,7 @@ public:
 };
 
 class InheritanceTest : public MethodReflectorTest {
+	INHERITED_CLASS_TYPEDEFS(InheritanceTest, MethodReflectorTest)
 };
 
 template<>
