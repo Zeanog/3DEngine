@@ -47,19 +47,12 @@ public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
 	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
 
-	template<typename TCaller>
-	static constexpr bool CanCall() {//TODO: TEST THIS!  Especially is_base_of use.  TCaller can be a child class of TObject, but not a parent class.
-		return std::same_as<TCaller, TObject> || std::is_base_of<TObject, TCaller>::value;
+	Bool CanCall(TObject* caller) const {
+		return this->m_Method != nullptr && caller != nullptr;
 	}
 
-	template<typename TCaller>
-	Bool CanCall(TCaller* caller) const {
-		return CanCall<TCaller>() && caller != nullptr;
-	}
-
-	template<typename TCaller>
-	TReturn Call(TCaller* caller, TArgs... args) const {
-		if (!caller || !this->m_Method) {
+	TReturn Call(TObject* caller, TArgs... args) const {
+		if (!CanCall(caller)) {
 #if _DEBUG
 			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
 #else
@@ -67,16 +60,7 @@ public:
 #endif		
 		}
 
-		if constexpr (!CanCall<TCaller>()) {
-#if _DEBUG
-			throw std::runtime_error(String::Format("Invalid caller type for method '%s'", this->m_MethodName.CStr()));
-#else
-			return TReturn();
-#endif
-		}
-		else {
-			return (caller->*(this->m_Method))(args...);
-		}
+		return (caller->*(this->m_Method))(args...);
 	}
 };
 
@@ -92,19 +76,12 @@ public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
 	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
 
-	template<typename TCaller>
-	static constexpr bool CanCall() {//TODO: TEST THIS!  Especially is_base_of use.  TCaller can be a parent class of TObject, but not a child class.
-		return std::same_as<TCaller, TObject> || std::is_base_of<TObject, TCaller>::value;
+	Bool CanCall(TObject* caller) const {
+		return this->m_Method != nullptr && caller != nullptr;
 	}
 
-	template<typename TCaller>
-	Bool CanCall(TCaller* caller) const {
-		return CanCall<TCaller>() && caller != nullptr;
-	}
-
-	template<typename TCaller>
-	TReturn Call(TCaller* caller, TArgs... args) const {
-		if (!caller || !this->m_Method) {
+	TReturn Call(TObject* caller, TArgs... args) const {
+		if (!CanCall(caller)) {
 #if _DEBUG
 			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
 #else
@@ -112,16 +89,7 @@ public:
 #endif		
 		}
 
-		if constexpr (!CanCall<TCaller>()) {
-#if _DEBUG
-			throw std::runtime_error(String::Format("Invalid caller type for method '%s'", this->m_MethodName.CStr()));
-#else
-			return TReturn();
-#endif
-		}
-		else {
-			return (caller->*(this->m_Method))(args...);
-		}
+		return (caller->*(this->m_Method))(args...);
 	}
 };
 
@@ -353,8 +321,6 @@ Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo)
 Bool HasMethod(const StaticString& methodName) const { \
 	return methodListName.HasMethod(methodName);	\
 }	\
-template<typename TMethod>	\
-using TMethodInfoFor = METHOD_INFO_TYPE_FROM(TMethod);	\
 template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>	\
 TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {	\
 	return m_MethodList.Call<Index, TReturn, TCaller, TArgs...>(methodName, caller, args...);	\
