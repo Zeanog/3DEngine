@@ -60,7 +60,32 @@ protected:
 		SignatureFor_F2, F2
 	)
 };
+///////////////////////////////////////////
+TEST_METHOD(CallF1FromReflector)
+{
+	using TReflector = Reflector<MethodReflectorTest>;
+
+	const Char* methodName = "F1";
+
+	try {
+		InheritanceTest testObjChild;
+		typename TReflector::TReflected* testObj = &testObjChild;
+		ParentReflectorTest* testObjParent = testObj;
+
+		auto ret = Singleton<TReflector>::GetInstance()->Call<Bool>(StaticString(methodName), &testObjChild, "Hello", 1509);
+	}
+	catch(...) {
+		String::ConvertFor(String::Format("Unexpected error calling %s", methodName), [](const wchar_t* msg) {
+			Assert::Fail(msg);
+		});
+	}
+}
+
 ```
+
+8/9/2026:
+Can now call methods directly from the Reflector now.  
+Can find methods based on name and types of passed in arguments.  So you can call methods with the same name by changing the args you pass in.
 
 7/25/2026:
 Refactored Reflector class.  Added Call method to reflector so users can ignore method info's
