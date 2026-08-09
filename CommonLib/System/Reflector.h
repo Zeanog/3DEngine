@@ -6,6 +6,8 @@
 #include "System/Map.h"
 #include "System/List.h"
 
+#include "System/Functors/FunctionTraits.h"
+
 template<typename TObject>
 class Reflector;
 
@@ -27,28 +29,97 @@ public:
 	AMethodInfo(const Char* name, TMethod method) : m_MethodName(name), m_Method(method) {}
 
 	DECLARE_GETSET(MethodName)
+
+	static constexpr UInt32 NumArgs() {
+		return FunctionTraits<TMethod>::NumArgs;
+	}
 };
+
+#include <type_traits>
 
 template<typename _TMethod>
 struct MethodInfo;
 
-template<typename _TReturn, class TObject, typename... TArgs>
-struct MethodInfo<_TReturn(TObject::*)(TArgs...)> : public AMethodInfo<_TReturn(TObject::*)(TArgs...)> {
-	INHERITED_CLASS_TYPEDEFS(MethodInfo<_TReturn(TObject::*)(TArgs...)>, AMethodInfo<_TReturn(TObject::*)(TArgs...)>)
+#define ARGS( methodInfoType )	std::invoke_result_t<decltype(&methodInfoType::GetArgs)>
+
+template<typename _TReturn, class TObject, typename... _TArgs>
+struct MethodInfo<_TReturn(TObject::*)(_TArgs...)> : public AMethodInfo<_TReturn(TObject::*)(_TArgs...)> {
+	INHERITED_CLASS_TYPEDEFS(MethodInfo<_TReturn(TObject::*)(_TArgs...)>, AMethodInfo<_TReturn(TObject::*)(_TArgs...)>)
 
 public:
 	using TReturn = _TReturn;
-	using TMethod = typename TSuper::TMethod;
+	using TArgs = std::tuple<_TArgs...>;
+	using TMethod = typename TSuper::TMethod;	
+
+	static std::tuple<_TArgs...> GetArgs() {
+		throw _Notvalid_impl_;
+	}
 
 public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
 	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
 
-	Bool CanCall(TObject* caller) const {
+	template<typename... __TArgs>
+	static constexpr bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+			return false;
+		}
+		else {
+			return std::is_constructible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+		}
+	}
+
+	Bool CanCall(const TObject* caller) const {
 		return this->m_Method != nullptr && caller != nullptr;
 	}
 
-	TReturn Call(TObject* caller, TArgs... args) const {
+	TReturn Call(TObject* caller, _TArgs... args) const {
+		if (!CanCall(caller)) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
+#else
+			return TReturn();
+#endif		
+		}
+
+		//assert(this->ArgsMatch<TArgs...>());
+
+		return (caller->*(this->m_Method))(args...);
+	}
+};
+
+template<typename _TReturn, class TObject, typename... _TArgs>
+struct MethodInfo<_TReturn(TObject::*)(_TArgs...) const> : public AMethodInfo<_TReturn(TObject::*)(_TArgs...) const> {
+	INHERITED_CLASS_TYPEDEFS(MethodInfo<_TReturn(TObject::*)(_TArgs...) const>, AMethodInfo<_TReturn(TObject::*)(_TArgs...) const>)
+
+public:
+	using TReturn = _TReturn;
+	using TArgs = std::tuple<_TArgs...>;
+	using TMethod = typename TSuper::TMethod;
+
+	static std::tuple<_TArgs...> GetArgs() {
+		throw _Notvalid_impl_;
+	}
+
+public:
+	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
+	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
+
+	template<typename... __TArgs>
+	static constexpr bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+			return false;
+		}
+		else {
+			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+		}
+	}
+
+	Bool CanCall(const TObject* caller) const {
+		return this->m_Method != nullptr && caller != nullptr;
+	}
+
+	TReturn Call(const TObject* caller, _TArgs... args) const {
 		if (!CanCall(caller)) {
 #if _DEBUG
 			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
@@ -61,47 +132,36 @@ public:
 	}
 };
 
-template<typename _TReturn, class TObject, typename... TArgs>
-struct MethodInfo<_TReturn(TObject::*)(TArgs...) const> : public AMethodInfo<_TReturn(TObject::*)(TArgs...) const> {
-	INHERITED_CLASS_TYPEDEFS(MethodInfo<_TReturn(TObject::*)(TArgs...) const>, AMethodInfo<_TReturn(TObject::*)(TArgs...) const>)
-
-public:
-	using TReturn = _TReturn;
-	using TMethod = typename TSuper::TMethod;
-
-public:
-	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
-	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
-
-	Bool CanCall(TObject* caller) const {
-		return this->m_Method != nullptr && caller != nullptr;
+struct MethodInfoHelpers {
+	template<typename TReturn, class TMethodInfo, typename TObject, typename... _TArgs>
+	static TReturn Call(const TMethodInfo& info, TObject* caller, _TArgs... args) {
+		return info.Call(caller, args...);
 	}
 
-	TReturn Call(TObject* caller, TArgs... args) const {
-		if (!CanCall(caller)) {
-#if _DEBUG
-			throw std::runtime_error(String::Format("Invalid caller or method ref for method '%s'", this->m_MethodName.CStr()));
-#else
-			return TReturn();
-#endif		
-		}
-
-		return (caller->*(this->m_Method))(args...);
+	template<typename TReturn, class TMethodInfo, typename TObject, typename... _TArgs>
+	static TReturn Call(const TMethodInfo& info, const TObject* caller, _TArgs... args) {
+		return info.Call(caller, args...);
 	}
 };
 
-template< class TMethodInfo, class TNextNode >
-struct MethodListNode {
-	TMethodInfo	MethodInfo;
+template< class _TNextNode, class _TMethod >
+struct AMethodListNode {
+public:
+	using TMethod = _TMethod;
+	using TMethodInfo = MethodInfo<TMethod>;
+	using TNextNode = _TNextNode;
+
+	TMethodInfo	Info;
 	TNextNode	NextNode;
 
-	MethodListNode(TMethodInfo info, TNextNode&& next) : MethodInfo(info), NextNode(next) {
-	}
+public:
+	AMethodListNode(const StaticString& methodName, TMethod method, TNextNode next) : Info(methodName, method) , NextNode(next){}
+	AMethodListNode(const Char* methodName, TMethod method, TNextNode&& next) : Info(methodName, method), NextNode(next) {}
 
 	template<typename TRequestedMethodInfo>
 	Bool FindMethodInfoAt(int index, TRequestedMethodInfo*& outMethodInfo) const {
 		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && index <= 0) {
-			outMethodInfo = (TRequestedMethodInfo*)&MethodInfo;
+			outMethodInfo = (TRequestedMethodInfo*)&Info;
 			return true;
 		}
 
@@ -117,38 +177,40 @@ struct MethodListNode {
 
 	template<typename TRequestedMethodInfo>
 	Bool FindMethodInfo(const StaticString& methodName, TRequestedMethodInfo*& outMethodInfo) const {
-		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && MethodInfo.MethodName() == methodName) {
-			outMethodInfo = (TRequestedMethodInfo*)&MethodInfo;
+		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && Info.MethodName() == methodName) {
+			outMethodInfo = (TRequestedMethodInfo*)&Info;
 			return true;
 		}
 
 		if constexpr (std::same_as<TNextNode, TNull>) {
 			outMethodInfo = nullptr;
 			return false;
-		} else {
+		}
+		else {
 			return NextNode.FindMethodInfo(methodName, outMethodInfo);
 		}
 	}
 
 	template<typename TRequestedMethodInfo>
 	TRequestedMethodInfo* FindMethodInfo(const StaticString& methodName) const {
-		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && MethodInfo.MethodName() == methodName) {
-			return (TRequestedMethodInfo*)&MethodInfo;
+		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && Info.MethodName() == methodName) {
+			return (TRequestedMethodInfo*)&Info;
 		}
 
 		if constexpr (std::same_as<TNextNode, TNull>) {
 			return nullptr;
-		} else {
+		}
+		else {
 			return NextNode.FindMethodInfo<TRequestedMethodInfo>(methodName);
 		}
 	}
 
 	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
-	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args ) const {
-		if (MethodInfo.MethodName() != methodName) {
+	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
+		if (Info.MethodName() != methodName) {
 			if constexpr (std::same_as<TNextNode, TNull>) {
 #if _DEBUG
-				throw std::runtime_error(String::Format("Unable to find method '%s'", MethodInfo.MethodName().CStr()));
+				throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
 #else
 				return TReturn();
 #endif
@@ -161,19 +223,19 @@ struct MethodListNode {
 		if constexpr (Index <= 0) {
 			if constexpr (!std::same_as<typename TMethodInfo::TReturn, TReturn>) {
 #if _DEBUG
-				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", MethodInfo.MethodName().CStr()));
+				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", Info.MethodName().CStr()));
 #else
 				return TReturn();
 #endif
 			}
 			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
-				return MethodInfo.Call(caller, args...);
+				return Info.Call(caller, args...);
 			}
 		}
 
 		if constexpr (std::same_as<TNextNode, TNull>) {
 #if _DEBUG
-			throw std::runtime_error(String::Format("Unable to find method '%s'", MethodInfo.MethodName().CStr()));
+			throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
 #else
 			return TReturn();
 #endif
@@ -184,7 +246,7 @@ struct MethodListNode {
 	}
 
 	Bool HasMethod(const StaticString& methodName) const {
-		if (MethodInfo.MethodName() == methodName) {
+		if (Info.MethodName() == methodName) {
 			return true;
 		}
 
@@ -197,7 +259,7 @@ struct MethodListNode {
 	}
 
 	void EnumerateMethodNames(List<StaticString>& outMethodNames) const {
-		outMethodNames.Add(MethodInfo.MethodName());
+		outMethodNames.Add(Info.MethodName());
 		if constexpr (!std::same_as<TNextNode, TNull>) {
 			NextNode.EnumerateMethodNames(outMethodNames);
 		}
@@ -207,87 +269,428 @@ struct MethodListNode {
 		if constexpr (std::same_as<TNextNode, TNull>) {
 			return 1;
 		}
-		
+
 		return 1 + NextNode.NumMethods();
 	}
 };
 
+template< class TNextNode, class TMethod >
+struct MethodListNode;
+
+template<class TNextNode, typename TReturn, typename TObject, typename... _TArgs>
+struct MethodListNode<TNextNode, TReturn (TObject::*)(_TArgs...)> : public AMethodListNode<TNextNode, TReturn (TObject::*)(_TArgs...)> {
+	using TAMethodListNode = AMethodListNode<TNextNode, TReturn(TObject::*)(_TArgs...)>;
+	INHERITED_CLASS_TYPEDEFS(MethodListNode, TAMethodListNode)
+
+public:
+	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
+	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
+
+	template<typename... __TArgs>
+	static constexpr bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+			return false;
+		}
+		else {
+			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+		}
+	}
+
+	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
+	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
+		if (this->Info.MethodName() != methodName) {
+			if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
+			}
+			else {
+				return this->NextNode.Call<Index, TReturn>(methodName, caller, args...);
+			}
+		}
+
+		if constexpr (Index <= 0) {
+			if constexpr (!std::same_as<typename TSuper::TMethodInfo::TReturn, TReturn>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", this->Info.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
+			}
+			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
+				return this->Info.Call(caller, args...);
+			}
+		}
+
+		if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+			return TReturn();
+#endif
+		}
+		else {
+			return this->NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
+		}
+	}
+
+	template<typename TReturn, typename TCaller, typename ...TArgs>
+	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
+		if (this->Info.MethodName() == methodName) {
+			constexpr bool canCall = CanCallWith<TArgs...>();
+			if constexpr (canCall) {
+				return MethodInfoHelpers::Call<TReturn>(this->Info, caller, args...);
+			}
+			else {
+				if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+					throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+					return TReturn();
+#endif
+				}
+				else {
+					return TSuper::NextNode.Call<TReturn>(methodName, caller, args...);
+				}
+			}
+		}
+		else {
+			if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
+			}
+			else {
+				return this->NextNode.Call<TReturn>(methodName, caller, args...);
+			}
+		}
+	}
+};
+
+template<class TNextNode, typename TReturn, typename TObject, typename... _TArgs>
+struct MethodListNode<TNextNode, TReturn (TObject::*)(_TArgs...) const> : public AMethodListNode<TNextNode, TReturn(TObject::*)(_TArgs...) const> {
+	using TAMethodListNode = AMethodListNode<TNextNode, TReturn(TObject::*)(_TArgs...) const>;
+	INHERITED_CLASS_TYPEDEFS(MethodListNode, TAMethodListNode)
+
+public:
+	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
+	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
+
+	template<typename... __TArgs>
+	static constexpr bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+			return false;
+		}
+		else {
+			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+		}
+	}
+
+	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
+	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
+		if (this->Info.MethodName() != methodName) {
+			if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
+			}
+			else {
+				return this->NextNode.Call<Index, TReturn>(methodName, caller, args...);
+			}
+		}
+
+		if constexpr (Index <= 0) {
+			if constexpr (!std::same_as<typename TSuper::TMethodInfo::TReturn, TReturn>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", this->Info.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
+			}
+			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
+				return this->Info.Call(caller, args...);
+			}
+		}
+
+		if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+			throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+			return TReturn();
+#endif
+		}
+		else {
+			return this->NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
+		}
+	}
+
+	template<typename TReturn, typename TCaller, typename ...TArgs>
+	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
+		if (this->Info.MethodName() == methodName) {
+			constexpr bool canCall = CanCallWith<TArgs...>();
+			if constexpr (canCall) {
+				return MethodInfoHelpers::Call<TReturn>(this->Info, caller, args...);
+			}
+			else {
+				if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+					throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+					return TReturn();
+#endif
+				}
+				else {
+					return this->NextNode.Call<TReturn>(methodName, caller, args...);
+				}
+			}
+		}
+		else {
+			if constexpr (std::same_as<TNextNode, TNull>) {
+#if _DEBUG
+				throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+#else
+				return TReturn();
+#endif
+			}
+			else {
+				return this->NextNode.Call<TReturn>(methodName, caller, args...);
+			}
+		}
+	}
+};
+
+//template< class TMethod, class TNextNode >
+//struct MethodListNode {
+//	CLASS_TYPEDEFS(MethodListNode);
+//
+//public:
+//	using TMethodInfo = MethodInfo<TMethod>;
+//	TMethodInfo	Info;
+//	TNextNode	NextNode;
+//
+//	MethodListNode(const StaticString& methodName, TMethod method, TNextNode&& next) : Info(methodName, method), NextNode(next) {
+//	}
+//
+//	MethodListNode(const Char* methodName, TMethod method, TNextNode&& next) : Info(StaticString(methodName), method), NextNode(next) {
+//	}
+//
+//	template<typename... __TArgs>
+//	static constexpr bool CanCallWith() {
+//		//if constexpr (TMethodInfo::NumArgs() != sizeof...(__TArgs)) {
+//		//	return false;
+//		//} else {
+//		return std::is_same_v<ARGS(TMethodInfo), std::tuple<__TArgs...>>;
+//		//}
+//	}
+//
+//	template<typename TRequestedMethodInfo>
+//	Bool FindMethodInfoAt(int index, TRequestedMethodInfo*& outMethodInfo) const {
+//		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && index <= 0) {
+//			outMethodInfo = (TRequestedMethodInfo*)&Info;
+//			return true;
+//		}
+//
+//		//We hit the end of the list without finding the method info
+//		if constexpr (std::same_as<TNextNode, TNull>) {
+//			outMethodInfo = nullptr;
+//			return false;
+//		}
+//		else {
+//			return NextNode.FindMethodInfoAt(index - 1, outMethodInfo);
+//		}
+//	}
+//
+//	template<typename TRequestedMethodInfo>
+//	Bool FindMethodInfo(const StaticString& methodName, TRequestedMethodInfo*& outMethodInfo) const {
+//		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && Info.MethodName() == methodName) {
+//			outMethodInfo = (TRequestedMethodInfo*)&Info;
+//			return true;
+//		}
+//
+//		if constexpr (std::same_as<TNextNode, TNull>) {
+//			outMethodInfo = nullptr;
+//			return false;
+//		} else {
+//			return NextNode.FindMethodInfo(methodName, outMethodInfo);
+//		}
+//	}
+//
+//	template<typename TRequestedMethodInfo>
+//	TRequestedMethodInfo* FindMethodInfo(const StaticString& methodName) const {
+//		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && Info.MethodName() == methodName) {
+//			return (TRequestedMethodInfo*)&Info;
+//		}
+//
+//		if constexpr (std::same_as<TNextNode, TNull>) {
+//			return nullptr;
+//		} else {
+//			return NextNode.FindMethodInfo<TRequestedMethodInfo>(methodName);
+//		}
+//	}
+//
+//	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
+//	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args ) const {
+//		if (Info.MethodName() != methodName) {
+//			if constexpr (std::same_as<TNextNode, TNull>) {
+//#if _DEBUG
+//				throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
+//#else
+//				return TReturn();
+//#endif
+//			}
+//			else {
+//				return NextNode.Call<Index, TReturn>(methodName, caller, args...);
+//			}
+//		}
+//
+//		if constexpr (Index <= 0) {
+//			if constexpr (!std::same_as<typename TMethodInfo::TReturn, TReturn>) {
+//#if _DEBUG
+//				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", Info.MethodName().CStr()));
+//#else
+//				return TReturn();
+//#endif
+//			}
+//			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
+//				return Info.Call(caller, args...);
+//			}
+//		}
+//
+//		if constexpr (std::same_as<TNextNode, TNull>) {
+//#if _DEBUG
+//			throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
+//#else
+//			return TReturn();
+//#endif
+//		}
+//		else {
+//			return NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
+//		}
+//	}
+//
+//	template<typename TReturn, typename TCaller, typename ...TArgs>
+//	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
+//		if (Info.MethodName() == methodName) {
+//			constexpr UInt32 numArgs = sizeof...(TArgs);
+//			constexpr UInt32 methodNumArgs = TMethodInfo::NumArgs();
+//			constexpr bool canCall = CanCallWith<TArgs...>();
+//			if constexpr (canCall) {
+//				return MethodInfoHelpers::Call<TReturn>(Info, caller, args...);
+//			}
+//			else {
+//				if constexpr (std::same_as<TNextNode, TNull>) {
+//#if _DEBUG
+//					throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
+//#else
+//					return TReturn();
+//#endif
+//				}
+//				else {
+//					return NextNode.Call<TReturn>(methodName, caller, args...);
+//				}
+//			}
+//		}
+//		else {
+//			if constexpr (std::same_as<TNextNode, TNull>) {
+//#if _DEBUG
+//				throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
+//#else
+//				return TReturn();
+//#endif
+//			}
+//			else {
+//				return NextNode.Call<TReturn>(methodName, caller, args...);
+//			}
+//		}
+//	}
+//
+//	Bool HasMethod(const StaticString& methodName) const {
+//		if (Info.MethodName() == methodName) {
+//			return true;
+//		}
+//
+//		if constexpr (std::same_as<TNextNode, TNull>) {
+//			return false;
+//		}
+//		else {
+//			return NextNode.HasMethod(methodName);
+//		}
+//	}
+//
+//	void EnumerateMethodNames(List<StaticString>& outMethodNames) const {
+//		outMethodNames.Add(Info.MethodName());
+//		if constexpr (!std::same_as<TNextNode, TNull>) {
+//			NextNode.EnumerateMethodNames(outMethodNames);
+//		}
+//	}
+//
+//	UInt32 constexpr NumMethods() const {
+//		if constexpr (std::same_as<TNextNode, TNull>) {
+//			return 1;
+//		}
+//		
+//		return 1 + NextNode.NumMethods();
+//	}
+//};
+
 //TODO: Possilby use std::tuple instead so we can use variadic templates instead of macros.  But this is probably good enough for now.
-#define METHODNODE_TYPE_1( methodInfo1Type ) MethodListNode<methodInfo1Type, TNull>
-#define METHODNODE_TYPE_2( methodInfo1Type, methodInfo2Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_1(methodInfo2Type)>
-#define METHODNODE_TYPE_3( methodInfo1Type, methodInfo2Type, methodInfo3Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_2(methodInfo2Type, methodInfo3Type)>
-#define METHODNODE_TYPE_4( methodInfo1Type, methodInfo2Type, methodInfo3Type, methodInfo4Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_3(methodInfo2Type, methodInfo3Type, methodInfo4Type)>
-#define METHODNODE_TYPE_5( methodInfo1Type, methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_4(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type)>
-#define METHODNODE_TYPE_6( methodInfo1Type, methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type, methodInfo6Type ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_5(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type, methodInfo6Type)>
+#define METHODNODE_TYPE_1( method1Type ) MethodListNode<TNull, method1Type>
+#define METHODNODE_TYPE_2( method1Type, method2Type ) MethodListNode<METHODNODE_TYPE_1(method2Type), method1Type>
+#define METHODNODE_TYPE_3( method1Type, method2Type, method3Type ) MethodListNode<METHODNODE_TYPE_2(method2Type, method3Type), method1Type>
+#define METHODNODE_TYPE_4( method1Type, method2Type, method3Type, method4Type ) MethodListNode<METHODNODE_TYPE_3(method2Type, method3Type, method4Type), method1Type>
+#define METHODNODE_TYPE_5( method1Type, method2Type, method3Type, method4Type, method5Type ) MethodListNode<METHODNODE_TYPE_4(method2Type, method3Type, method4Type, method5Type), method1Type>
+#define METHODNODE_TYPE_6( method1Type, method2Type, method3Type, method4Type, method5Type, method6Type ) MethodListNode<METHODNODE_TYPE_5(method2Type, method3Type, method4Type, method5Type, method6Type), method1Type>
 
-#define METHODNODE_1( methodInfo1Type, method1 ) METHODNODE_TYPE_1(methodInfo1Type)(method1, TNull())
-#define METHODNODE_2( methodInfo1Type, method1, methodInfo2Type, method2 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_1(methodInfo2Type)>(method1, METHODNODE_1(methodInfo2Type, method2))
-#define METHODNODE_3( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_2(methodInfo2Type, methodInfo3Type)>(method1, METHODNODE_2(methodInfo2Type, method2, methodInfo3Type, method3))
-#define METHODNODE_4( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_3(methodInfo2Type, methodInfo3Type)>(method1, METHODNODE_3(methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4))
-#define METHODNODE_5( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_4(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type)>(method1, METHODNODE_4(methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5))
-#define METHODNODE_6( methodInfo1Type, method1, methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5, methodInfo6Type, method6 ) MethodListNode<methodInfo1Type, METHODNODE_TYPE_5(methodInfo2Type, methodInfo3Type, methodInfo4Type, methodInfo5Type, methodInfo6Type)>(method1, METHODNODE_5(methodInfo2Type, method2, methodInfo3Type, method3, methodInfo4Type, method4, methodInfo5Type, method5, methodInfo6Type, method6))
-
-#include "System/Functors/FunctionTraits.h"
-
-#define METHOD_INFO_TYPE_FOR( methodPtr ) typename FunctionTraits<decltype(methodPtr)>::TMethodInfo
-#define METHOD_INFO_TYPE_FROM( methodType ) typename FunctionTraits<methodType>::TMethodInfo
+#define METHODNODE_1( owner, method1Type, method1 ) METHODNODE_TYPE_1(method1Type)(#method1, &owner::method1, TNull())
+#define METHODNODE_2( owner, method1Type, method1, method2Type, method2 ) MethodListNode<METHODNODE_TYPE_1(method2Type), method1Type>(#method1, &owner::method1, METHODNODE_1(owner, method2Type, method2))
+#define METHODNODE_3( owner, method1Type, method1, method2Type, method2, method3Type, method3 ) MethodListNode<METHODNODE_TYPE_2(method2Type, method3Type), method1Type>(#method1, &owner::method1, METHODNODE_2(owner, method2Type, method2, method3Type, method3))
+#define METHODNODE_4( owner, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4 ) MethodListNode<METHODNODE_TYPE_3(method2Type, method3Type, method4Type), method1Type>(#method1, &owner::method1, METHODNODE_3(owner, method2Type, method2, method3Type, method3, method4Type, method4))
+#define METHODNODE_5( owner, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 ) MethodListNode<METHODNODE_TYPE_4(method2Type, method3Type, method4Type, method5Type), method1Type>(#method1, &owner::method1, METHODNODE_4(owner, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5))
+#define METHODNODE_6( owner, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 ) MethodListNode<METHODNODE_TYPE_5(method2Type, method3Type, method4Type, method5Type, method6Type), method1Type>(#method1, &owner::method1, METHODNODE_5(owner, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6))
+#define METHOD_INFO_TYPE_FROM( methodType ) MethodInfo<methodType>
+#define METHOD_INFO_TYPE_FOR( methodPtr ) METHOD_INFO_TYPE_FROM(decltype(methodPtr))
 
 #define CREATE_METHOD_INFO_FOR( owner, methodType, method ) METHOD_INFO_TYPE_FROM(methodType)(StaticString(#method), (methodType)&owner::method)
 
 #define REGISTER_METHODS_1( owner, methodListName, method1Type, method1 ) \
-METHODNODE_TYPE_1(METHOD_INFO_TYPE_FOR(&owner::method1))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
-		TNull()	\
+METHODNODE_TYPE_1(method1Type)	methodListName = {	\
+	#method1, &owner::method1, TNull() \
 };
 
 #define REGISTER_METHODS_2( owner, methodListName, method1Type, method1, method2Type, method2 ) \
-METHODNODE_TYPE_2(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
-		METHODNODE_1(	\
-			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2)	\
-		)	\
+METHODNODE_TYPE_2(method1Type, method2Type)	methodListName = { \
+	#method1, &owner::method1, \
+	METHODNODE_1( owner, method2Type, method2 )	\
 };
 
 #define REGISTER_METHODS_3( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3 ) \
-METHODNODE_TYPE_3(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
-		METHODNODE_2(	\
-			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
-			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3)	\
-		)	\
+METHODNODE_TYPE_3(method1Type, method2Type, method3Type)	methodListName = {	\
+		#method1, &owner::method1,								\
+		METHODNODE_2( owner, method2Type, method2, method3Type, method3 )	\
 };
 
 #define REGISTER_METHODS_4( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4 ) \
-METHODNODE_TYPE_4(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type), METHOD_INFO_TYPE_FROM(method4Type))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
-		METHODNODE_3(	\
-			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
-			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3),	\
-			METHOD_INFO_TYPE_FROM(method4Type), CREATE_METHOD_INFO_FOR(owner, method4Type, method4)	\
-		)	\
+METHODNODE_TYPE_4(method1Type, method2Type, method3Type, method4Type)	methodListName = {	\
+		#method1, &owner::method1,								\
+		METHODNODE_3( owner, method2Type, method2, method3Type, method3, method4Type, method4 )	\
 };
 
 #define REGISTER_METHODS_5( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 ) \
-METHODNODE_TYPE_5(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type), METHOD_INFO_TYPE_FROM(method4Type), METHOD_INFO_TYPE_FROM(method5Type))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
-		METHODNODE_4(	\
-			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
-			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3),	\
-			METHOD_INFO_TYPE_FROM(method4Type), CREATE_METHOD_INFO_FOR(owner, method4Type, method4),	\
-			METHOD_INFO_TYPE_FROM(method5Type), CREATE_METHOD_INFO_FOR(owner, method5Type, method5)	\
-		)	\
+METHODNODE_TYPE_5(method1Type, method2Type, method3Type, method4Type, method5Type)	methodListName = {	\
+		#method1, &owner::method1,								\
+		METHODNODE_4( owner, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 )	\
 };
 
 #define REGISTER_METHODS_6( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 ) \
-METHODNODE_TYPE_6(METHOD_INFO_TYPE_FROM(method1Type), METHOD_INFO_TYPE_FROM(method2Type), METHOD_INFO_TYPE_FROM(method3Type), METHOD_INFO_TYPE_FROM(method4Type), METHOD_INFO_TYPE_FROM(method5Type), METHOD_INFO_TYPE_FROM(method6Type))	methodListName = {	\
-		CREATE_METHOD_INFO_FOR(owner, method1Type, method1),								\
-		METHODNODE_5(	\
-			METHOD_INFO_TYPE_FROM(method2Type), CREATE_METHOD_INFO_FOR(owner, method2Type, method2),	\
-			METHOD_INFO_TYPE_FROM(method3Type), CREATE_METHOD_INFO_FOR(owner, method3Type, method3),	\
-			METHOD_INFO_TYPE_FROM(method4Type), CREATE_METHOD_INFO_FOR(owner, method4Type, method4),	\
-			METHOD_INFO_TYPE_FROM(method5Type), CREATE_METHOD_INFO_FOR(owner, method5Type, method5),	\
-			METHOD_INFO_TYPE_FROM(method6Type), CREATE_METHOD_INFO_FOR(owner, method6Type, method6)	\
-		)	\
+METHODNODE_TYPE_6(method1Type, method2Type, method3Type, method4Type, method5Type, method6Type)	methodListName = {	\
+		#method1, &owner::method1,								\
+		METHODNODE_5( owner, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 )	\
 };
 
 #include <tuple>
@@ -330,7 +733,7 @@ TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) con
 }														\
 template<typename TReturn, typename TCaller, typename ...TArgs>		\
 TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {	\
-	return m_MethodList.Call<0, TReturn, TCaller, TArgs...>(methodName, caller, args...);	\
+	return m_MethodList.Call<TReturn, TCaller, TArgs...>(methodName, caller, args...);	\
 }
 
 class AReflector {

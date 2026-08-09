@@ -7,36 +7,34 @@ template<typename TFunc>
 struct FunctionTraits;
 
 // Specialization for regular functions
-template<typename R, typename... TArgs>
-struct FunctionTraits<R(TArgs...)> {
+template<typename R, typename... _TArgs>
+struct FunctionTraits<R(_TArgs...)> {
 	using TReturn = R;
-	static constexpr std::size_t NumArgs = sizeof...(TArgs);
+	using TArgs = std::tuple<_TArgs...>;
+	static constexpr std::size_t NumArgs = sizeof...(_TArgs);
 
-	// Helper to get a specific argument type by index
 	template<std::size_t N>
-	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
+	using TArg = std::tuple_element_t<N, TArgs>;
 };
 
-template<typename R, typename C, typename... TArgs>
-struct FunctionTraits<R(C::*)(TArgs...)> {
+template<typename R, typename C, typename... _TArgs>
+struct FunctionTraits<R(C::*)(_TArgs...)> {
 	using TReturn = R;
-	static constexpr std::size_t NumArgs = sizeof...(TArgs);
+	using TArgs = std::tuple<_TArgs...>;
+	static constexpr std::size_t NumArgs = sizeof...(_TArgs);
 
-	// Helper to get a specific argument type by index
 	template<std::size_t N>
-	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
-
-	typedef typename MethodInfo<R(C::*)(TArgs...)> TMethodInfo;
+	using TArg = std::tuple_element_t<N, TArgs>;
+	/*typedef typename MethodInfo<R(C::*)(TArgs...)> TMethodInfo;*/
 };
 
-template<typename R, typename C, typename... TArgs>
-struct FunctionTraits<R(C::*)(TArgs...) const> {
+template<typename R, typename C, typename... _TArgs>
+struct FunctionTraits<R(C::*)(_TArgs...) const> {
 	using TReturn = R;
-	static constexpr std::size_t NumArgs = sizeof...(TArgs);
+	using TArgs = std::tuple<_TArgs...>;
+	static constexpr std::size_t NumArgs = sizeof...(_TArgs);
 
-	// Helper to get a specific argument type by index
 	template<std::size_t N>
-	using TArg = std::tuple_element_t<N, std::tuple<TArgs...>>;
-
-	typedef typename MethodInfo<R(C::*)(TArgs...) const> TMethodInfo;
+	using TArg = std::tuple_element_t<N, TArgs>;
+	/*typedef typename MethodInfo<R(C::*)(TArgs...) const> TMethodInfo;*/
 };
