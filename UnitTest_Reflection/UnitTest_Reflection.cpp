@@ -94,6 +94,23 @@ namespace UnitTestReflection
 			}
 		}
 
+		TEST_METHOD(CallGetValueFromReflector)
+		{
+			using TReflector = Reflector<MethodReflectorTest>;
+
+			const Char* methodName = "Value";
+
+			try {
+				typename TReflector::TReflected testObj;
+				auto ret = Singleton<TReflector>::GetInstance()->Call<UInt32>(StaticString(methodName), &testObj);
+			}
+			catch (...) {
+				String::ConvertFor(String::Format("Unexpected error calling %s", methodName), [](const wchar_t* msg) {
+					Assert::Fail(msg);
+				});
+			}
+		}
+
 		TEST_METHOD(CallF1FromReflector)
 		{
 			using TReflector = Reflector<MethodReflectorTest>;
@@ -105,7 +122,7 @@ namespace UnitTestReflection
 				typename TReflector::TReflected* testObj = &testObjChild;
 				ParentReflectorTest* testObjParent = testObj;
 
-				auto ret = Singleton<TReflector>::GetInstance()->Call<Bool>(StaticString(methodName), &testObjChild, (const Char*)"Hello", 1509);
+				auto ret = Singleton<TReflector>::GetInstance()->Call<Bool>(StaticString(methodName), &testObjChild, "Hello", 1509);
 			}
 			catch(...) {
 				String::ConvertFor(String::Format("Unexpected error calling %s", methodName), [](const wchar_t* msg) {

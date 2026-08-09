@@ -34,6 +34,13 @@ public:
 
 class InheritanceTest : public MethodReflectorTest {
 	INHERITED_CLASS_TYPEDEFS(InheritanceTest, MethodReflectorTest)
+
+public:
+	virtual Bool F1(const char* str, UInt32 num) override {
+		auto ret = TSuper::F1(str, num);
+		m_Value = num * num;
+		return false;
+	}
 };
 
 template<>
