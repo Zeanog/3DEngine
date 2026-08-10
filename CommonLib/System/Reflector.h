@@ -248,20 +248,25 @@ public:
 	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 
-	template<typename... __TArgs>
+	template<Bool ExplicitArgs, typename... __TArgs>
 	static constexpr bool CanCallWith() {
 		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
 			return false;
 		}
 		else {
-			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			if constexpr (ExplicitArgs) {
+				return std::is_same_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			}
+			else {
+				return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			}
 		}
 	}
 
 	template<typename TReturn, typename TCaller, typename ...TArgs>
 	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
 		if (this->Info.MethodName() == methodName) {
-			constexpr bool canCall = CanCallWith<TArgs...>();
+			constexpr bool canCall = CanCallWith<false, TArgs...>();
 			if constexpr (canCall) {
 				return MethodInfoHelpers::Call<TReturn>(this->Info, caller, args...);
 			}
@@ -302,20 +307,25 @@ public:
 	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 
-	template<typename... __TArgs>
+	template<Bool ExplicitArgs, typename... __TArgs>
 	static constexpr bool CanCallWith() {
 		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
 			return false;
 		}
 		else {
-			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			if constexpr (ExplicitArgs) {
+				return std::is_same_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			}
+			else {
+				return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			}
 		}
 	}
 
 	template<typename TReturn, typename TCaller, typename ...TArgs>
 	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
 		if (this->Info.MethodName() == methodName) {
-			constexpr bool canCall = CanCallWith<TArgs...>();
+			constexpr bool canCall = CanCallWith<false, TArgs...>();
 			if constexpr (canCall) {
 				return MethodInfoHelpers::Call<TReturn>(this->Info, caller, args...);
 			}

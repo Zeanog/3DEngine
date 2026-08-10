@@ -28,7 +28,7 @@ namespace UnitTestReflection
 				InheritanceTest testObj;
 				methodInfo->Call(&testObj, 9);
 			}
-			catch (std::runtime_error error) {
+			catch (const std::runtime_error& error) {
 				auto formattedString = String::Format("Caught error: %s", error.what());
 				String::ConvertFor(formattedString, [](const wchar_t* msg) {
 					Assert::Fail(msg);
@@ -69,7 +69,7 @@ namespace UnitTestReflection
 				typename TReflector::TReflected::TSuper* testObjParent = &testObj;
 				methodInfo->Call((typename TReflector::TReflected*)testObjParent, 1509);
 			}
-			catch (std::runtime_error error) {
+			catch (const std::runtime_error& error) {
 				auto formattedString = String::Format("Caught expected error: %s", error.what());
 				String::ConvertFor(formattedString, [](const wchar_t* msg) {
 					Assert::IsTrue(true, msg);
@@ -110,7 +110,7 @@ namespace UnitTestReflection
 			catch (const std::runtime_error& error) {
 				String::ConvertFor(error.what(), [](const wchar_t* msg) {
 					Assert::Fail(msg);
-					});
+				});
 			}
 		}
 	};
