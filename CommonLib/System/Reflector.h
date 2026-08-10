@@ -274,7 +274,7 @@ public:
 #endif
 				}
 				else {
-					return TSuper::NextNode.Call<TReturn>(methodName, caller, args...);
+					return this->NextNode.Call<TReturn>(methodName, caller, args...);
 				}
 			}
 		}
