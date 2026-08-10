@@ -146,6 +146,8 @@ struct MethodInfoHelpers {
 
 template< class _TNextNode, class _TMethod >
 struct AMethodListNode {
+	ABSTRACT_CLASS_TYPEDEFS(AMethodListNode) {}
+
 public:
 	using TMethod = _TMethod;
 	using TMethodInfo = MethodInfo<TMethod>;
@@ -205,46 +207,6 @@ public:
 		}
 	}
 
-	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
-	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
-		if (Info.MethodName() != methodName) {
-			if constexpr (std::same_as<TNextNode, TNull>) {
-#if _DEBUG
-				throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
-#else
-				return TReturn();
-#endif
-			}
-			else {
-				return NextNode.Call<Index, TReturn>(methodName, caller, args...);
-			}
-		}
-
-		if constexpr (Index <= 0) {
-			if constexpr (!std::same_as<typename TMethodInfo::TReturn, TReturn>) {
-#if _DEBUG
-				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", Info.MethodName().CStr()));
-#else
-				return TReturn();
-#endif
-			}
-			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
-				return Info.Call(caller, args...);
-			}
-		}
-
-		if constexpr (std::same_as<TNextNode, TNull>) {
-#if _DEBUG
-			throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
-#else
-			return TReturn();
-#endif
-		}
-		else {
-			return NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
-		}
-	}
-
 	Bool HasMethod(const StaticString& methodName) const {
 		if (Info.MethodName() == methodName) {
 			return true;
@@ -293,46 +255,6 @@ public:
 		}
 		else {
 			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
-		}
-	}
-
-	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
-	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
-		if (this->Info.MethodName() != methodName) {
-			if constexpr (std::same_as<TNextNode, TNull>) {
-#if _DEBUG
-				throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
-#else
-				return TReturn();
-#endif
-			}
-			else {
-				return this->NextNode.Call<Index, TReturn>(methodName, caller, args...);
-			}
-		}
-
-		if constexpr (Index <= 0) {
-			if constexpr (!std::same_as<typename TSuper::TMethodInfo::TReturn, TReturn>) {
-#if _DEBUG
-				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", this->Info.MethodName().CStr()));
-#else
-				return TReturn();
-#endif
-			}
-			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
-				return this->Info.Call(caller, args...);
-			}
-		}
-
-		if constexpr (std::same_as<TNextNode, TNull>) {
-#if _DEBUG
-			throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
-#else
-			return TReturn();
-#endif
-		}
-		else {
-			return this->NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
 		}
 	}
 
@@ -390,46 +312,6 @@ public:
 		}
 	}
 
-	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
-	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
-		if (this->Info.MethodName() != methodName) {
-			if constexpr (std::same_as<TNextNode, TNull>) {
-#if _DEBUG
-				throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
-#else
-				return TReturn();
-#endif
-			}
-			else {
-				return this->NextNode.Call<Index, TReturn>(methodName, caller, args...);
-			}
-		}
-
-		if constexpr (Index <= 0) {
-			if constexpr (!std::same_as<typename TSuper::TMethodInfo::TReturn, TReturn>) {
-#if _DEBUG
-				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", this->Info.MethodName().CStr()));
-#else
-				return TReturn();
-#endif
-			}
-			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
-				return this->Info.Call(caller, args...);
-			}
-		}
-
-		if constexpr (std::same_as<TNextNode, TNull>) {
-#if _DEBUG
-			throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
-#else
-			return TReturn();
-#endif
-		}
-		else {
-			return this->NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
-		}
-	}
-
 	template<typename TReturn, typename TCaller, typename ...TArgs>
 	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
 		if (this->Info.MethodName() == methodName) {
@@ -464,180 +346,6 @@ public:
 		}
 	}
 };
-
-//template< class TMethod, class TNextNode >
-//struct MethodListNode {
-//	CLASS_TYPEDEFS(MethodListNode);
-//
-//public:
-//	using TMethodInfo = MethodInfo<TMethod>;
-//	TMethodInfo	Info;
-//	TNextNode	NextNode;
-//
-//	MethodListNode(const StaticString& methodName, TMethod method, TNextNode&& next) : Info(methodName, method), NextNode(next) {
-//	}
-//
-//	MethodListNode(const Char* methodName, TMethod method, TNextNode&& next) : Info(StaticString(methodName), method), NextNode(next) {
-//	}
-//
-//	template<typename... __TArgs>
-//	static constexpr bool CanCallWith() {
-//		//if constexpr (TMethodInfo::NumArgs() != sizeof...(__TArgs)) {
-//		//	return false;
-//		//} else {
-//		return std::is_same_v<ARGS(TMethodInfo), std::tuple<__TArgs...>>;
-//		//}
-//	}
-//
-//	template<typename TRequestedMethodInfo>
-//	Bool FindMethodInfoAt(int index, TRequestedMethodInfo*& outMethodInfo) const {
-//		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && index <= 0) {
-//			outMethodInfo = (TRequestedMethodInfo*)&Info;
-//			return true;
-//		}
-//
-//		//We hit the end of the list without finding the method info
-//		if constexpr (std::same_as<TNextNode, TNull>) {
-//			outMethodInfo = nullptr;
-//			return false;
-//		}
-//		else {
-//			return NextNode.FindMethodInfoAt(index - 1, outMethodInfo);
-//		}
-//	}
-//
-//	template<typename TRequestedMethodInfo>
-//	Bool FindMethodInfo(const StaticString& methodName, TRequestedMethodInfo*& outMethodInfo) const {
-//		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && Info.MethodName() == methodName) {
-//			outMethodInfo = (TRequestedMethodInfo*)&Info;
-//			return true;
-//		}
-//
-//		if constexpr (std::same_as<TNextNode, TNull>) {
-//			outMethodInfo = nullptr;
-//			return false;
-//		} else {
-//			return NextNode.FindMethodInfo(methodName, outMethodInfo);
-//		}
-//	}
-//
-//	template<typename TRequestedMethodInfo>
-//	TRequestedMethodInfo* FindMethodInfo(const StaticString& methodName) const {
-//		if (std::same_as<TRequestedMethodInfo, TMethodInfo> && Info.MethodName() == methodName) {
-//			return (TRequestedMethodInfo*)&Info;
-//		}
-//
-//		if constexpr (std::same_as<TNextNode, TNull>) {
-//			return nullptr;
-//		} else {
-//			return NextNode.FindMethodInfo<TRequestedMethodInfo>(methodName);
-//		}
-//	}
-//
-//	template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>
-//	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args ) const {
-//		if (Info.MethodName() != methodName) {
-//			if constexpr (std::same_as<TNextNode, TNull>) {
-//#if _DEBUG
-//				throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
-//#else
-//				return TReturn();
-//#endif
-//			}
-//			else {
-//				return NextNode.Call<Index, TReturn>(methodName, caller, args...);
-//			}
-//		}
-//
-//		if constexpr (Index <= 0) {
-//			if constexpr (!std::same_as<typename TMethodInfo::TReturn, TReturn>) {
-//#if _DEBUG
-//				throw std::runtime_error(String::Format("Return type mismatch for method '%s'", Info.MethodName().CStr()));
-//#else
-//				return TReturn();
-//#endif
-//			}
-//			else {//Keeping the 'else' so we can be ignored at compile time if the return type doesn't match
-//				return Info.Call(caller, args...);
-//			}
-//		}
-//
-//		if constexpr (std::same_as<TNextNode, TNull>) {
-//#if _DEBUG
-//			throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
-//#else
-//			return TReturn();
-//#endif
-//		}
-//		else {
-//			return NextNode.Call<Index - 1, TReturn>(methodName, caller, args...);
-//		}
-//	}
-//
-//	template<typename TReturn, typename TCaller, typename ...TArgs>
-//	TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {
-//		if (Info.MethodName() == methodName) {
-//			constexpr UInt32 numArgs = sizeof...(TArgs);
-//			constexpr UInt32 methodNumArgs = TMethodInfo::NumArgs();
-//			constexpr bool canCall = CanCallWith<TArgs...>();
-//			if constexpr (canCall) {
-//				return MethodInfoHelpers::Call<TReturn>(Info, caller, args...);
-//			}
-//			else {
-//				if constexpr (std::same_as<TNextNode, TNull>) {
-//#if _DEBUG
-//					throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
-//#else
-//					return TReturn();
-//#endif
-//				}
-//				else {
-//					return NextNode.Call<TReturn>(methodName, caller, args...);
-//				}
-//			}
-//		}
-//		else {
-//			if constexpr (std::same_as<TNextNode, TNull>) {
-//#if _DEBUG
-//				throw std::runtime_error(String::Format("Unable to find method '%s'", Info.MethodName().CStr()));
-//#else
-//				return TReturn();
-//#endif
-//			}
-//			else {
-//				return NextNode.Call<TReturn>(methodName, caller, args...);
-//			}
-//		}
-//	}
-//
-//	Bool HasMethod(const StaticString& methodName) const {
-//		if (Info.MethodName() == methodName) {
-//			return true;
-//		}
-//
-//		if constexpr (std::same_as<TNextNode, TNull>) {
-//			return false;
-//		}
-//		else {
-//			return NextNode.HasMethod(methodName);
-//		}
-//	}
-//
-//	void EnumerateMethodNames(List<StaticString>& outMethodNames) const {
-//		outMethodNames.Add(Info.MethodName());
-//		if constexpr (!std::same_as<TNextNode, TNull>) {
-//			NextNode.EnumerateMethodNames(outMethodNames);
-//		}
-//	}
-//
-//	UInt32 constexpr NumMethods() const {
-//		if constexpr (std::same_as<TNextNode, TNull>) {
-//			return 1;
-//		}
-//		
-//		return 1 + NextNode.NumMethods();
-//	}
-//};
 
 //TODO: Possilby use std::tuple instead so we can use variadic templates instead of macros.  But this is probably good enough for now.
 #define METHODNODE_TYPE_1( method1Type ) MethodListNode<TNull, method1Type>
