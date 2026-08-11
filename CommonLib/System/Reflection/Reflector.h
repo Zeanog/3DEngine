@@ -4,7 +4,6 @@
 #include "System/Singleton.h"
 #include "System/Map.h"
 
-
 template<typename TObject>
 class Reflector;
 
