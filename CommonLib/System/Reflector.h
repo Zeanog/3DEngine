@@ -40,8 +40,6 @@ public:
 template<typename _TMethod>
 struct MethodInfo;
 
-#define ARGS( methodInfoType )	std::invoke_result_t<decltype(&methodInfoType::GetArgs)>
-
 template<typename _TReturn, class TObject, typename... _TArgs>
 struct MethodInfo<_TReturn(TObject::*)(_TArgs...)> : public AMethodInfo<_TReturn(TObject::*)(_TArgs...)> {
 	INHERITED_CLASS_TYPEDEFS(MethodInfo<_TReturn(TObject::*)(_TArgs...)>, AMethodInfo<_TReturn(TObject::*)(_TArgs...)>)
@@ -50,10 +48,6 @@ public:
 	using TReturn = _TReturn;
 	using TArgs = std::tuple<_TArgs...>;
 	using TMethod = typename TSuper::TMethod;	
-
-	static std::tuple<_TArgs...> GetArgs() {
-		throw _Notvalid_impl_;
-	}
 
 public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
@@ -96,10 +90,6 @@ public:
 	using TReturn = _TReturn;
 	using TArgs = std::tuple<_TArgs...>;
 	using TMethod = typename TSuper::TMethod;
-
-	static std::tuple<_TArgs...> GetArgs() {
-		throw _Notvalid_impl_;
-	}
 
 public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
