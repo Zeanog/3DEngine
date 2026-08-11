@@ -1,7 +1,7 @@
 #pragma once
 
 #include "System\Typedefs.h"
-#include "System/Reflector.h"
+#include "System/Reflection/Reflector.h"
 
 template<typename _TParameters>
 struct AParameters {

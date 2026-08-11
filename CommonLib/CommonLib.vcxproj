@@ -106,7 +106,9 @@
     <ClInclude Include="System\List.h" />
     <ClInclude Include="System\Map.h" />
     <ClInclude Include="System\Pool.h" />
-    <ClInclude Include="System\Reflector.h" />
+    <ClInclude Include="System\Reflection\MethodInfo.h" />
+    <ClInclude Include="System\Reflection\MethodListNode.h" />
+    <ClInclude Include="System\Reflection\Reflector.h" />
     <ClInclude Include="System\Singleton.h" />
     <ClInclude Include="System\StackString.h" />
     <ClInclude Include="System\StaticString.h" />

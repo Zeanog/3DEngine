@@ -426,7 +426,7 @@ void GLApplication::Release()
 
 #include "Rendering/ModelLoaders/MeshManager.h"
 #include "Audio/SourceVoice.h"
-#include "System/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
+#include "System/Reflection/Reflector.h"//Needed for the ContainerIterator declarations and FOREACH
 #include "System/JsonValueParsers.h"
 #include "Rendering/ModelLoaders/ModelManager.h"
 #include "Rendering/ModelLoaders/SceneLoader.h"

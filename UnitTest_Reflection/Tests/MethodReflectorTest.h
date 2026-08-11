@@ -1,6 +1,7 @@
 #pragma once
 
-#include "System/Reflector.h"
+#include "System/Reflection/Reflector.h"
+#include "System/Reflection/MethodListNode.h"
 
 class ParentReflectorTest {
 	CLASS_TYPEDEFS(ParentReflectorTest)
