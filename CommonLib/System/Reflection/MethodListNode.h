@@ -315,11 +315,7 @@ Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo)
 Bool HasMethod(const StaticString& methodName) const { \
 	return methodListName.HasMethod(methodName);	\
 }	\
-template<UInt32 Index, typename TReturn, typename TCaller, typename ...TArgs>	\
-TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {	\
-	return m_MethodList.Call<Index, TReturn, TCaller, TArgs...>(methodName, caller, args...);	\
-}														\
 template<typename TReturn, typename TCaller, typename ...TArgs>		\
 TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {	\
-	return m_MethodList.Call<TReturn, TCaller, TArgs...>(methodName, caller, args...);	\
+	return m_MethodList.Call<TReturn>(methodName, caller, args...);	\
 }
