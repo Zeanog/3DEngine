@@ -125,10 +125,10 @@ public:
 		}
 		else {
 			if constexpr (ExplicitArgs) {
-				return std::is_same_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+				return std::is_same_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
 			}
 			else {
-				return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+				return std::is_convertible_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
 			}
 		}
 	}
@@ -184,10 +184,10 @@ public:
 		}
 		else {
 			if constexpr (ExplicitArgs) {
-				return std::is_same_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+				return std::is_same_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
 			}
 			else {
-				return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+				return std::is_convertible_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
 			}
 		}
 	}
