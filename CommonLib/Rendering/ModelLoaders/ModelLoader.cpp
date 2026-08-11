@@ -2,7 +2,7 @@
 #include "rapidjson\document.h"
 #include "System/File.h"
 #include "Rendering/ModelLoaders/MeshManager.h"
-#include "System/Reflector.h"
+#include "System/Reflection/Reflector.h"
 #include "System/JsonValueParsers.h"
 #include "Shaders/ShaderProgramManager.h"
 

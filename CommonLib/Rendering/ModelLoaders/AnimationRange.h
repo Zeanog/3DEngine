@@ -2,7 +2,7 @@
 
 #include "System/Typedefs.h"
 #include "System/Singleton.h"
-#include "System/Reflector.h"
+#include "System/Reflection/Reflector.h"
 
 struct AnimationRange {
 	Int32			StartFrame = 0;
