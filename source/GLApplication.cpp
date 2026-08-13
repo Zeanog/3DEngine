@@ -1,7 +1,6 @@
 #include <windows.h>
 #include "GLApplication.h"
 #include "Model/SphereModel.h"
-//#include "Model/CubeModel.h"
 #include "Model/PlaneModel.h"
 
 #include "System/Typedefs.h"
@@ -13,17 +12,9 @@
 
 #include "System/Input/InputSystem.h"
 #include "Audio/AudioSystem.h"
-//#include "System\Audio\SubmixVoice.h"
-//#include "System/Configuration.h"
 #include "Math/MathUtils.h"
 #include "Lighting/LightPool.h"
-#include "System/Win32/Window.h"
 
-CComModule	_module;
-
-/**
-*	Initialize our GL application
-*/
 bool GLApplication::Initialize(HWND hwnd, int width, int height)
 {
 	HRESULT hr = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);

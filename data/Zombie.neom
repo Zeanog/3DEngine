@@ -1,26 +1,3 @@
-{
-	"def": {
-		"mesh": "Data\\Idle.fbx",
-		"skeleton": "mixamorig:",
-		"anims": {
-			"Data\\Idle.fbx": {
-				"mixamo.com": {
-					"Idle": "0:-1"
-				}
-			},
-			"Data\\Drunk Walk.fbx": {
-				"mixamo.com": {
-					"DrunkWalk": "0:-1"
-				}
-			}
-		}
-	},
-	"shaderProgram": {
-		"vert": "data\\deferredShading.vert",
-		"frag": "data\\deferredShading.frag"
-	},
-	"shadowProgram": {
-		"vert": "data\\shadowMap.vert",
-		"frag": "data\\shadowMap.frag"
-	}
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:17daf4ef1bc2bcb6678e79245e0ec2ddab475dc832873827615f2b6cd919118b
+size 443

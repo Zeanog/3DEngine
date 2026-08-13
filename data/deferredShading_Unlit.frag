@@ -1,12 +1,3 @@
-
-varying vec4		position;
-varying vec3		normal;
-
-uniform vec4		vColor;
-
-void main( void )
-{
-	gl_FragData[0]		= vColor;
-	gl_FragData[1]		= vec4(position.xyz, 0);
-	gl_FragData[2]		= vec4(normal.xyz, 0);
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:cff1718f0d6f218333213bd160366b27b126e5edb0a6b1a48dbb1d49dd9efe98
+size 201

@@ -118,17 +118,17 @@ public:
 	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 
-	template<Bool ExplicitArgs, typename... __TArgs>
+	template<Bool ExplicitArgs, typename... TPastInArgs>
 	static constexpr bool CanCallWith() {
-		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+		if constexpr (sizeof...(_TArgs) != sizeof...(TPastInArgs)) {
 			return false;
 		}
 		else {
 			if constexpr (ExplicitArgs) {
-				return std::is_same_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
+				return std::is_same_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
 			}
 			else {
-				return std::is_convertible_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
+				return std::is_convertible_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
 			}
 		}
 	}
@@ -177,17 +177,17 @@ public:
 	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 
-	template<Bool ExplicitArgs, typename... __TArgs>
+	template<Bool ExplicitArgs, typename... TPastInArgs>
 	static constexpr bool CanCallWith() {
-		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+		if constexpr (sizeof...(_TArgs) != sizeof...(TPastInArgs)) {
 			return false;
 		}
 		else {
 			if constexpr (ExplicitArgs) {
-				return std::is_same_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
+				return std::is_same_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
 			}
 			else {
-				return std::is_convertible_v<std::tuple<__TArgs...>, std::tuple<_TArgs...>>;
+				return std::is_convertible_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
 			}
 		}
 	}
