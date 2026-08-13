@@ -20,7 +20,7 @@ namespace rapidjson {
 			// Avoids an allocation.  
 			// But could take up a lot of stack space.  
 			// If this becomes an issue change back to String and eat the allocation
-			STACK_STRING(jsonBody, file.Length());
+			STACK_STRING(jsonBody, file.Length() + 1);
 			//String	jsonBody;
 			verify(file.ReadContents(jsonBody));
 			outDoc.Parse(jsonBody.CStr());
