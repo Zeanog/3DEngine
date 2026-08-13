@@ -1,8 +1,3 @@
-{
-	"mesh": "data/Cicada.fbx",
-	"invertNormals": false,
-	"shaderProgram": {
-		"vert": "data/deferredShading.vert",
-		"frag": "data/deferredShading.frag"
-	}
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:89839dbbc34cbc6e766423f3b11e56207f94650a92158404fb3eadd05b34a302
+size 156

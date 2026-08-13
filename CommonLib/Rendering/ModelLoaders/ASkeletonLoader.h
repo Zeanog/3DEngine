@@ -1,26 +1,3 @@
-#include "System/Typedefs.h"
-#include "System/List.h"
-#include "System/StaticString.h"
-#include "Rendering/Joint.h"
-
-class ASkeletonLoader {
-	ABSTRACT_CLASS_TYPEDEFS(ASkeletonLoader) {}
-
-protected:
-	List<Joint>							m_Joints;
-
-public:
-	virtual	void	Clear() = 0;
-
-	UInt32 NumJoints() const {
-		return m_Joints.Length();
-	}
-
-	const Joint& GetJoint(int index) const {
-		return m_Joints[index];
-	}
-
-	Joint& GetJoint(int index) {
-		return m_Joints[index];
-	}
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:6cd096fe22d245edd00c607327e1c52991ad61ab8aa0453cdaa1f4977f18bb2e
+size 457

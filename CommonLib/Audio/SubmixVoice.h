@@ -1,26 +1,3 @@
-#pragma once
-
-#include "ASourceVoice.h"
-
-class SubmixVoice : public ASourceVoice<IXAudio2SubmixVoice> {
-	INHERITED_CLASS_TYPEDEFS(SubmixVoice, ASourceVoice<IXAudio2SubmixVoice>)
-
-	friend class AudioSystem;
-
-protected:
-	UInt16		m_NumChannels{};
-	UInt16		m_SampleRate{};
-
-public:
-	SubmixVoice();
-
-	virtual Bool	Init(IXAudio2* audio, UInt16 numChannels, UInt16 sampleRate);
-
-	virtual UInt16	NumChannels() const override {
-		return m_NumChannels;
-	}
-
-	UInt16	SampleRate() const {
-		return m_SampleRate;
-	}
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:09f74753a9a108729aa7ddcd2d9d94db538298dcd207271543a4996489f26f84
+size 504

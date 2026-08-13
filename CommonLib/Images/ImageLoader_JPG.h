@@ -1,19 +1,3 @@
-#pragma once
-
-#include "System\Typedefs.h"
-#include "Images\ImageLoader.h"
-#include <vector>
-
-class ImageLoader_JPG : public ImageLoader {
-public:
-
-protected:
-	std::vector<Byte>	m_Data;
-
-public:
-	virtual Bool	Load(const Char* fileName) override;
-
-	virtual Bool	IsValid() const override;
-
-	virtual const Byte*		Data() const override;
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:773e1cbdd9bd6ad9170e7e0813524205921726dcea0d04d73224b063ee2db53d
+size 335

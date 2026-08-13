@@ -1,30 +1,3 @@
-/// @ref gtc_vec1
-/// @file glm/gtc/vec1.hpp
-///
-/// @see core (dependence)
-///
-/// @defgroup gtc_vec1 GLM_GTC_vec1
-/// @ingroup gtc
-///
-/// Include <glm/gtc/vec1.hpp> to use the features of this extension.
-///
-/// Add vec1, ivec1, uvec1 and bvec1 types.
-
-#pragma once
-
-// Dependency:
-#include "../ext/vector_bool1.hpp"
-#include "../ext/vector_bool1_precision.hpp"
-#include "../ext/vector_float1.hpp"
-#include "../ext/vector_float1_precision.hpp"
-#include "../ext/vector_double1.hpp"
-#include "../ext/vector_double1_precision.hpp"
-#include "../ext/vector_int1.hpp"
-#include "../ext/vector_int1_precision.hpp"
-#include "../ext/vector_uint1.hpp"
-#include "../ext/vector_uint1_precision.hpp"
-
-#if GLM_MESSAGES == GLM_ENABLE && !defined(GLM_EXT_INCLUDED)
-#	pragma message("GLM: GLM_GTC_vec1 extension included")
-#endif
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:ce099e8a46f1148cfdbb83f51e5bdbada0d7e8177ddba8d42eb65f91f78deddf
+size 816

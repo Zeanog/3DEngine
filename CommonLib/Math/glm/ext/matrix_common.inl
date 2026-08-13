@@ -1,16 +1,3 @@
-#include "../matrix.hpp"
-
-namespace glm
-{
-	template<length_t C, length_t R, typename T, typename U, qualifier Q>
-	GLM_FUNC_QUALIFIER mat<C, R, T, Q> mix(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y, U a)
-	{
-		return mat<C, R, U, Q>(x) * (static_cast<U>(1) - a) + mat<C, R, U, Q>(y) * a;
-	}
-
-	template<length_t C, length_t R, typename T, typename U, qualifier Q>
-	GLM_FUNC_QUALIFIER mat<C, R, T, Q> mix(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y, mat<C, R, U, Q> const& a)
-	{
-		return matrixCompMult(mat<C, R, U, Q>(x), static_cast<U>(1) - a) + matrixCompMult(mat<C, R, U, Q>(y), a);
-	}
-}//namespace glm
+version https://git-lfs.github.com/spec/v1
+oid sha256:ce25e8f18fe8fbcfff4012b19d3f295cf41b78cd09eb4b0e1ee01e8c03a3bba5
+size 617

@@ -1,30 +1,3 @@
-#pragma once
-
-#include "System/Typedefs.h"
-#include "System/Singleton.h"
-//#include <windows.h>
-#include <stdio.h>
-
-class DebugConsole {
-	CLASS_TYPEDEFS(DebugConsole)
-	SINGLETON_DECLARATIONS(DebugConsole) {
-	}
-
-protected:
-	FILE*		m_hStdOutFile = nullptr;
-	FILE*		m_hErrFile = nullptr;
-
-public:
-	Bool	Open();
-	void	Close();
-
-	inline Bool	IsOpen() const {
-		return m_hStdOutFile != nullptr && m_hErrFile != nullptr;
-	}
-
-	Bool	Write(const Char* format, ...);
-
-protected:
-	Bool	AttachIO();
-	void	DetachIO();
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:0ab00e9c264f47a8416b01bbbd7f469c2706a5100d1f657eeee2b0c878a592b3
+size 506

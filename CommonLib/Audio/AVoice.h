@@ -1,20 +1,3 @@
-#pragma once
-
-#include "System/Typedefs.h"
-
-class AVoice {
-    CLASS_TYPEDEFS(AVoice)
-
-	friend class AudioSystem;
-
-protected:
-	virtual void	Destroy() = 0;
-};
-
-template< typename _TData >
-void DestroyVoice(_TData*& ptr) {
-	if (ptr) {
-		ptr->DestroyVoice();
-	}
-	ptr = NULL;
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:d2a8439afb3401fe08da1e8322b8422d4f272d2c67ff3a2096812e941d6bf455
+size 273

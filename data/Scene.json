@@ -1,35 +1,3 @@
-{
-	"camera": {
-		"position": {
-			"x": 0,
-			"y": -4,
-			"z": -10
-		},
-		"rotation": {
-			"x": 0,
-			"y": 0,
-			"z": 0
-		}
-	},
-	"models": [
-		
-	],
-	"audioChannels": {
-		"Music": {
-			"channels": 2,
-			"sampleRate": 44100,
-			"paths": [
-				"Data\\that-s-the-way-it-is-music-travel-love-ft-bugoy-drilon.mp3",
-				"Data\\5.1SurroundSoundTest.mp3"
-			]
-		},
-		"Fx": {
-			"channels": 2,
-			"sampleRate": 44100,
-			"fxChain": "Data\\TestReverb.afx",
-			"paths": [
-				"Data\\baseball_hit.wav"
-			]
-		}
-	}
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:3c7daf9464476d186eb837bac605b1f7c850bb29aa9edee8221366fe9fc4770f
+size 501

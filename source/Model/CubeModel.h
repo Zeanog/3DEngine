@@ -1,19 +1,3 @@
-#pragma once
-#include "AModel.h"
-
-/** 
-*	A simple cube model that is easy to render
-*/
-class CubeModel : public AModel
-{
-public:
-	// Methods
-	CubeModel(float side);
-
-	virtual void	render( ShaderProgram_GLSL& program ) override;
-
-protected:
-	// Fields
-	float m_side;
-};
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:28187933f9236e237db1eec2d75f4739f04c4f291c141f28e1205eebba89521e
+size 270

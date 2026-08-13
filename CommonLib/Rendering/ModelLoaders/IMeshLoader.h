@@ -1,24 +1,3 @@
-#pragma once
-
-#include "System/Typedefs.h"
-#include "System/StaticString.h"
-#include "System/List.h"
-#include "System/Map.h"
-#include "Rendering/Mesh.h"
-#include "Rendering/VertexBuffer.h"
-#include "Rendering/IndexBuffer.h"
-#include "Rendering/Joint.h"
-#include "Rendering/ModelLoaders/ModelDef.h"
-
-class IMeshLoader {
-	CLASS_TYPEDEFS(IMeshLoader)
-
-protected:
-	virtual Bool LoadScene(const StaticString& fileName) = 0;
-	virtual Bool ParseMesh(const StaticString& jointPrefix, Neo::Mesh& outMesh) = 0;
-	virtual Bool ParseAnimations(const StaticString& jointPrefix, const ModelDef::TInFileAnimationMap& inFileAnimMap, Neo::Mesh& outMesh) = 0;
-
-public:
-	virtual Bool	Load(const ModelDef& def, Neo::Mesh& outMesh) = 0;
-	virtual	void	Clear() = 0;
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:502981d23cf741c5ad2b52203bad9e8bbe4f4f8a5f6b154d90e20c6dce3453cb
+size 744

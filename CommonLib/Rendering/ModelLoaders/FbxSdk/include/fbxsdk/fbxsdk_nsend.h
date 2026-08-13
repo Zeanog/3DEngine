@@ -1,16 +1,3 @@
-/****************************************************************************************
- 
-   Copyright (C) 2015 Autodesk, Inc.
-   All rights reserved.
- 
-   Use of this software is subject to the terms of the Autodesk license agreement
-   provided at the time of installation or download, or which otherwise accompanies
-   this software in either electronic or hard copy form.
- 
-****************************************************************************************/
-
-//! \file fbxsdk_nsend.h
-
-#if FBXSDK_DEFINE_NAMESPACE == 1
-	}
-#endif
+version https://git-lfs.github.com/spec/v1
+oid sha256:fe71ca84bdbdabd8d6802bebbb81fadf59f16056171293ae919720d08426446e
+size 540

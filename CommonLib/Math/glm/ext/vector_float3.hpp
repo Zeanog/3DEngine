@@ -1,18 +1,3 @@
-/// @ref core
-/// @file glm/ext/vector_float3.hpp
-
-#pragma once
-#include "../detail/type_vec3.hpp"
-
-namespace glm
-{
-	/// @addtogroup core_vector
-	/// @{
-
-	/// 3 components vector of single-precision floating-point numbers.
-	///
-	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
-	typedef vec<3, float, defaultp>		vec3;
-
-	/// @}
-}//namespace glm
+version https://git-lfs.github.com/spec/v1
+oid sha256:03d186b2344d390c32a512a9b7736707b6399f0c3f77b80ab0d49a7d0b983751
+size 425

@@ -1,29 +1,3 @@
-[
-	{
-		"Type": "Reverb",
-		"WetDryMix": 100.0,
-		"ReflectionsDelay": 5,
-		"ReverbDelay": 10,
-		"RearDelay": 0,
-		"PositionLeft": 6,
-		"PositionRight": 6,
-		"PositionMatrixLeft": 27,
-		"PositionMatrixRight": 27,
-		"EarlyDiffusion": 15,
-		"LateDiffusion": 15,
-		"LowEQCutoff": 10,
-		"HighEQCutoff": 15,
-		"RoomFilterFreq": 7000.0,
-		"RoomFilterMain": -2.0,
-		"RoomFilterHF": -1.0,
-		"ReflectionsGain": 0.0,
-		"ReverbGain": 0.0,
-		"DecayTime": 0.8,
-		"Density": 100.0,
-		"RoomSize": 5.0
-	},
-	{
-		"Type": "EQ",
-		"Gain0": 100.0
-	}
-]
+version https://git-lfs.github.com/spec/v1
+oid sha256:bc3caf2a61187d325a1dd0fa9d829382981add188b94bf06e84144be01199915
+size 528

@@ -1,32 +1,3 @@
-#include "ModelManager.h"
-#include "ModelLoader.h"
-
-ModelManager::ModelManager() {
-	m_Loaders.Add(StaticString(".neom"), new ModelLoader());
-}
-
-ModelManager::~ModelManager() {
-	Destroy( m_Loaders );
-}
-
-Model* ModelManager::Get( const StaticString& path ) {
-	Model* model{};
-	if(m_Models.Find(path, model)) {
-		return model;
-	}
-
-	model = new Model();
-	if( !LoadModel(path.CStr(), model) ) {
-		DeletePtr(model);
-		return NULL;
-	}
-
-	m_Models.Add( path, model );
-	return model;
-}
-
-void ModelManager::ReloadAll() {
-	FOREACH(iter, m_Models) {
-		LoadModel(iter->first.CStr(), iter->second);
-	}
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:5a12d022035029334e73ca025977a396b0b1ed5197ae2dc490b55a92b5403b53
+size 588

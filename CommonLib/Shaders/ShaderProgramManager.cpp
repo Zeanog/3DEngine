@@ -1,36 +1,3 @@
-#include "ShaderProgramManager.h"
-
-#include "rapidjson/rapidjson.h"
-#include "ShaderManager_Vertex.h"
-
-ShaderProgramManager::ShaderProgramManager() {
-}
-
-ShaderProgramManager::~ShaderProgramManager() {
-}
-
-const ShaderProgramManager::TAsset*	ShaderProgramManager::Get(const StaticString& vertPath, const StaticString& fragPath) {
-	try {
-		TAsset* asset{};
-		//TODO: Please find a better way of doing this!!!!!
-		UInt32 pathLength = vertPath.Length() + fragPath.Length() + 1;
-		STACK_STRING(uniqueName, pathLength);
-		strcat_s(uniqueName.Str(), pathLength, vertPath.CStr());
-		strcat_s(uniqueName.Str(), pathLength, fragPath.CStr());
-		//TODO: Please find a better way of doing this!!!!!
-
-		if (m_Container.Find(uniqueName.CStr(), asset)) {
-			return asset;
-		}
-
-		asset = new TAsset();
-		Load(uniqueName.CStr(), vertPath, fragPath, asset);
-		return asset;
-	}
-	catch(...){
-		return nullptr;
-	}
-}
-
-void ShaderProgramManager::ReloadAll() {
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:187dc82033983186751ab77aa6edfc7625c86ca6acd88a5fc0f055e1ce5cc28f
+size 936

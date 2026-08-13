@@ -1,15 +1,3 @@
-#include "SubmixVoice.h"
-#include "AudioSystem.h"
-
-SubmixVoice::SubmixVoice() {
-}
-
-Bool SubmixVoice::Init(IXAudio2* audio, UInt16 numChannels, UInt16 sampleRate) {
-	assert(!m_Voice);
-
-	m_NumChannels = numChannels;
-	m_SampleRate = sampleRate;
-	m_FormatHash = Singleton<AudioSystem>::GetInstance()->GenerateHash(numChannels, sampleRate);
-
-	return SUCCEEDED(audio->CreateSubmixVoice(&m_Voice, m_NumChannels, m_SampleRate, 0, 0, nullptr, nullptr));
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:e1382b4bbf948abbe45c3c7242fc546d0fff51be50752883765f3304674c1b21
+size 446

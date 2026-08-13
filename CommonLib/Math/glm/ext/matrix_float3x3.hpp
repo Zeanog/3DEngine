@@ -1,23 +1,3 @@
-/// @ref core
-/// @file glm/ext/matrix_float3x3.hpp
-
-#pragma once
-#include "../detail/type_mat3x3.hpp"
-
-namespace glm
-{
-	/// @addtogroup core_matrix
-	/// @{
-
-	/// 3 columns of 3 components matrix of single-precision floating-point numbers.
-	///
-	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.6 Matrices</a>
-	typedef mat<3, 3, float, defaultp>			mat3x3;
-
-	/// 3 columns of 3 components matrix of single-precision floating-point numbers.
-	///
-	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.6 Matrices</a>
-	typedef mat<3, 3, float, defaultp>			mat3;
-
-	/// @}
-}//namespace glm
+version https://git-lfs.github.com/spec/v1
+oid sha256:13afb5c9a76cd00924bfd90338861bc7ba85097cc8a2c93a747862d9aef95737
+size 713

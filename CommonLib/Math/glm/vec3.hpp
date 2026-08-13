@@ -1,14 +1,3 @@
-/// @ref core
-/// @file glm/vec3.hpp
-
-#pragma once
-#include "./ext/vector_bool3.hpp"
-#include "./ext/vector_bool3_precision.hpp"
-#include "./ext/vector_float3.hpp"
-#include "./ext/vector_float3_precision.hpp"
-#include "./ext/vector_double3.hpp"
-#include "./ext/vector_double3_precision.hpp"
-#include "./ext/vector_int3.hpp"
-#include "./ext/vector_int3_precision.hpp"
-#include "./ext/vector_uint3.hpp"
-#include "./ext/vector_uint3_precision.hpp"
+version https://git-lfs.github.com/spec/v1
+oid sha256:6b6f940edd76cdc02fa84dc58fc4983fe2bc952d820821ec51c2c49710495629
+size 445

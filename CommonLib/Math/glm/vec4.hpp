@@ -1,15 +1,3 @@
-/// @ref core
-/// @file glm/vec4.hpp
-
-#pragma once
-#include "./ext/vector_bool4.hpp"
-#include "./ext/vector_bool4_precision.hpp"
-#include "./ext/vector_float4.hpp"
-#include "./ext/vector_float4_precision.hpp"
-#include "./ext/vector_double4.hpp"
-#include "./ext/vector_double4_precision.hpp"
-#include "./ext/vector_int4.hpp"
-#include "./ext/vector_int4_precision.hpp"
-#include "./ext/vector_uint4.hpp"
-#include "./ext/vector_uint4_precision.hpp"
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:6c30614e1a422185899259cc1e4987b2249d4d63d6a0b3a48ad61979f0bf055a
+size 446

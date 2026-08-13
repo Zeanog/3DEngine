@@ -1,18 +1,3 @@
-/// @ref core
-/// @file glm/ext/vector_uint2.hpp
-
-#pragma once
-#include "../detail/type_vec2.hpp"
-
-namespace glm
-{
-	/// @addtogroup core_vector
-	/// @{
-
-	/// 2 components vector of unsigned integer numbers.
-	///
-	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
-	typedef vec<2, unsigned int, defaultp>		uvec2;
-
-	/// @}
-}//namespace glm
+version https://git-lfs.github.com/spec/v1
+oid sha256:3d03953933445d262f9e838144218343dcbd92f01ddcafcba368e68712affecf
+size 417

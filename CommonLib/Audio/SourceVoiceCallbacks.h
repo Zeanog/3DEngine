@@ -1,23 +1,3 @@
-#pragma once
-
-#include "System\Typedefs.h"
-
-#include <xaudio2.h>
-
-class SourceVoice;
-
-class SourceVoiceCallbacks : public IXAudio2VoiceCallback {
-protected:
-	SourceVoice* m_Voice;
-
-public:
-	SourceVoiceCallbacks(SourceVoice* source);
-
-	virtual void __stdcall OnVoiceProcessingPassStart(UINT32 bytesRequired) override;
-	virtual void __stdcall OnVoiceProcessingPassEnd() override;
-	virtual void __stdcall OnStreamEnd() override;
-	virtual void __stdcall OnBufferStart(void* pBufferContext) override;
-	virtual void __stdcall OnBufferEnd(void* pBufferContext) override;
-	virtual void __stdcall OnLoopEnd(void* pBufferContext) override;
-	virtual void __stdcall OnVoiceError(void* pBufferContext, HRESULT error) override;
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:83dff4a877193bab52798f53f3016543aa78703f4600a9dc56511b9d574a20c6
+size 716

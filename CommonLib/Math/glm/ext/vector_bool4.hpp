@@ -1,18 +1,3 @@
-/// @ref core
-/// @file glm/ext/vector_bool4.hpp
-
-#pragma once
-#include "../detail/type_vec4.hpp"
-
-namespace glm
-{
-	/// @addtogroup core_vector
-	/// @{
-
-	/// 4 components vector of boolean.
-	///
-	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
-	typedef vec<4, bool, defaultp>		bvec4;
-
-	/// @}
-}//namespace glm
+version https://git-lfs.github.com/spec/v1
+oid sha256:b9106d7154ed6df900ed9ed5919bed0b625d08058f761df8e783e14686daef39
+size 392

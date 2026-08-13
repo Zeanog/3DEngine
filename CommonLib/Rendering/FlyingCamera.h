@@ -1,25 +1,3 @@
-#pragma once
-
-#include "Rendering/Camera.h"
-
-class FlyingCamera : public ACameraDecorator {
-	INHERITED_CLASS_TYPEDEFS(FlyingCamera, ACameraDecorator)
-
-protected:
-	DEFINE_MEMBER_EX(glm::vec3, TranslationSpeed)//Reasonable Value Magnitude: 10
-	DEFINE_MEMBER_EX(glm::vec3, RotationSpeed)//Reasonable Value Magnitude: 12
-	
-public:
-	FlyingCamera() : TSelf(new Camera()) {
-	}
-
-	FlyingCamera(ICamera* decoratee) : TSuper(decoratee) {
-	}
-	
-	virtual void						Update(Float32 deltaTime) override {
-		m_Decoratee->Translate(deltaTime * m_TranslationSpeed);
-		m_Decoratee->Rotate(deltaTime * m_RotationSpeed);
-		
-		TSuper::Update(deltaTime);
-	}
-};
+version https://git-lfs.github.com/spec/v1
+oid sha256:2591885f1321ae7025b9f152bc39d55b9442d5ee221fc23f6303241e137b4a35
+size 635

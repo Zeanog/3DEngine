@@ -1,28 +1,3 @@
-#include "FBXNodeParser_SkeletonalJoint.h"
-
-//StaticString JointPrefix("HIKCharacterNode1_");//TODO: Find a better place for this
-//StaticString JointPrefix("mixamorig:");//TODO: Find a better place for this
-
-Bool FBXNodeParser_SkeletonalJoint::Parse(fbxsdk::FbxNode* node, const StaticString& prefixToRemove, Joint& outJoint) {
-	if (!CanParse(node)) {
-		return false;
-	}
-
-	auto parentNode = node->GetParent();
-	auto&& parentNodeName = parentNode->GetNameOnly();
-
-	Int32 parentIndex = -1;
-	if (m_NodeNameToJointIndexMap.Contains(parentNodeName)) {
-		parentIndex = m_NodeNameToJointIndexMap[parentNodeName];
-	}
-
-	outJoint.Parent(parentIndex);
-	auto&& nodeName = node->GetNameOnly();
-	if (prefixToRemove.Length() > 0) {
-		verify(nodeName.FindAndReplace(prefixToRemove.CStr(), ""));
-	}
-	outJoint.Name(nodeName.Buffer());
-	m_NodeNameToJointIndexMap.Add(nodeName, m_JointNameToNodeMap.Size());
-	m_JointNameToNodeMap.Add(outJoint.Name(), node);
-	return true;
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:99e25448b328bc698c387284f5c200951f2bf7a1d6365ceb1006a745fdcac941
+size 954
