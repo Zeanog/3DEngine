@@ -43,13 +43,18 @@ public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
 	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
 
-	template<typename... __TArgs>
-	static constexpr bool CanCallWith() {
-		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+	template<Bool ExplicitArgs, typename... TPassedInArgs>
+	static constexpr Bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(TPassedInArgs)) {
 			return false;
 		}
+		
+		if constexpr (ExplicitArgs) {
+			return std::is_same_v<std::tuple<TPassedInArgs...>, TArgs>;
+		}
 		else {
-			return std::is_constructible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			//Can we cast from what was passed in to what the method expects
+			return std::is_convertible_v<std::tuple<TPassedInArgs...>, TArgs>;
 		}
 	}
 
@@ -65,9 +70,6 @@ public:
 			return TReturn();
 #endif		
 		}
-
-		//assert(this->ArgsMatch<TArgs...>());
-
 		return (caller->*(this->m_Method))(args...);
 	}
 };
@@ -85,13 +87,18 @@ public:
 	MethodInfo(const StaticString& name, TMethod method) : TSuper(name, method) {}
 	MethodInfo(const Char* name, TMethod method) : TSuper(name, method) {}
 
-	template<typename... __TArgs>
+	template<Bool ExplicitArgs, typename... TPassedInArgs>
 	static constexpr bool CanCallWith() {
-		if constexpr (sizeof...(_TArgs) != sizeof...(__TArgs)) {
+		if constexpr (sizeof...(_TArgs) != sizeof...(TPassedInArgs)) {
 			return false;
 		}
+		
+		if constexpr (ExplicitArgs) {
+			return std::is_same_v<std::tuple<TPassedInArgs...>, TArgs>;
+		}
 		else {
-			return std::is_convertible_v<std::tuple<_TArgs...>, std::tuple<__TArgs...>>;
+			//Can we cast from what was passed in to what the method expects
+			return std::is_convertible_v<std::tuple<TPassedInArgs...>, TArgs>;
 		}
 	}
 
@@ -107,7 +114,6 @@ public:
 			return TReturn();
 #endif		
 		}
-
 		return (caller->*(this->m_Method))(args...);
 	}
 };

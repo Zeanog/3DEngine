@@ -4,9 +4,6 @@
 #include "System/Singleton.h"
 #include "System/Map.h"
 
-template<typename TObject>
-class Reflector;
-
 class AReflector {
 	ABSTRACT_CLASS_TYPEDEFS(AReflector) {}
 
@@ -24,7 +21,7 @@ protected:
 	}
 
 public:
-	Bool	HasMember(const StaticString& memberName) const {
+	virtual Bool	HasMember(const StaticString& memberName) const {
 		return m_MemberInfoMap.Contains(memberName);
 	}
 
@@ -63,15 +60,16 @@ public:
 
 #include "System/JsonValueParsers.h"
 
+template<typename TObject>
+class Reflector;
+
 class AReflectorJson : public AReflector {
-	INHERITED_CLASS_TYPEDEFS(AReflectorJson, AReflector)
+	ABSTRACT_INHERITED_CLASS_TYPEDEFS(AReflectorJson, AReflector) {}
 
 protected:
 	Map<StaticString, const IValueParser*>	m_ParserMap;
 
 protected:
-	AReflectorJson() {}
-
 	template<typename TMember>
 	void	RegisterMember(const StaticString& memberName, UInt64 offset) {
 		TSuper::RegisterMember<TMember>(memberName, offset);
@@ -79,6 +77,10 @@ protected:
 	}
 
 public:
+	virtual Bool	HasMember(const StaticString& memberName) const override {
+		return TSuper::HasMember(memberName) && m_ParserMap.Contains(memberName);
+	}
+
 	template<typename TObject>
 	Bool	Set(const StaticString& memberName, TObject* obj, const rapidjson::Value& memberValue) {
 		if (!HasMember(memberName)) {

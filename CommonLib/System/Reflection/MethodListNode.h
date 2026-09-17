@@ -3,13 +3,13 @@
 #include "System/Reflection/MethodInfo.h"
 
 struct MethodInfoHelpers {
-	template<typename TReturn, class TMethodInfo, typename TObject, typename... _TArgs>
-	static TReturn Call(const TMethodInfo& info, TObject* caller, _TArgs... args) {
+	template<typename TReturn, class TMethodInfo, typename TObject, typename... TArgs>
+	static TReturn Call(const TMethodInfo& info, TObject* caller, TArgs... args) {
 		return info.Call(caller, args...);
 	}
 
-	template<typename TReturn, class TMethodInfo, typename TObject, typename... _TArgs>
-	static TReturn Call(const TMethodInfo& info, const TObject* caller, _TArgs... args) {
+	template<typename TReturn, class TMethodInfo, typename TObject, typename... TArgs>
+	static TReturn Call(const TMethodInfo& info, const TObject* caller, TArgs... args) {
 		return info.Call(caller, args...);
 	}
 };
@@ -118,18 +118,18 @@ public:
 	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 
-	template<Bool ExplicitArgs, typename... TPastInArgs>
-	static constexpr bool CanCallWith() {
-		if constexpr (sizeof...(_TArgs) != sizeof...(TPastInArgs)) {
+	template<Bool ExplicitArgs, typename... TPassedInArgs>
+	static constexpr Bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(TPassedInArgs)) {
 			return false;
 		}
+		
+		if constexpr (ExplicitArgs) {
+			return std::is_same_v<std::tuple<TPassedInArgs...>, std::tuple<_TArgs...>>;
+		}
 		else {
-			if constexpr (ExplicitArgs) {
-				return std::is_same_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
-			}
-			else {
-				return std::is_convertible_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
-			}
+			//Can we cast from what was passed in to what the method expects
+			return std::is_convertible_v<std::tuple<TPassedInArgs...>, std::tuple<_TArgs...>>;
 		}
 	}
 
@@ -177,18 +177,18 @@ public:
 	MethodListNode(const StaticString& methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 	MethodListNode(const Char* methodName, TSuper::TMethod method, TNextNode&& next) : TSuper(methodName, method, next) {}
 
-	template<Bool ExplicitArgs, typename... TPastInArgs>
-	static constexpr bool CanCallWith() {
-		if constexpr (sizeof...(_TArgs) != sizeof...(TPastInArgs)) {
+	template<Bool ExplicitArgs, typename... TPassedInArgs>
+	static constexpr Bool CanCallWith() {
+		if constexpr (sizeof...(_TArgs) != sizeof...(TPassedInArgs)) {
 			return false;
 		}
+		
+		if constexpr (ExplicitArgs) {
+			return std::is_same_v<std::tuple<TPassedInArgs...>, std::tuple<_TArgs...>>;
+		}
 		else {
-			if constexpr (ExplicitArgs) {
-				return std::is_same_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
-			}
-			else {
-				return std::is_convertible_v<std::tuple<TPastInArgs...>, std::tuple<_TArgs...>>;
-			}
+			//Can we cast from what was passed in to what the method expects
+			return std::is_convertible_v<std::tuple<TPassedInArgs...>, std::tuple<_TArgs...>>;
 		}
 	}
 
@@ -202,7 +202,7 @@ public:
 			else {
 				if constexpr (std::same_as<TNextNode, TNull>) {
 #if _DEBUG
-					throw std::runtime_error(String::Format("Unable to find method '%s'", this->Info.MethodName().CStr()));
+					throw std::runtime_error(String::Format("Unable to find method '%s' with argument types", this->Info.MethodName().CStr()));
 #else
 					return TReturn();
 #endif
@@ -227,7 +227,6 @@ public:
 	}
 };
 
-//TODO: Possilby use std::tuple instead so we can use variadic templates instead of macros.  But this is probably good enough for now.
 #define METHODNODE_TYPE_1( method1Type ) MethodListNode<TNull, method1Type>
 #define METHODNODE_TYPE_2( method1Type, method2Type ) MethodListNode<METHODNODE_TYPE_1(method2Type), method1Type>
 #define METHODNODE_TYPE_3( method1Type, method2Type, method3Type ) MethodListNode<METHODNODE_TYPE_2(method2Type, method3Type), method1Type>
@@ -246,37 +245,37 @@ public:
 
 #define CREATE_METHOD_INFO_FOR( owner, methodType, method ) METHOD_INFO_TYPE_FROM(methodType)(StaticString(#method), (methodType)&owner::method)
 
-#define REGISTER_METHODS_1( owner, methodListName, method1Type, method1 ) \
-METHODNODE_TYPE_1(method1Type)	methodListName = {	\
+#define REGISTER_METHODS_1( owner, methodList, method1Type, method1 ) \
+METHODNODE_TYPE_1(method1Type)	methodList = {	\
 	#method1, &owner::method1, TNull() \
 };
 
-#define REGISTER_METHODS_2( owner, methodListName, method1Type, method1, method2Type, method2 ) \
-METHODNODE_TYPE_2(method1Type, method2Type)	methodListName = { \
+#define REGISTER_METHODS_2( owner, methodList, method1Type, method1, method2Type, method2 ) \
+METHODNODE_TYPE_2(method1Type, method2Type)	methodList = { \
 	#method1, &owner::method1, \
 	METHODNODE_1( owner, method2Type, method2 )	\
 };
 
-#define REGISTER_METHODS_3( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3 ) \
-METHODNODE_TYPE_3(method1Type, method2Type, method3Type)	methodListName = {	\
+#define REGISTER_METHODS_3( owner, methodList, method1Type, method1, method2Type, method2, method3Type, method3 ) \
+METHODNODE_TYPE_3(method1Type, method2Type, method3Type)	methodList = {	\
 		#method1, &owner::method1,								\
 		METHODNODE_2( owner, method2Type, method2, method3Type, method3 )	\
 };
 
-#define REGISTER_METHODS_4( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4 ) \
-METHODNODE_TYPE_4(method1Type, method2Type, method3Type, method4Type)	methodListName = {	\
+#define REGISTER_METHODS_4( owner, methodList, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4 ) \
+METHODNODE_TYPE_4(method1Type, method2Type, method3Type, method4Type)	methodList = {	\
 		#method1, &owner::method1,								\
 		METHODNODE_3( owner, method2Type, method2, method3Type, method3, method4Type, method4 )	\
 };
 
-#define REGISTER_METHODS_5( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 ) \
-METHODNODE_TYPE_5(method1Type, method2Type, method3Type, method4Type, method5Type)	methodListName = {	\
+#define REGISTER_METHODS_5( owner, methodList, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 ) \
+METHODNODE_TYPE_5(method1Type, method2Type, method3Type, method4Type, method5Type)	methodList = {	\
 		#method1, &owner::method1,								\
 		METHODNODE_4( owner, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5 )	\
 };
 
-#define REGISTER_METHODS_6( owner, methodListName, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 ) \
-METHODNODE_TYPE_6(method1Type, method2Type, method3Type, method4Type, method5Type, method6Type)	methodListName = {	\
+#define REGISTER_METHODS_6( owner, methodList, method1Type, method1, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 ) \
+METHODNODE_TYPE_6(method1Type, method2Type, method3Type, method4Type, method5Type, method6Type)	methodList = {	\
 		#method1, &owner::method1,								\
 		METHODNODE_5( owner, method2Type, method2, method3Type, method3, method4Type, method4, method5Type, method5, method6Type, method6 )	\
 };
@@ -295,25 +294,25 @@ using TMethodSignatures_##methodName = std::tuple<methodSignature>;	\
 using SignatureFor_##methodName = typename std::tuple_element_t<0, TMethodSignatures_##methodName>;	\
 using MethodInfoFor_##methodName = METHOD_INFO_TYPE_FROM(SignatureFor_##methodName);
 
-#define DEFINE_METHODINFO_ACCESSORS(methodListName) \
+#define DEFINE_METHODINFO_ACCESSORS(methodList) \
 template<typename TMethodInfo>				\
 TMethodInfo* FindMethodInfo(const StaticString& methodName) const {	\
-	return methodListName.FindMethodInfo(methodName);	\
+	return methodList.FindMethodInfo(methodName);	\
 }	\
 template<typename TMethodInfo>				\
 TMethodInfo* FindMethodInfo(const Char* methodName) const {	\
-	return methodListName.FindMethodInfo(StaticString(methodName));	\
+	return methodList.FindMethodInfo(StaticString(methodName));	\
 }	\
 template<typename TMethodInfo>				\
 Bool FindMethodInfo(const Char* methodName, TMethodInfo*& outMethodInfo) const { \
-	return methodListName.FindMethodInfo(StaticString(methodName), outMethodInfo); \
+	return methodList.FindMethodInfo(StaticString(methodName), outMethodInfo); \
 } \
 template<typename TMethodInfo>				\
 Bool FindMethodInfo(const StaticString& methodName, TMethodInfo*& outMethodInfo) const { \
-	return methodListName.FindMethodInfo(methodName, outMethodInfo); \
+	return methodList.FindMethodInfo(methodName, outMethodInfo); \
 } \
 Bool HasMethod(const StaticString& methodName) const { \
-	return methodListName.HasMethod(methodName);	\
+	return methodList.HasMethod(methodName);	\
 }	\
 template<typename TReturn, typename TCaller, typename ...TArgs>		\
 TReturn Call(const StaticString& methodName, TCaller* caller, TArgs... args) const {	\

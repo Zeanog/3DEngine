@@ -70,9 +70,25 @@ public:
 		return Length() - 1;
 	}
 
+	void AddRange(const TData* data, UInt32 length) {
+		for (UInt32 ix = 0; ix < length; ++ix) {
+			Add(data[ix]);
+		}
+	}
+
 	void AddRange(const AList<TData>& other) {
 		FOREACH_CONST(elem, other.m_Data) {
 			Add(*elem);
+		}
+	}
+
+	void Insert(UInt32 index, const TData& data) {
+		if (index != m_Data.size()) {
+			m_Data.insert(m_Data.begin() + index, data);
+		}
+		else {
+			assert(index == m_Data.size());
+			m_Data.push_back(data);
 		}
 	}
 
