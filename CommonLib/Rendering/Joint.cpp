@@ -1,3 +1,67 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3c960c3e6b4e5b89aa4a8e6eafe425f290a4d7b4bd59d02bfc3a534c25e0826f
-size 1475
+#include "Joint.h"
+#include "Rendering/ModelLoaders/MeshLoader_FBX.h"
+
+#include <windows.h>
+#include <gl/glew.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
+
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+Joint::Joint() {
+	m_Parent = -1;
+}
+
+Joint::Joint(Int32 parentIndex) {
+	Parent(parentIndex);
+}
+
+void Joint::Render( const glm::mat4& transform, float radius, UInt32 meshPrecision) {
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
+	glMultMatrixf(glm::value_ptr(transform));
+
+	GLUquadricObj *sphere = gluNewQuadric();
+	gluQuadricTexture(sphere, true);
+	gluSphere(sphere, radius, meshPrecision, meshPrecision);
+	gluDeleteQuadric(sphere);
+
+	glPopMatrix();
+}
+
+Joint* Neo::Skeleton::FindJoint(const StaticString& name) {
+	assert(m_NameToJointIndexMap.Contains(name));
+	return &m_Joints[m_NameToJointIndexMap[name]];
+}
+
+const Joint* Neo::Skeleton::FindJoint(const StaticString& name) const {
+	assert(m_NameToJointIndexMap.Contains(name));
+	return &m_Joints[m_NameToJointIndexMap[name]];
+}
+
+Int32 Neo::Skeleton::FindJointIndex(const StaticString& name) const {
+	if (!m_NameToJointIndexMap.Contains(name)) {
+		return -1;
+	}
+	return m_NameToJointIndexMap[name];
+}
+
+const glm::mat4& AnimKeyFrame::GetLocalTransform(int index) const {
+	return m_FrameData[index];
+}
+
+glm::mat4 AnimKeyFrame::GetGlobalTransform(int index, const Neo::Skeleton& skeleton) const {
+	glm::mat4 mat(glm::identity<glm::mat4>());
+
+	Int32 currentIndex = index;
+	const Joint* joint = NULL;
+	while (currentIndex >= 0) {
+		mat *= GetLocalTransform(currentIndex);
+		joint = skeleton.FindJoint(currentIndex);
+		currentIndex = joint->Parent();
+	};
+
+	return mat;
+}

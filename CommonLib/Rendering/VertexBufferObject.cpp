@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:d8474c43498efc7f379ab0b5af7d1cac1a321df250e0e59f892e70a668e4e44e
-size 216
+#include "VertexBufferObject.h"
+
+AVertexBufferObject::AVertexBufferObject() {
+	
+}
+
+AVertexBufferObject::~AVertexBufferObject() {
+	if (m_VBO > 0) {
+		glDeleteBuffers(1, &m_VBO);
+		assert(!glGetError());
+		m_VBO = 0;
+	}
+}
+
+void AVertexBufferObject::UploadData(UInt32 location) {//TODO: Bad name as we dont upload anything
+	assert(m_VBO == 0);
+	glGenBuffers(1, &m_VBO);
+	assert(!glGetError());
+}

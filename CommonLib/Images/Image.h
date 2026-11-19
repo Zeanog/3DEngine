@@ -1,3 +1,41 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:5cdb7f808316b20243b0c60773443bc58f36a9b062af1bc0cefeca5891fa148b
-size 527
+#pragma once
+
+#include "System/Typedefs.h"
+#include "ImageLoader.h"
+
+namespace Neo {
+	class Image {
+	public:
+		UInt32			m_PixelFormat;
+		UInt32			m_Id;
+
+	protected:
+
+	public:
+		Image() {
+			m_Id = 0;
+			m_PixelFormat = 0;
+		}
+
+		Image(UInt32 id, UInt32 format) {
+			m_PixelFormat = format;
+			m_Id = id;
+		}
+
+		Image(const ImageLoader& loader) {
+			m_Id = 0;
+			m_PixelFormat = 0;
+			verify(UploadData(loader));
+		}
+
+		~Image();
+
+		void	Bind(UInt32 location) const;
+		void	Unbind(UInt32 location) const;
+
+		void	Bind() const;
+		void	Unbind() const;
+
+		Bool	UploadData(const ImageLoader& loader);
+	};
+};

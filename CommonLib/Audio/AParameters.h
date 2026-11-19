@@ -1,3 +1,28 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:25448bcba4e5d0ddfba505d89907bf179ebd25c5fb8b1ec08f53c327c46d1cd6
-size 651
+#pragma once
+
+#include "System\Typedefs.h"
+#include "System/Reflection/Reflector.h"
+
+template<typename _TParameters>
+struct AParameters {
+	ABSTRACT_CLASS_TYPEDEFS(AParameters) {}
+
+public:
+	typedef _TParameters	TParameters;
+
+public:
+	static Bool	UpdateFrom(const rapidjson::Value& value, TParameters& outParams) {
+		assert(value.IsObject());
+
+		auto reflector = Singleton<Reflector<TParameters>>::GetInstance();
+		FOREACH_MEMBER(iter, value) {//Could attempt to call setter if member doesn't exists
+			if (!reflector->HasMember(iter->name.GetString())) {//Ignore "Type"
+				continue;
+			}
+
+			auto memberName = iter->name.GetString();
+			reflector->Set(memberName, outParams, iter->value);
+		}
+		return true;
+	}
+};
