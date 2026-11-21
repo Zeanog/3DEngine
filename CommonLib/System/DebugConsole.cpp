@@ -80,9 +80,9 @@ Bool	DebugConsole::Write(const Char* format, ...) {
 		if (IsOpen()) {
 			printf_s(msg);
 		}
+		return true;
 	}
 	__finally {
 		va_end(args);
-		return true;
 	}
 }
