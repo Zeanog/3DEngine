@@ -81,7 +81,9 @@ TEST_METHOD(CallF1FromReflector)
 	}
 }
 
-```
+
+11/21/2026:
+Fixed my lfs issues.  Attempting to fix the project so I can try Claude on it.  
 
 8/9/2026:
 Can now call methods directly from the Reflector now.  
