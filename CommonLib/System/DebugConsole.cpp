@@ -70,7 +70,7 @@ void DebugConsole::DetachIO() {
 	m_hErrFile = nullptr;
 }
 
-Bool	DebugConsole::Write(const Char* format, ...) {
+void	DebugConsole::Write(const Char* format, ...) {
 	va_list args;
 	__try {
 		va_start(args, format);
@@ -80,7 +80,6 @@ Bool	DebugConsole::Write(const Char* format, ...) {
 		if (IsOpen()) {
 			printf_s(msg);
 		}
-		return true;
 	}
 	__finally {
 		va_end(args);

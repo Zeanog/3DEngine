@@ -22,7 +22,7 @@ public:
 		return m_hStdOutFile != nullptr && m_hErrFile != nullptr;
 	}
 
-	Bool	Write(const Char* format, ...);
+	void	Write(const Char* format, ...);
 
 protected:
 	Bool	AttachIO();
