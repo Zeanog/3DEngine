@@ -80,7 +80,7 @@ TEST_METHOD(CallF1FromReflector)
 		});
 	}
 }
-...
+```
 
 11/21/2026:
 Fixed my lfs issues.  Attempting to fix the project so I can try Claude on it.  
